@@ -44,6 +44,7 @@
 #include "backup.h"
 #include "parser.h"
 #include "datetime.h"
+#include "mspi.h"
 
 #include "power.h"
 #include "i2c.h"
@@ -73,6 +74,7 @@ static void vInitTask(void *pvParameters)
 {
 portTickType xLastWakeTime;
 
+	MSPI_Init();
 	COM_Open(115200,UARTP_None,UARTSB_1);
 
 	I2C_Open(MAX_I2C_FREQ);
