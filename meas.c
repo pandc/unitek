@@ -15,6 +15,8 @@
 #include "ad5934.h"
 #include "meas.h"
 
+#define PI		3.1415926535897932384626433832795
+
 #define ADG715_SLAVE				0x4b
 #define MEAS_SAMPLES				10
 
@@ -56,15 +58,13 @@ static const uint8_t adg715_cmd[CALIB_Items] = {
 	0x01
 };
 
-static float real_values,imm_values,final_resist,kcell_factor;
+static float real_values,imm_values,final_resist,kcell_factor,gcable;
 static uint32_t ad5934_freq;
 static int meas_samples = DEFAULT_MEAS_SAMPLES,curr_chan = -1;
 static int16_t rsamples[MEAS_SAMPLES],isamples[MEAS_SAMPLES];
-static uint8_t mcpok;
+uint8_t mcpok;
 
-struct meas_calpar_st {
-	float ncl,nch,nos,gf;
-} mcp[CALIB_Items];
+struct meas_calpar_st mcp[CALIB_Items];
 
 static uint32_t get_start_freq(uint32_t freq)
 {
@@ -98,11 +98,12 @@ int i;
 		return FALSE;
 	for (i = 0; i < 4; i++)
 	{
-		COM_Printf("\r\n*MEASINIT: %c,%.7e,%.7e,%.7e,%.7e",calib_items[i],
-			mcp[i].nch,mcp[i].ncl,mcp[i].gf,mcp[i].nos);
+		COM_Printf("\r\n*MEASINIT: %c,%.7e,%.7e,%.7e,%.7e,%.7e",calib_items[i],
+			mcp[i].nch,mcp[i].ncl,mcp[i].gf,mcp[i].nos,mcp[i].sp);
 	}
 	COM_Printf("\r\n*MEASINIT: K,%.7e",kcell_factor);
 	COM_Printf("\r\n*MEASINIT: F,%lu",ad5934_freq);
+	COM_Printf("\r\n*MEASINIT: G,%.7e",gcable);
 	COM_Puts("\r\n");
 	return TRUE;
 }
@@ -123,43 +124,50 @@ float f;
 	mcpok = FALSE;
 	for (i = 0; i < 4; i++)
 	{
-		EEP_Read(EEP_HNch_addr+i*16,&f,4);
-		if (!isnan(f))
+		EEP_Read(EEP_HNch_addr+i*20,&f,4);
+		if (isnan(f))
 			return FALSE;
-		EEP_Read(EEP_HNcl_addr+i*16,&f,4);
-		if (!isnan(f))
+		EEP_Read(EEP_HNcl_addr+i*20,&f,4);
+		if (isnan(f))
 			return FALSE;
-		EEP_Read(EEP_HGF_addr+i*16,&f,4);
-		if (!isnan(f))
+		EEP_Read(EEP_HGF_addr+i*20,&f,4);
+		if (isnan(f))
 			return FALSE;
-		EEP_Read(EEP_HNos_addr+i*16,&f,4);
-		if (!isnan(f))
+		EEP_Read(EEP_HNos_addr+i*20,&f,4);
+		if (isnan(f))
+			return FALSE;
+		EEP_Read(EEP_HPhase_addr+i*20,&f,4);
+		if (isnan(f))
 			return FALSE;
 	}
 	for (i = 0; i < 4; i++)
 	{
-		EEP_Read(EEP_HNch_addr+i*16,&mcp[i].nch,4);
+		EEP_Read(EEP_HNch_addr+i*20,&mcp[i].nch,4);
 
-		EEP_Read(EEP_HNcl_addr+i*16,&mcp[i].ncl,4);
+		EEP_Read(EEP_HNcl_addr+i*20,&mcp[i].ncl,4);
 
-		EEP_Read(EEP_HGF_addr+i*16,&mcp[i].gf,4);
+		EEP_Read(EEP_HGF_addr+i*20,&mcp[i].gf,4);
 
-		EEP_Read(EEP_HNos_addr+i*16,&mcp[i].nos,4);
+		EEP_Read(EEP_HNos_addr+i*20,&mcp[i].nos,4);
+
+		EEP_Read(EEP_HPhase_addr+i*20,&mcp[i].sp,4);
 	}
-	EEP_Read(EEP_KCell_addr,&f,4);
-	if (!isnan(f))
+	EEP_Read(EEP_KCell_addr,&kcell_factor,4);
+	if (isnan(kcell_factor))
 		kcell_factor = 1.0;
-	else
-		kcell_factor = f;
 
 	EEP_Read(EEP_Freq_addr,&ad5934_freq,4);
 	if (ad5934_freq == 0xffffffff)
 		ad5934_freq = DEFAULT_FREQ;
+
+	EEP_Read(EEP_GCable_addr,&gcable,4);
+	if (isnan(gcable))
+		gcable = 0.0;
 	mcpok = TRUE;
 	return TRUE;
 }
 
-int domeas(float *val)
+int domeas(float *val,float *pphase)
 {
 int i,j,res = FALSE;
 uint8_t buf[10],vbuf[10];
@@ -273,12 +281,21 @@ uint32_t stf = 0;
 
 	real_values /= (float)meas_samples;
 	imm_values /= (float)meas_samples;
-	
+ 	if (pphase)
+	{       
+                *pphase = atan((double)imm_values / (double)real_values);
+		if ((real_values >= 0) && (imm_values < 0))
+			*pphase = *pphase + 2 * PI ;
+		else if (real_values < 0) 
+			*pphase = *pphase + PI; 
+		Dprintf(DBGLVL_Meas,"System phase: %.10e",*pphase);
+	}
+       
+
 	res = TRUE;
 
 	final_resist = sqrt(imm_values*imm_values+real_values*real_values);
 	Dprintf(DBGLVL_Meas,"Resistance value: %.3f",final_resist);
-
 exi:
 	if (res)
 	{
@@ -291,47 +308,57 @@ exi:
 	return res;
 }
 
-int meas(float *val)
+int meas(float *resist,float *condut,float *conduc)
 {
 int i;
+float val,tphase;
 
 	if (!mcpok)
 		return FALSE;
 	for (i = CALIB_Low; i >= CALIB_High; i--)
 	{
 		set_meas_chan(i);
-		if (!domeas(val))
+		if (!domeas(&val,&tphase))
 			return FALSE;
-		Dprintf(DBGLVL_Meas,"meas: ncl=%.10e nch=%.10e nx=%.10e",mcp[i].ncl,mcp[i].nch,*val);
-		if (*val > mcp[i].ncl)
+		Dprintf(DBGLVL_Meas,"meas: ncl=%.10e nch=%.10e nx=%.10e sp=%.10e tp=%.10e",mcp[i].ncl,mcp[i].nch,val,mcp[i].sp,tphase);
+		if (val > mcp[i].ncl)
 			break;
 	}
 	if (i == CALIB_Low)
 	{
-		if (*val > mcp[i].nch)
+		if (val > mcp[i].nch)
 		{
 			Dprintf(DBGLVL_Meas,"meas: nx clamped to nch");
-			*val = mcp[i].nch;
+			val = mcp[i].nch;
 		}
 	}
 	else if (i < CALIB_High)
 	{
 		i = CALIB_High;
-		*val = mcp[i].ncl;
+		val = mcp[i].ncl;
 		Dprintf(DBGLVL_Meas,"meas: nx clamped to ncl");
 	}
-	*val = (*val - mcp[i].nos) * mcp[i].gf;
+	tphase -= mcp[i].sp;
+	*condut=(((val - mcp[i].nos) * mcp[i].gf) * cos(tphase));
+	*condut=*condut - gcable;
+	*resist=(1.0 / *condut)-RES_ADD;
+//	*resist = (1.0 / (((val - mcp[i].nos) * mcp[i].gf) * cos(tphase) - gcable)) - RES_ADD;
+	*condut = 1.0 / *resist;
+	*conduc = *condut / kcell_factor;
 	return TRUE;
 }
 
-int meas_temp(float *val)
+int meas_temp(float *resist)
 {
+float tphase,val;
+
 	if (!mcpok)
 		return FALSE;
 	set_meas_chan(CALIB_Ptc);
-	if (!domeas(val))
+	if (!domeas(&val,&tphase))
 		return FALSE;
-	Dprintf(DBGLVL_Meas,"meas_temp: nch=%.10e ncl=%.10e gf=%.10e nos=%.10e",mcp[CALIB_Ptc].nch,mcp[CALIB_Ptc].ncl,mcp[CALIB_Ptc].gf,mcp[CALIB_Ptc].nos);
-	*val = (*val - mcp[CALIB_Ptc].nos) * mcp[CALIB_Ptc].gf;
+	Dprintf(DBGLVL_Meas,"meas_temp: nch=%.10e ncl=%.10e gf=%.10e nos=%.10e sp=%.10e",mcp[CALIB_Ptc].nch,mcp[CALIB_Ptc].ncl,mcp[CALIB_Ptc].gf,mcp[CALIB_Ptc].nos);
+	tphase -= mcp[CALIB_Ptc].sp;
+	*resist = (1.0 / (((val - mcp[CALIB_Ptc].nos) * mcp[CALIB_Ptc].gf) * cos(tphase) - gcable)) - RES_ADD;
 	return TRUE;
 }

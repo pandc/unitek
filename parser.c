@@ -2,7 +2,9 @@
 #include <string.h>
 #include <ctype.h>
 #include <time.h>
-#include <bsp.h>
+#include <math.h>
+
+#include "bsp.h"
 #include "types.h"
 #include "com.h"
 #include "tools.h"
@@ -406,7 +408,7 @@ uint16_t i;
 static int parser_calib(char *arg)
 {
 int item,i;
-float res[2];
+float res[2],sp;
 uint8_t c;
 uint32_t freq = 0;
 
@@ -425,6 +427,14 @@ uint32_t freq = 0;
 			break;
 		case 'P':
 			item = CALIB_Ptc;
+			break;
+		case 'G':
+			if (!mcpok)
+			{
+				COM_Puts("\r\nInvalid calibration parameters\r\n");
+				return CALLBACKRET_Error;
+			}
+			item = CALIB_GCable;
 			break;
 		case 'K':
 			COM_Puts("\r\nEnter kcell: ");
@@ -491,10 +501,37 @@ uint32_t freq = 0;
 			break;
 		}
 		COM_Puts("\r\n");
-		if (!set_meas_chan(item))
+		if (!set_meas_chan((item < CALIB_Items)? item: CALIB_High))
 		{
 			COM_Puts("Error setting ADG715\r\n");
 			return CALLBACKRET_Error;
+		}
+		if (item == CALIB_GCable)
+		{
+			COM_Puts(">>> Connect reference resistance of 100KOhm and press enter (ESC to abort)\r\n");
+			for (;;)
+			{
+				if (COM_Getch(&c))
+				{
+					if ((c == '\r') || (c == 27))
+						break;
+				}
+				else
+					return CALLBACKRET_Error;
+			}
+			if (c != '\r')
+				return CALLBACKRET_Error;
+			if (!domeas(res,&sp))
+			{
+				COM_Puts("Measure error\r\n");
+				return CALLBACKRET_Error;
+			}
+			sp -= mcp[CALIB_High].sp;
+			float gx = ((res[0] - mcp[CALIB_High].nos) * mcp[CALIB_High].gf) * cos(sp);
+			float gc =gx-(1.0 / 100300.0);
+			COM_Printf("gx=%.10e G(100300Ohm)=%.10e GCable=%.10e\r\n",gx,1.0 / 100300.0,gc);
+			EEP_Write(EEP_GCable_addr,&gc,4);
+			return CALLBACKRET_Ok;
 		}
 		if (item == CALIB_Ptc)
 		{
@@ -514,7 +551,7 @@ uint32_t freq = 0;
 				}
 				if (c != '\r')
 					return CALLBACKRET_Error;
-				if (!domeas(res+i))
+				if (!domeas(res+i,(i == 1)? &sp: NULL))
 				{
 					COM_Puts("Measure error\r\n");
 					return CALLBACKRET_Error;
@@ -527,15 +564,17 @@ uint32_t freq = 0;
 					float nl = res[1];
 					float gf = (rh - rl) / (nh - nl);
 					float nos = nh - (rh / gf);
-					COM_Printf("Nch=%.3f Ncl=%.3f GF=%.10e Nos=%.10e\r\n",
+					COM_Printf("Nch=%.3f Ncl=%.3f GF=%.10e Nos=%.10e sp=%.10e\r\n",
 						nh,
 						nl,
 						gf,
-						nos);
+						nos,
+						sp);
 					EEP_Write(EEP_PNch_addr,&nh,sizeof(float));
 					EEP_Write(EEP_PNcl_addr,&nl,sizeof(float));
 					EEP_Write(EEP_PGF_addr,&gf,sizeof(float));
 					EEP_Write(EEP_PNos_addr,&nos,sizeof(float));
+					EEP_Write(EEP_PPhase_addr,&sp,sizeof(float));
 					return CALLBACKRET_Ok;
 				}
 			}
@@ -555,7 +594,7 @@ uint32_t freq = 0;
 			}
 			if (c != '\r')
 				return CALLBACKRET_Error;
-			if (!domeas(res+i))
+			if (!domeas(res+i,(i == 1)? &sp: NULL))
 			{
 				COM_Puts("Measure error\r\n");
 				return CALLBACKRET_Error;
@@ -568,18 +607,21 @@ uint32_t freq = 0;
 				float nl = res[0];
 				float gf = (yh - yl) / (nh - nl);
 				float nos = nh - (yh / gf);
-				COM_Printf("Nch=%.3f Ncl=%.3f GF=%.10e Nos=%.10e\r\n",
+				COM_Printf("Nch=%.3f Ncl=%.3f GF=%.10e Nos=%.10e sp=%.10e\r\n",
 					nh,
 					nl,
 					gf,
-					nos);
-				EEP_Write(EEP_HNch_addr+(item*16),&nh,sizeof(float));
-				EEP_Write(EEP_HNcl_addr+(item*16),&nl,sizeof(float));
-				EEP_Write(EEP_HGF_addr+(item*16),&gf,sizeof(float));
-				EEP_Write(EEP_HNos_addr+(item*16),&nos,sizeof(float));
+					nos,
+					sp);
+				EEP_Write(EEP_HNch_addr+(item*20),&nh,sizeof(float));
+				EEP_Write(EEP_HNcl_addr+(item*20),&nl,sizeof(float));
+				EEP_Write(EEP_HGF_addr+(item*20),&gf,sizeof(float));
+				EEP_Write(EEP_HNos_addr+(item*20),&nos,sizeof(float));
+				EEP_Write(EEP_HPhase_addr+(item*20),&sp,sizeof(float));
 				return CALLBACKRET_Ok;
 			}
 		}
+		
 	}
 	return CALLBACKRET_Error;
 }
@@ -1099,7 +1141,7 @@ static int parser_logout(char *arg)
 
 static int parser_meas(char *arg)
 {
-float val;
+float resist,condut,conduc;
 
 	if (strcmpNoCase(arg,"=INIT"))
 	{
@@ -1112,9 +1154,9 @@ float val;
 	}
 	else if (strcmpNoCase(arg,"=PTC"))
 	{
-		if (meas_temp(&val))
+		if (meas_temp(&resist))
 		{
-			COM_Printf("\r\n*MEAS: %.3fOhm\r\n",val);
+			COM_Printf("\r\n*MEAS: %.3fOhm\r\n",resist);
 			return CALLBACKRET_Ok;
 		}
 		else
@@ -1123,9 +1165,9 @@ float val;
 	else if (!strcmpNoCase(arg,"=COND"))
 		return CALLBACKRET_Error;
 
-	if (meas(&val))
+	if (meas(&resist,&condut,&conduc))
 	{
-		COM_Printf("\r\n*MEAS: %.10eS,%.10eOhm,%.10eS/cm2\r\n",val,(1.0/val)-RES_ADD,val/meas_getkcell());
+		COM_Printf("\r\n*MEAS: %.10eS,%.10eOhm,%.10eS/cm2\r\n",condut,resist,conduc);
 		return CALLBACKRET_Ok;
 	}
 	else
