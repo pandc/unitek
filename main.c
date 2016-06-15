@@ -52,6 +52,7 @@
 #include "eeprom.h"
 #include "parser.h"
 #include "menu.h"
+#include "meas.h"
 
 /* Private typedef -----------------------------------------------------------*/
 /* Private define ------------------------------------------------------------*/
@@ -93,6 +94,8 @@ portTickType xLastWakeTime;
 	keyboard_init();
 
 	MenuInit();
+
+	meas_start();
 
 	// Initialise the xLastWakeTime variable with the current time.
 	xLastWakeTime = xTaskGetTickCount();
