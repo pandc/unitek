@@ -9,6 +9,8 @@
 
 #include "freertos.h"
 #include "task.h"
+#include "ffile.h"
+#include "meas.h"
 
 #include "my_definitions.h"
 #include "Display_128x64.h"
@@ -19,11 +21,15 @@
 #include "VariabiliGlobali_di_Lavoro.h"
 #include "keyboard.h"
 #include "menu.h"
+#include "my_types.h"
 
 extern bitmap_struct_type mybmp_struct1,mybmp_struct2;
 
-unsigned char menuchange;
 unsigned char MenuFunction_Index;
+
+print_conc_var struct_conc_print;
+
+
 
 unsigned int menu_triang_x,menu_triang_y;
 //unsigned char menu_triang_index=0;
@@ -35,6 +41,7 @@ unsigned char menu_triang_index;
 
 unsigned short ADC_array[4];
 
+
 extern unsigned char screen_image[1024];
 
 extern unsigned int blink_timer_on;
@@ -43,21 +50,24 @@ extern unsigned int triangolino_inversion_timer;
 extern unsigned char loop_flag;
 
 extern const char StringsMenuProg      [4][6][20];
+extern setp_e_soglie_type conc_soglie_limit_up,conc_soglie_limit_dn;
 //dovrebbero essere costanti in flash,ma non riesco a inizializzarle
-
-/*
- modo_concentrazione_type concentr_percent ;
- modo_concentrazione_type concentr_p_di_tit;
- modo_concentrazione_type concentr_g_su_l  ;
- modo_concentrazione_type concentr_microS;
- modo_concentrazione_type concentr_milliS;
-*/
+//***************************************************************************************
 void (*MenuFunctionPt[30])(void);
-
+void (*WorkMenu_CalcPrint_UnMisura_Conc[8])(unsigned int);
+void (*CalcPrint_UnMisura_Conc[8])(unsigned int,unsigned int,unsigned int);
+void (*IncrPrint_UnMisura_Conc[8])(unsigned short*,unsigned int,unsigned int,unsigned int);
+void (*Formula_ConcConvers    [8])(unsigned int);
+unsigned int(* FormulaInversa_Conc [8])(void);
+//***************************************************************************************
 static void menu_task(void *par)
 {
-	LCD_Display_Setup();
-	FontPointerInit();
+        LCD_Display_Setup();
+	FontPointerInit(); 
+        LoadDisplay_Logo();
+        ffready(portMAX_DELAY);
+        LoadRamSettingsFrom_External_DataFlash();
+
 
 	MenuFunction_Index=MENU_TEMPHUM;
 
@@ -72,156 +82,76 @@ static void menu_task(void *par)
 
 //***************************************************************************************
 void MenuInit(void)
-{
-	//associoo i puntatori a funzione a specifiche funzioni
-	MenuFunctionPt[MENU_TEMPHUM]			=&MenuTempHum;	    //0
-	MenuFunctionPt[MENU_PROGR]				=&MenuProg;			//1
-	MenuFunctionPt[SUBMENU_INOUT]			=&SubmenuINOUT;		//2
+{  
+        //associo i puntatori a funzione menu a specifiche funzioni
+	MenuFunctionPt[MENU_TEMPHUM]		=&MenuTempHum;	    //0
+	MenuFunctionPt[MENU_PROGR]		=&MenuProg;			//1
+	MenuFunctionPt[SUBMENU_INOUT]		=&SubmenuINOUT;		//2
 	MenuFunctionPt[SUBMENU_SELEZIONA_PROG]	=&SubmenuSelProgr;	//3
-	MenuFunctionPt[SUBMENU_COMUNIC]			=&SubmenuComunic;	//4
-	MenuFunctionPt[SUBMENU_SETCLOCK]		=&SubmenuSetClock;  //5
-	MenuFunctionPt[SUBMENU_SEL_LINGUA]		=&SumMenuSelLingua;	//6
-	MenuFunctionPt[SUBMENU_SERVIZIO]		=&SubmenuServizio;	//7
+	MenuFunctionPt[SUBMENU_COMUNIC]		=&SubmenuComunic;	//4
+	MenuFunctionPt[SUBMENU_SETCLOCK]	=&SubmenuSetClock;  //5
+	MenuFunctionPt[SUBMENU_SEL_LINGUA]	=&SumMenuSelLingua;	//6
+	MenuFunctionPt[SUBMENU_SERVIZIO]	=&SubmenuServizio;	//7
 	MenuFunctionPt[SUBMENU_SELECTED_PROGR]	=&SubmenuSelectedProgr;	//8
 
 
 	MenuFunctionPt[SUB2MENU_IMPOSTA_SIMBOLI]	=&Sub2MenuImpostaSimboli;
-	MenuFunctionPt[SUB2MENU_TK]					=&Sub2MenuTK;
+	MenuFunctionPt[SUB2MENU_TK]			=&Sub2MenuTK;
 	MenuFunctionPt[SUB3MENU_CURVA_DI_LAVORO]	=&Sub2MenuCurvadiLavoro;
 	MenuFunctionPt[SUB2MENU_IMPOSTA_SOGLIE] 	=&Sub2MenuImpostaSoglie;
 	MenuFunctionPt[SUB2MENU_IMPOSTA_TIMER]  	=&Sub2MenuImpostaTimer;
-	MenuFunctionPt[SUB2MENU_SEL_TIPO_CURV_LAV]  =&Sub2MenuSelTipoCurvaLavoro;
+	MenuFunctionPt[SUB2MENU_SEL_TIPO_CURV_LAV]      =&Sub2MenuSelTipoCurvaLavoro;
 	MenuFunctionPt[SUB3MENU_CURVA_DI_LAVORO3pt]	=&Sub2MenuCurvadiLavoro3Punti;
-/*
-	concentr_percent.min_lowrange=1;
-	concentr_percent.max_lowrange=999;
-	concentr_percent.min_hirange=1000;
-	concentr_percent.max_hirange=9999;
-	concentr_percent.decim_lowrange=2;
-	concentr_percent.decim_hirange=1;
+        MenuFunctionPt[SUB3MENU_SEL_LCH]		=&Sub2Sel_L_C_H;
 
-	concentr_p_di_tit.min_lowrange=1;
-	concentr_p_di_tit.max_lowrange=999;
-	concentr_p_di_tit.min_hirange=1000;
-	concentr_p_di_tit.max_hirange=9999;
-	concentr_p_di_tit.decim_lowrange=1;
-	concentr_p_di_tit.decim_hirange=0;
-
-	concentr_g_su_l.min_lowrange=1;
-	concentr_g_su_l.max_lowrange=999;
-	concentr_g_su_l.min_hirange=1000;
-	concentr_g_su_l.max_hirange=9999;
-	concentr_g_su_l.decim_lowrange=1;
-	concentr_g_su_l.decim_hirange=0;
-
-	concentr_microS.min_lowrange=1;
-	concentr_microS.max_lowrange=999;
-	concentr_microS.min_hirange=1;
-	concentr_microS.max_hirange=999;
-	concentr_microS.decim_lowrange=0;
-	concentr_microS.decim_hirange=0;
-
-	concentr_milliS.min_lowrange=1;
-	concentr_milliS.max_lowrange=999;
-	concentr_milliS.min_hirange=1;
-	concentr_milliS.max_hirange=999;
-	concentr_milliS.decim_lowrange=0;
-	concentr_milliS.decim_hirange=0;
-*/
-
-	/*per le soglie:
-	anche queste avranno una rappresentazione diversa a 2nda dell'unità di misura
-	Io modificherei il valore binario e farei la conversione al momento nell'unità di
-	misura
-	 */
-//per ora metto un pò di valori a caso.In realtà queste variabili dovrebbero essere in Flash
-//dovrebbero essere caricate in un unico program_arr al momento della conferma della selezione
-//del programma,per cui tutti i casi in cui ho program_arr[selected_program_index] dovranno diventare
-//	program_arr
-//
+        
+        //associo i puntatori a funzione calcolo e stampa concentrazione a specifiche funzioni che tengono conto unità di misura
+        //vale solo per schermata iniziale con fonts=20
+       WorkMenu_CalcPrint_UnMisura_Conc[UNIT_MIS_CONCENTR_PERCENTUALE ]=WorkMenu_CalcPrint_Percent;
+       WorkMenu_CalcPrint_UnMisura_Conc[UNIT_MIS_CONCENTR_PUNT_TITOL  ]=WorkMenu_CalcPrint_PuntTitol;
+       WorkMenu_CalcPrint_UnMisura_Conc[UNIT_MIS_CONCENTR_GRAMMILITRO ]=WorkMenu_CalcPrint_GrammiLitro;
+       WorkMenu_CalcPrint_UnMisura_Conc[UNIT_MIS_CONCENTR_uSIEMENS    ]=WorkMenu_CalcPrint_uSiemens;
+       WorkMenu_CalcPrint_UnMisura_Conc[UNIT_MIS_CONCENTR_mSIEMENS    ]=WorkMenu_CalcPrint_milliSiemens;
+       
+       CalcPrint_UnMisura_Conc[UNIT_MIS_CONCENTR_PERCENTUALE ]=CalcPrint_Percent_xy;
+       CalcPrint_UnMisura_Conc[UNIT_MIS_CONCENTR_PUNT_TITOL  ]=CalcPrint_PuntTitol_xy;
+       CalcPrint_UnMisura_Conc[UNIT_MIS_CONCENTR_GRAMMILITRO ]=CalcPrint_GrammiLitro_xy;
+       CalcPrint_UnMisura_Conc[UNIT_MIS_CONCENTR_uSIEMENS    ]=CalcPrint_uSiemens_xy;
+       CalcPrint_UnMisura_Conc[UNIT_MIS_CONCENTR_mSIEMENS    ]=CalcPrint_milliSiemens_xy;
+       
+       IncrPrint_UnMisura_Conc  [UNIT_MIS_CONCENTR_PERCENTUALE ]=IncrPrintConc_Percent_xy;
+       IncrPrint_UnMisura_Conc  [UNIT_MIS_CONCENTR_PUNT_TITOL  ]=IncrPrintConc_PuntTitol_xy;
+       IncrPrint_UnMisura_Conc  [UNIT_MIS_CONCENTR_GRAMMILITRO ]=IncrPrintConc_GrammiLitro_xy;
+       IncrPrint_UnMisura_Conc  [UNIT_MIS_CONCENTR_uSIEMENS    ]=IncrPrintConc_uSiemens_xy;
+       IncrPrint_UnMisura_Conc  [UNIT_MIS_CONCENTR_mSIEMENS    ]=IncrPrintConc_milliSiemens_xy;
+     
+       Formula_ConcConvers      [UNIT_MIS_CONCENTR_PERCENTUALE ]=Formula_ConcConvers_Percent;
+       Formula_ConcConvers      [UNIT_MIS_CONCENTR_PUNT_TITOL  ]=Formula_ConcConvers_PuntTitol;
+       Formula_ConcConvers      [UNIT_MIS_CONCENTR_GRAMMILITRO ]=Formula_ConcConvers_grammiLitro; 
+       Formula_ConcConvers      [UNIT_MIS_CONCENTR_uSIEMENS    ]=Formula_ConcConvers_uSiemens;
+       Formula_ConcConvers      [UNIT_MIS_CONCENTR_mSIEMENS    ]=Formula_ConcConvers_milliSiemens;
+       //limiti massimi e minimi di set points e soglie
+       conc_soglie_limit_up.ses_struct.SetConc=64000;
+       conc_soglie_limit_up.ses_struct.AllConcMin=64000;
+       conc_soglie_limit_up.ses_struct.AllConcMax=64000;
+       conc_soglie_limit_up.ses_struct.IsteresiConc=10000;
+       conc_soglie_limit_up.ses_struct.SetTemp=30000;
+       conc_soglie_limit_up.ses_struct.AllTempMin=30000;
+       conc_soglie_limit_up.ses_struct.AllTempMax=30000;
+       conc_soglie_limit_up.ses_struct.IsteresiTemp=2000;
 
 
-
-
-	/*
-	program_arr[0].setp_e_soglie.ses_struct.SetConc=52000;
-	program_arr[0].setp_e_soglie.ses_struct.AllConcMin=40000;
-	program_arr[0].setp_e_soglie.ses_struct.AllConcMax=60000;
-	program_arr[0].setp_e_soglie.ses_struct.IsteresiConc=1000;
-	program_arr[0].setp_e_soglie.ses_struct.SetTemp=30000;
-	program_arr[0].setp_e_soglie.ses_struct.AllTempMin=25000;
-	program_arr[0].setp_e_soglie.ses_struct.AllTempMax=33000;
-	program_arr[0].setp_e_soglie.ses_struct.IsteresiTemp=400;
-	program_arr[0].curva_lav1_C_index=7;
-	program_arr[0].curva_lav3_L_index=2;
-	program_arr[0].curva_lav3_C_index=8;
-	program_arr[0].curva_lav3_H_index=10;
-
-	program_arr[1].setp_e_soglie.ses_struct.SetConc=50000;
-	program_arr[1].setp_e_soglie.ses_struct.AllConcMin=38000;
-	program_arr[1].setp_e_soglie.ses_struct.AllConcMax=58000;
-	program_arr[1].setp_e_soglie.ses_struct.IsteresiConc=800;
-	program_arr[1].setp_e_soglie.ses_struct.SetTemp=28000;
-	program_arr[1].setp_e_soglie.ses_struct.AllTempMin=23000;
-	program_arr[1].setp_e_soglie.ses_struct.AllTempMax=32000;
-	program_arr[1].setp_e_soglie.ses_struct.IsteresiTemp=350;
-	program_arr[1].curva_lav1_C_index=6;
-	program_arr[1].curva_lav3_L_index=1;
-	program_arr[1].curva_lav3_C_index=9;
-	program_arr[1].curva_lav3_H_index=11;
-
-	program_arr[2].setp_e_soglie.ses_struct.SetConc=48000;
-	program_arr[2].setp_e_soglie.ses_struct.AllConcMin=36000;
-	program_arr[2].setp_e_soglie.ses_struct.AllConcMax=56000;
-	program_arr[2].setp_e_soglie.ses_struct.IsteresiConc=780;
-	program_arr[2].setp_e_soglie.ses_struct.SetTemp=28000;
-	program_arr[2].setp_e_soglie.ses_struct.AllTempMin=23000;
-	program_arr[2].setp_e_soglie.ses_struct.AllTempMax=32000;
-	program_arr[2].setp_e_soglie.ses_struct.IsteresiTemp=350;
-	program_arr[2].curva_lav1_C_index=2;
-	program_arr[2].curva_lav3_L_index=2;
-	program_arr[2].curva_lav3_C_index=12;
-	program_arr[2].curva_lav3_H_index=14;
-
-	program_arr[3].setp_e_soglie.ses_struct.SetConc=46000;
-	program_arr[3].setp_e_soglie.ses_struct.AllConcMin=37000;
-	program_arr[3].setp_e_soglie.ses_struct.AllConcMax=57500;
-	program_arr[3].setp_e_soglie.ses_struct.IsteresiConc=1100;
-	program_arr[3].setp_e_soglie.ses_struct.SetTemp=22000;
-	program_arr[3].setp_e_soglie.ses_struct.AllTempMin=21000;
-	program_arr[3].setp_e_soglie.ses_struct.AllTempMax=29500;
-	program_arr[3].setp_e_soglie.ses_struct.IsteresiTemp=410;
-
-	program_arr[4].setp_e_soglie.ses_struct.SetConc=52000;
-	program_arr[4].setp_e_soglie.ses_struct.AllConcMin=40000;
-	program_arr[4].setp_e_soglie.ses_struct.AllConcMax=60000;
-	program_arr[4].setp_e_soglie.ses_struct.IsteresiConc=1000;
-	program_arr[4].setp_e_soglie.ses_struct.SetTemp=30000;
-	program_arr[4].setp_e_soglie.ses_struct.AllTempMin=25000;
-	program_arr[4].setp_e_soglie.ses_struct.AllTempMax=33000;
-	program_arr[4].setp_e_soglie.ses_struct.IsteresiTemp=400;
-
-	conc_soglie_limit_up.ses_struct.SetConc=64000;
-	conc_soglie_limit_up.ses_struct.AllConcMin=64000;
-	conc_soglie_limit_up.ses_struct.AllConcMax=64000;
-	conc_soglie_limit_up.ses_struct.IsteresiConc=10000;
-	conc_soglie_limit_up.ses_struct.SetTemp=30000;
-	conc_soglie_limit_up.ses_struct.AllTempMin=30000;
-	conc_soglie_limit_up.ses_struct.AllTempMax=30000;
-	conc_soglie_limit_up.ses_struct.IsteresiTemp=2000;
-
-
-	conc_soglie_limit_dn.ses_struct.SetConc=0;
-	conc_soglie_limit_dn.ses_struct.AllConcMin=0;
-	conc_soglie_limit_dn.ses_struct.AllConcMax=0;
-	conc_soglie_limit_dn.ses_struct.IsteresiConc=100;
-	conc_soglie_limit_dn.ses_struct.SetTemp=200;
-	conc_soglie_limit_dn.ses_struct.AllTempMin=200;
-	conc_soglie_limit_dn.ses_struct.AllTempMax=200;
-	conc_soglie_limit_dn.ses_struct.IsteresiTemp=100;
-
-	*/
-
+       conc_soglie_limit_dn.ses_struct.SetConc=0;
+       conc_soglie_limit_dn.ses_struct.AllConcMin=0;
+       conc_soglie_limit_dn.ses_struct.AllConcMax=0;
+       conc_soglie_limit_dn.ses_struct.IsteresiConc=100;
+       conc_soglie_limit_dn.ses_struct.SetTemp=200;
+       conc_soglie_limit_dn.ses_struct.AllTempMin=200;
+       conc_soglie_limit_dn.ses_struct.AllTempMax=200;
+       conc_soglie_limit_dn.ses_struct.IsteresiTemp=100;
+        
+        
+        
 	xTaskCreate(menu_task, "menu", 256, NULL, tskIDLE_PRIORITY, NULL);
 }
 
@@ -229,17 +159,18 @@ void MenuInit(void)
 void MenuTempHum(void)
 {
 	uint8_t key;
-	//unsigned char loop_flag,to_print=0;
+	
 	//unsigned char unit_misura_old;
 	//unsigned int decimillesimi,conc_to_print;
-	unsigned int temp_to_print;
-	//unsigned int   multiplied,conc_to_print_old,temp_to_print_old;
+	unsigned int temperature_to_print;
+	unsigned int  /* multiplied,conc_to_print_old,*/temperature_to_print_old;
 	unsigned int abilita_disabilita_old;
 
+       // float myfloat_temper,my_float_conc;
 
 
 	//conc_to_print_old=0xFFFF;
-	//temp_to_print_old=0xFFFF;
+	temperature_to_print_old=0xFFFF;
 	abilita_disabilita_old=0x3;
 
 
@@ -252,22 +183,19 @@ void MenuTempHum(void)
 	LCD_CopyScreen();
 
 
-	#ifdef SHOW_BEUTA_VUOTA
-		mybmp_struct2.bmp_pointer=beutaVuota_bmp;
-		mybmp_struct2.righe		 =beutaVuotaHeightPixels;
-		mybmp_struct2.colonne	 =beutaVuotaWidthPages;
-		mybmp_struct2.start_x=30;
-		mybmp_struct2.start_y=42;
-		GetBitmap();
-	#endif
+#ifdef SHOW_BEUTA_VUOTA
+        mybmp_struct2.bmp_pointer=beutaVuota_bmp;
+        mybmp_struct2.righe		 =beutaVuotaHeightPixels;
+        mybmp_struct2.colonne	 =beutaVuotaWidthPages;
+        mybmp_struct2.start_x=30;
+        mybmp_struct2.start_y=42;
+        GetBitmap();
+#endif
 
-	//#define SHOW_TERMOMETRO
-	#ifdef 	SHOW_TERMOMETRO
-
+//#define SHOW_TERMOMETRO
+#ifdef 	SHOW_TERMOMETRO
 	//per disegnare una bitmap :dopo avere assegnato i riferimenti alla bitmap(prime 3 righe qui sotto),
 	//scegliere le coordintate(possibilmente pari,per ora) e chiamare GetBitmap();   NB scrive solo in RAM,andrà poi copiata nella RAM del display
-
-
 	mybmp_struct2.bmp_pointer=termometro_bmp;
 	mybmp_struct2.righe		 =termometroHeightPixels;
 	mybmp_struct2.colonne	 =termometroWidthPages;
@@ -276,7 +204,7 @@ void MenuTempHum(void)
 	GetBitmap();
 
 
-	#endif
+#endif
 
 	//#define SHOW_RISCALDATORE
 	#ifdef SHOW_RISCALDATORE
@@ -294,6 +222,8 @@ void MenuTempHum(void)
 	mybmp_struct2.start_x=94;
 	mybmp_struct2.start_y=2;
 	GetBitmap();
+        
+        
 
 	SelectFont(CALIBRI_10);
 
@@ -305,7 +235,7 @@ void MenuTempHum(void)
 
 	while(1)
 	{
-		if (key_getstroke(&key,portMAX_DELAY) && (key == KEY_PROG))
+		if (key_getstroke(&key,100/*portMAX_DELAY*/) && (key == KEY_PROG))
 		{
 		  MenuFunction_Index=MENU_PROGR;
 		  return;
@@ -331,264 +261,53 @@ void MenuTempHum(void)
 			abilita_disabilita_old=abilita_disabilita;
 
 		}
-
+#define SHOW_ADC
 #if defined(SHOW_ADC)
-		 if(CHECK_ADC1_AQUIRED)
+
+		 if(1)// meas_temp(&myfloat_temper))
 		 {
-			 CLEAR_ADC1_AQUIRED;
-			 AD1_GetValue16(ADC_array);
-			 temp_to_print=ADC_array[LETTURA_TEMP]/128;
+			 ADC_array[LETTURA_TEMP]=38951;//(unsigned short)myfloat_temper;
 
-			 temp_to_print*=3;
-
-			 if(temp_to_print != temp_to_print_old)
+			 if(temperature_to_print != temperature_to_print_old)
 			 {
 				 SelectFont(CALIBRI_20);
 				 CleanArea_Ram_and_Screen(68,120,14,36);
-				 BinToBCDisp(temp_to_print,UN_DECIMALE,68,14);
+				 BinToBCDisp(ADC_array[LETTURA_TEMP]/*temperature_to_print*/,UN_DECIMALE,68,14);
 				 LCD_CopyPartialScreen(68,120,14,36);
-				 temp_to_print_old=temp_to_print;
+				 temperature_to_print_old=temperature_to_print;
 			 }
 
 		 }
 
-		switch(program_arr.unita_mis_concentr)
-		{
-		  case UNIT_MIS_CONCENTR_PERCENTUALE:
+                
+                if(1)// meas(&my_float_conc))
+                {  
+                    
+                  ADC_array[LETTURA_CONC]=43528;//(unsigned short)my_float_conc; 
+                  
+                 WorkMenu_CalcPrint_UnMisura_Conc[RamSettings.ptype_arr[RamSettings.selected_program_id].unita_mis_concentr](ADC_array[LETTURA_CONC]);
 
-			  if(CHECK_ADC0_AQUIRED)
-			  {
-				  CLEAR_ADC0_AQUIRED;
-				  AD1_GetValue16(ADC_array);
-				  //64000=100%  qui vogliono la risoluzione dello 0,1% quindi 64000=>10000
-
-				  multiplied=ADC_array[LETTURA_CONC]*10;
-				  decimillesimi=multiplied/64;
-
-				  if(decimillesimi>9999)decimillesimi=9999;
-
-				  if(decimillesimi>999)
-				  {
-					  conc_to_print=decimillesimi/10;
-				  }
-				  else
-				  {
-					  conc_to_print=decimillesimi;
-				  }
-
-				  if(conc_to_print!=conc_to_print_old)
-				  {
-					  SelectFont(CALIBRI_10);
-					  CleanArea_Ram_and_Screen(20,40,UN_MIS_Y_START,14);
-					  LCDPrintString("%",27,UN_MIS_Y_START);
-					  LCD_CopyPartialScreen(20,40,UN_MIS_Y_START,14);
-
-
-					  SelectFont(CALIBRI_20);
-					  CleanArea_Ram_and_Screen(00,62,14,36);
-					  if(decimillesimi>999)
-					  {
-						  BinToBCDisp(conc_to_print,UN_DECIMALE,4,14);
-					  }
-					  else
-					  {
-						  BinToBCDisp(conc_to_print,DUE_DECIMALI,4,14);
-					  }
-
-					  LCD_CopyPartialScreen(00,62,14,36);
-
-					  conc_to_print_old=conc_to_print;
-				  }
-			  }
-
-			  break;
-
-		  case UNIT_MIS_CONCENTR_PUNT_TITOL:
-			  if(CHECK_ADC0_AQUIRED)
-			  {
-				  CLEAR_ADC0_AQUIRED;
-				  AD1_GetValue16(ADC_array);
-				  //64000=100%  qui vogliono la risoluzione dello 0,1% quindi 64000=>10000
-
-				  multiplied=ADC_array[LETTURA_CONC]*10;
-				  decimillesimi=multiplied/64;
-
-				  if(decimillesimi>9999)decimillesimi=9999;
-
-				  if(decimillesimi>999)
-				  {
-					  conc_to_print=decimillesimi/10;
-				  }
-				  else
-				  {
-					  conc_to_print=decimillesimi;
-				  }
-				  if(conc_to_print!=conc_to_print_old)
-				  {
-					  SelectFont(CALIBRI_10);
-					  CleanArea_Ram_and_Screen(20,40,UN_MIS_Y_START,14);
-					  LCDPrintString("P",27,UN_MIS_Y_START);
-					  LCD_CopyPartialScreen(20,40,UN_MIS_Y_START,14);
-
-					  var_concentr_to_print=5420;
-					  SelectFont(CALIBRI_20);
-					  CleanArea_Ram_and_Screen(00,62,14,36);
-					  if(decimillesimi>999)
-					  {
-
-						  BinToBCDisp(conc_to_print,INTERO,4,14);
-					  }
-					  else
-					  {
-						  BinToBCDisp(conc_to_print,UN_DECIMALE,4,14);
-					  }
-
-					  LCD_CopyPartialScreen(00,62,14,36);
-
-					  conc_to_print_old=conc_to_print;
-
-				  }
-			  }
-			  break;
-
-		  case UNIT_MIS_CONCENTR_GRAMMILITRO:
-			  if(CHECK_ADC0_AQUIRED)
-			  {
-				  CLEAR_ADC0_AQUIRED;
-				  AD1_GetValue16(ADC_array);
-				  //64000=100%  qui vogliono la risoluzione dello 0,1% quindi 64000=>10000
-
-				  multiplied=ADC_array[LETTURA_CONC]*10;
-				  decimillesimi=multiplied/64;
-
-				  if(decimillesimi>9999)decimillesimi=9999;
-
-				  if(decimillesimi>999)
-				  {
-					  conc_to_print=decimillesimi/10;
-				  }
-				  else
-				  {
-					  conc_to_print=decimillesimi;
-				  }
-
-				  if(conc_to_print!=conc_to_print_old)
-				  {
-					  SelectFont(CALIBRI_10);
-					  CleanArea_Ram_and_Screen(20,40,UN_MIS_Y_START,14);
-					  LCDPrintString("g/l",24,UN_MIS_Y_START);
-					  LCD_CopyPartialScreen(20,40,UN_MIS_Y_START,14);
-
-
-					  SelectFont(CALIBRI_20);
-					  CleanArea_Ram_and_Screen(00,62,14,36);
-					  if(decimillesimi>999)
-					  {
-
-						  BinToBCDisp(conc_to_print,INTERO,4,14);
-					  }
-					  else
-					  {
-						  BinToBCDisp(conc_to_print,UN_DECIMALE,4,14);
-					  }
-
-					  LCD_CopyPartialScreen(00,62,14,36);
-
-					  conc_to_print_old=conc_to_print;
-
-				  }
-			  }
-			  break;
-
-		  case UNIT_MIS_CONCENTR_uSIEMENS:
-			  if(CHECK_ADC0_AQUIRED)
-			  {
-				  CLEAR_ADC0_AQUIRED;
-				  AD1_GetValue16(ADC_array);
-				  //64000=100%  qui vogliono la risoluzione dello 0,1% quindi 64000=>10000
-
-				  multiplied=ADC_array[LETTURA_CONC]*1;
-				  decimillesimi=multiplied/64;
-
-				  if(decimillesimi>999)decimillesimi=999;
-
-				  conc_to_print=decimillesimi;
-
-
-
-				  if(conc_to_print!=conc_to_print_old)
-				  {
-					  SelectFont(CALIBRI_10);
-					  CleanArea_Ram_and_Screen(20,40,UN_MIS_Y_START,14);
-					  LCDPrintString("uS",26,UN_MIS_Y_START);
-					  LCD_CopyPartialScreen(20,40,UN_MIS_Y_START,14);
-
-
-					  SelectFont(CALIBRI_20);
-					  CleanArea_Ram_and_Screen(00,62,14,36);
-					  BinToBCDisp(conc_to_print,INTERO,4,14);
-					  LCD_CopyPartialScreen(00,62,14,36);
-
-					  conc_to_print_old=conc_to_print;
-				  }
-			  }
-			  break;
-
-		  case UNIT_MIS_CONCENTR_mSIEMENS:
-			  if(CHECK_ADC0_AQUIRED)
-			  {
-				  CLEAR_ADC0_AQUIRED;
-				  AD1_GetValue16(ADC_array);
-				  //64000=100%  qui vogliono la risoluzione dello 0,1% quindi 64000=>10000
-
-				  multiplied=ADC_array[LETTURA_CONC]*1;
-				  decimillesimi=multiplied/64;
-
-				  if(decimillesimi>999)decimillesimi=999;
-				  conc_to_print=decimillesimi;
-
-
-
-				  if(conc_to_print!=conc_to_print_old)
-				  {
-					  SelectFont(CALIBRI_10);
-					  CleanArea_Ram_and_Screen(20,40,UN_MIS_Y_START,14);
-					  LCDPrintString("mS",26,UN_MIS_Y_START);
-					  LCD_CopyPartialScreen(20,40,UN_MIS_Y_START,14);
-
-
-					  SelectFont(CALIBRI_20);
-					  CleanArea_Ram_and_Screen(00,62,14,36);
-					  BinToBCDisp(conc_to_print,INTERO,4,14);
-					  LCD_CopyPartialScreen(00,62,14,36);
-
-					  conc_to_print_old=conc_to_print;
-				  }
-			  }
-			  break;
-
-		  default:
-			  break;
-
-
-		}
+                 } 
 #endif
-
+/*
 		if(stato_intervento_conc==STATO_INIZIALE)
 		{
-			//per stampare  "SETP xxx" o bitmpa pompa quando entro,solo la prima volta fingo di avere lettura ADC abbondante
-		   ADC_array[LETTURA_CONC] =1+ (program_arr.setp_e_soglie.ses_struct.SetConc + program_arr.setp_e_soglie.ses_struct.IsteresiConc);
+		   //per stampare  "SETP xxx" o bitmpa pompa quando entro,solo la prima volta fingo di avere lettura ADC abbondante
+                   ADC_array[LETTURA_CONC] =1+ (RamSettings.ptype_arr[RamSettings.selected_program_id].setp_e_soglie.ses_struct.SetConc +
+                                                    RamSettings.ptype_arr[RamSettings.selected_program_id].setp_e_soglie.ses_struct.IsteresiConc);
+		  
 		   stato_intervento_conc=  STATO_POMPA_ON_CONC_SCARSA;
 		}
 
 		if(stato_intervento_temper==STATO_INIZIALE)
 		{
 			//se ne manca allora faccio saltare a stato riposo,come se da questo si accorgesse che ne manca
-			ADC_array[LETTURA_TEMP]= program_arr.setp_e_soglie.ses_struct.SetTemp + program_arr.setp_e_soglie.ses_struct.IsteresiTemp;
+			ADC_array[LETTURA_TEMP]= (RamSettings.ptype_arr[RamSettings.selected_program_id].setp_e_soglie.ses_struct.SetTemp +
+                                                    RamSettings.ptype_arr[RamSettings.selected_program_id].setp_e_soglie.ses_struct.IsteresiTemp);
 			stato_intervento_temper=STATO_RISC_ON_TEMP_SCARSA;
 		}
 
-
+*/
 		//**************** INTERVENTO!!!********************************************
 		//confronto con setpoint,isteresi ecc
 		switch(stato_intervento_conc)
@@ -596,8 +315,8 @@ void MenuTempHum(void)
 
 
 			case STATO_POMPA_RIPOSO:
-				//if((ADC_array[LETTURA_CONC]) < program_arr..setp_e_soglie.SetConc - program_arr.ses_struct.setp_e_soglie.ses_struct.IsteresiConc)
-				if((ADC_array[LETTURA_CONC]) < (program_arr.setp_e_soglie.ses_struct.SetConc - program_arr.setp_e_soglie.ses_struct.IsteresiConc))
+				//if((ADC_array[LETTURA_CONC]) < RamSettings.ptype_arr[RamSettings.selected_program_id].setp_e_soglie.SetConc - RamSettings.ptype_arr[RamSettings.selected_program_id]ses_struct.setp_e_soglie.ses_struct.IsteresiConc)
+				if((ADC_array[LETTURA_CONC]) < (RamSettings.ptype_arr[RamSettings.selected_program_id].setp_e_soglie.ses_struct.SetConc - RamSettings.ptype_arr[RamSettings.selected_program_id].setp_e_soglie.ses_struct.IsteresiConc))
 				{
 
 					stato_intervento_conc=STATO_POMPA_ON_CONC_SCARSA;
@@ -616,8 +335,8 @@ void MenuTempHum(void)
 
 
 			case STATO_POMPA_ON_CONC_SCARSA:
-				//if((ADC_array[LETTURA_CONC]) > (program_arr..setp_e_soglie.SetConc + program_arr.ses_struct.setp_e_soglie.ses_struct.IsteresiConc))
-				if((ADC_array[LETTURA_CONC]) > (program_arr.setp_e_soglie.ses_struct.SetConc + program_arr.setp_e_soglie.ses_struct.IsteresiConc))
+				//if((ADC_array[LETTURA_CONC]) > (RamSettings.ptype_arr[RamSettings.selected_program_id].setp_e_soglie.SetConc + RamSettings.ptype_arr[RamSettings.selected_program_id]ses_struct.setp_e_soglie.ses_struct.IsteresiConc))
+				if((ADC_array[LETTURA_CONC]) > (RamSettings.ptype_arr[RamSettings.selected_program_id].setp_e_soglie.ses_struct.SetConc + RamSettings.ptype_arr[RamSettings.selected_program_id].setp_e_soglie.ses_struct.IsteresiConc))
 				{
 					stato_intervento_conc=STATO_POMPA_RIPOSO;
 					//cancello disegno pompa
@@ -632,9 +351,9 @@ void MenuTempHum(void)
 				}
 				else
 				{
-					if((ADC_array[LETTURA_CONC]) < (program_arr.setp_e_soglie.ses_struct.AllConcMin-+ program_arr.setp_e_soglie.ses_struct.IsteresiConc))
+					if((ADC_array[LETTURA_CONC]) < (RamSettings.ptype_arr[RamSettings.selected_program_id].setp_e_soglie.ses_struct.AllConcMin-+ RamSettings.ptype_arr[RamSettings.selected_program_id].setp_e_soglie.ses_struct.IsteresiConc))
 					{
-						//prova=program_arr.setp_e_soglie.ses_struct.AllConcMin;
+						//prova=RamSettings.ptype_arr[RamSettings.selected_program_id]setp_e_soglie.ses_struct.AllConcMin;
 						SelectFont(CALIBRI_10);
 						LCDPrintString("MIN!",30,42);
 						LCD_CopyPartialScreen(30,58,42,54);
@@ -657,7 +376,7 @@ void MenuTempHum(void)
 
 /*
 		 		 //se va bene faccio saltare in stato CONC_SCARSA come se si accorgesse da lì che conc è ok
-		 		if((ADC_array[LETTURA_TEMP]) < program_arr.setp_e_soglie.ses_struct.SetTemp - program_arr.setp_e_soglie.ses_struct.IsteresiTemp)
+		 		if((ADC_array[LETTURA_TEMP]) < RamSettings.ptype_arr[RamSettings.selected_program_id]setp_e_soglie.ses_struct.SetTemp - RamSettings.ptype_arr[RamSettings.selected_program_id]setp_e_soglie.ses_struct.IsteresiTemp)
 		 		{
 		 			 stato_intervento_temper=  STATO_RISC_ON_TEMP_SCARSA;
 		 			CleanArea_Ram_and_Screen(68,128,42,64);
@@ -675,7 +394,7 @@ void MenuTempHum(void)
 */
 
 			case STATO_RISC_RIPOSO:
-				if((ADC_array[LETTURA_TEMP]) < program_arr.setp_e_soglie.ses_struct.SetTemp - program_arr.setp_e_soglie.ses_struct.IsteresiTemp)
+				if((ADC_array[LETTURA_TEMP]) < RamSettings.ptype_arr[RamSettings.selected_program_id].setp_e_soglie.ses_struct.SetTemp - RamSettings.ptype_arr[RamSettings.selected_program_id].setp_e_soglie.ses_struct.IsteresiTemp)
 					{
 					stato_intervento_temper=STATO_RISC_ON_TEMP_SCARSA;
 					CleanArea_Ram_and_Screen(68,128,42,64);
@@ -694,7 +413,9 @@ void MenuTempHum(void)
 
 
 			case STATO_RISC_ON_TEMP_SCARSA:
-				if((ADC_array[LETTURA_TEMP]) > program_arr.setp_e_soglie.ses_struct.SetTemp + program_arr.setp_e_soglie.ses_struct.IsteresiTemp)
+                                if((ADC_array[LETTURA_TEMP]) > RamSettings.ptype_arr[RamSettings.selected_program_id].setp_e_soglie.ses_struct.SetTemp +
+                                                                      RamSettings.ptype_arr[RamSettings.selected_program_id].setp_e_soglie.ses_struct.IsteresiTemp)
+				
 				{
 					stato_intervento_temper=STATO_RISC_RIPOSO;
 					//cancello disegno riscaldatore
@@ -705,20 +426,20 @@ void MenuTempHum(void)
 					CleanArea_Ram_and_Screen(68,127,42,54);
 					LCDPrintString("SET",68,42);
 
-					temp_to_print=program_arr.setp_e_soglie.ses_struct.SetTemp*3;
+					temperature_to_print=RamSettings.ptype_arr[RamSettings.selected_program_id].setp_e_soglie.ses_struct.SetTemp*3;
 
-					temp_to_print/=128;
+					temperature_to_print/=128;
 
-					BinToBCDisp(temp_to_print,UN_DECIMALE,90,42);
+					BinToBCDisp(temperature_to_print,UN_DECIMALE,90,42);
 					LCD_CopyPartialScreen(68,128,42,54);
 				}
 				else
 				{
-					if((ADC_array[LETTURA_TEMP]) < program_arr.setp_e_soglie.ses_struct.AllTempMin)
+					if((ADC_array[LETTURA_TEMP]) < RamSettings.ptype_arr[RamSettings.selected_program_id].setp_e_soglie.ses_struct.AllTempMin)
 					{
 						//CleanArea_Ram_and_Screen(104,128,42,64);
 /*
-						prova=program_arr.ses_struct.setp_e_soglie.ses_struct.AllTempMin;
+						prova=RamSettings.ptype_arr[RamSettings.selected_program_id]ses_struct.setp_e_soglie.ses_struct.AllTempMin;
 						mybmp_struct2.bmp_pointer=termometro_bmp;
 						mybmp_struct2.righe		 =termometroHeightPixels;
 						mybmp_struct2.colonne	 =termometroWidthPages;
@@ -872,7 +593,7 @@ void MenuProg(void)
 			last_string_to_print=first_string_to_print + 5;
 			for(string_index=first_string_to_print;string_index<last_string_to_print;string_index++)
 			{
-				LCDPrintString(StringsMenuProg[linguaggio][string_index],12,strings_y);
+				LCDPrintString(StringsMenuProg[RamSettings.Linguaggio][string_index],12,strings_y);
 				strings_y+=12;
 			}
 
@@ -1008,7 +729,6 @@ void MoveTriangolinoSx(void)
 
 }
 //***************************************************************************************
-
 void DisegnaTriangolinoMenu(unsigned short triang_x,unsigned short triang_y)
 {
 	mybmp_struct2.bmp_pointer=triangolino_bmp;
@@ -1026,3 +746,352 @@ void DisegnaCornice (void)
 	RigaVertic(0,0,63);
 	RigaVertic(127,0,63);
 }
+//***************************************************************************************
+void LoadRamSettingsFrom_uC_Flash(void)
+{
+	const unsigned char* cuipt=(const unsigned char *)&saved_prog_arr[0];//0xFF000;
+	unsigned short i,size;
+	unsigned char * sec_image_pt;
+
+	sec_image_pt=(unsigned char *)&RamSettings;
+	size=sizeof RamSettings;
+
+	for(i=0;i<size;i++)
+	{
+		*sec_image_pt++=*cuipt++;
+	}
+}
+//***************************************************************************************
+void LoadRamSettingsFrom_External_DataFlash(void)
+{
+  FFILE *FileMyParameters;
+  unsigned short size;
+
+  size=sizeof RamSettings;
+  
+  FileMyParameters =ffopen("MyParameters.bin",'r');
+  if (!FileMyParameters)
+  {
+    //decidere se oltre a copiare da const in uc Flash,o addirittura creare il file  mancante
+    //memcpy(&RamSettings,&
+    FileMyParameters = ffopen("MyParameters.bin",'w');
+    if (FileMyParameters)
+    {
+      ffwrite(FileMyParameters,&RamSettings,size);
+      ffclose(FileMyParameters);
+    }
+  }
+  else
+  {  
+    ffread(FileMyParameters,&RamSettings,size);
+    ffclose(FileMyParameters);
+  } 
+}
+//***************************************************************************************
+unsigned char SaveRamSettings_in_External_DataFlash(void)
+{
+  FFILE *FileMyParameters;
+  unsigned short size;
+  
+  size=sizeof RamSettings;
+  
+  FileMyParameters=ffopen("MyParameters.bin",'w');
+  if(FileMyParameters)
+  {
+    ffwrite(FileMyParameters,&RamSettings,size);
+    ffclose(FileMyParameters);
+    return 1;//tutto ok
+  }
+  else return 0;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+/* _____      _           _                      _                                                          __            _          ___   ___  
+  / ____|    | |         | |                    | |                                                        / _|          | |        |__ \ / _ \ 
+ | |     __ _| | ___ ___ | | ___      ___    ___| |_ __ _ _ __ ___  _ __   __ _     ___ ___  _ __   ___   | |_ ___  _ __ | |_ ___      ) | | | |
+ | |    / _` | |/ __/ _ \| |/ _ \    / _ \  / __| __/ _` | '_ ` _ \| '_ \ / _` |   / __/ _ \| '_ \ / __|  |  _/ _ \| '_ \| __/ __|    / /| | | |
+ | |___| (_| | | (_| (_) | | (_) |  |  __/  \__ \ || (_| | | | | | | |_) | (_| |  | (_| (_) | | | | (__   | || (_) | | | | |_\__ \   / /_| |_| |
+  \_____\__,_|_|\___\___/|_|\___/    \___|  |___/\__\__,_|_| |_| |_| .__/ \__,_|   \___\___/|_| |_|\___|  |_| \___/|_| |_|\__|___/  |____|\___/ 
+                                                                   | |                                                                          
+                                                                   |_|      */
+
+//***************************************************************************************
+void WorkMenu_CalcPrint_Percent(unsigned int bin)
+{
+     
+      static unsigned int conc_to_print_old=0xFFFFFFF;
+      
+      Formula_ConcConvers_Percent(bin);
+      
+ 
+      if(struct_conc_print.conc_to_print!=conc_to_print_old) 
+      {
+              SelectFont(CALIBRI_10);
+              CleanArea_Ram_and_Screen(20,40,UN_MIS_Y_START,14);
+              LCDPrintString("%",27,UN_MIS_Y_START);
+              LCD_CopyPartialScreen(20,40,UN_MIS_Y_START,14);
+
+
+              SelectFont(CALIBRI_20);
+              CleanArea_Ram_and_Screen(00,62,14,36);
+             
+              BinToBCDisp(struct_conc_print.conc_to_print,struct_conc_print.decimali_to_print,4,14);
+             
+              LCD_CopyPartialScreen(00,62,14,36);
+
+              conc_to_print_old=struct_conc_print.conc_to_print;
+      }
+}
+//***************************************************************************************
+void WorkMenu_CalcPrint_PuntTitol(unsigned int bin)
+{
+      static unsigned int conc_to_print_old=0xFFFFFFF;
+      //AD1_GetValue16(ADC_array);
+      //64000=100%  qui vogliono la risoluzione dello 0,1% quindi 64000=>10000
+      Formula_ConcConvers_PuntTitol(bin);
+       
+        if(struct_conc_print.conc_to_print!=conc_to_print_old)
+        {
+                SelectFont(CALIBRI_10);
+                CleanArea_Ram_and_Screen(20,40,UN_MIS_Y_START,14);
+                LCDPrintString("P",27,UN_MIS_Y_START);
+                LCD_CopyPartialScreen(20,40,UN_MIS_Y_START,14);
+
+                
+                SelectFont(CALIBRI_20);
+                CleanArea_Ram_and_Screen(00,62,14,36);
+                
+                BinToBCDisp(struct_conc_print.conc_to_print,struct_conc_print.decimali_to_print,4,14);
+
+                LCD_CopyPartialScreen(00,62,14,36);
+
+                conc_to_print_old=struct_conc_print.conc_to_print;
+
+        }
+}
+//***************************************************************************************
+void WorkMenu_CalcPrint_GrammiLitro(unsigned int bin)
+{
+      static unsigned int conc_to_print_old=0xFFFFFFF;
+      
+      //64000=100%  qui vogliono la risoluzione dello 0,1% quindi 64000=>10000
+      Formula_ConcConvers_grammiLitro(bin);
+     
+
+      if(struct_conc_print.conc_to_print!=conc_to_print_old)
+      {
+              SelectFont(CALIBRI_10);
+              CleanArea_Ram_and_Screen(20,40,UN_MIS_Y_START,14);
+              LCDPrintString("g/l",24,UN_MIS_Y_START);
+              LCD_CopyPartialScreen(20,40,UN_MIS_Y_START,14);
+
+
+              SelectFont(CALIBRI_20);
+              CleanArea_Ram_and_Screen(00,62,14,36);
+              
+              BinToBCDisp(struct_conc_print.conc_to_print,struct_conc_print.decimali_to_print,4,14);
+              
+
+              LCD_CopyPartialScreen(00,62,14,36);
+
+              conc_to_print_old=struct_conc_print.conc_to_print;
+
+      }
+}
+
+//***************************************************************************************
+void WorkMenu_CalcPrint_uSiemens(unsigned int bin)
+{
+   static unsigned int conc_to_print_old=0xFFFFFFF;
+    //AD1_GetValue16(ADC_array);
+    //64000=100%  qui vogliono la risoluzione dello 0,1% quindi 64000=>10000
+
+    Formula_ConcConvers_uSiemens(bin);
+
+    if(struct_conc_print.conc_to_print!=conc_to_print_old)
+    {
+            SelectFont(CALIBRI_10);
+            CleanArea_Ram_and_Screen(20,40,UN_MIS_Y_START,14);
+            LCDPrintString("uS",26,UN_MIS_Y_START);
+            LCD_CopyPartialScreen(20,40,UN_MIS_Y_START,14);
+
+
+            SelectFont(CALIBRI_20);
+            CleanArea_Ram_and_Screen(00,62,14,36);
+            BinToBCDisp(struct_conc_print.conc_to_print,INTERO,4,14);
+            LCD_CopyPartialScreen(00,62,14,36);
+
+            conc_to_print_old=struct_conc_print.conc_to_print;
+    }
+}
+
+//***************************************************************************************
+void WorkMenu_CalcPrint_milliSiemens(unsigned int bin)
+{
+    static unsigned int conc_to_print_old=0xFFFFFFF;
+      //AD1_GetValue16(ADC_array);
+      //64000=100%  qui vogliono la risoluzione dello 0,1% quindi 64000=>10000
+    Formula_ConcConvers_milliSiemens(bin);
+
+     if(struct_conc_print.conc_to_print!=conc_to_print_old)
+     {
+              SelectFont(CALIBRI_10);
+              CleanArea_Ram_and_Screen(20,40,UN_MIS_Y_START,14);
+              LCDPrintString("mS",26,UN_MIS_Y_START);
+              LCD_CopyPartialScreen(20,40,UN_MIS_Y_START,14);
+
+
+              SelectFont(CALIBRI_20);
+              CleanArea_Ram_and_Screen(00,62,14,36);
+              BinToBCDisp(struct_conc_print.conc_to_print,INTERO,4,14);
+              LCD_CopyPartialScreen(00,62,14,36);
+
+              conc_to_print_old=struct_conc_print.conc_to_print;
+      }
+}
+//****************************************************************************************************************************************************
+
+
+/* _____      _      _____      _       _                                                __            _          __  ___    
+  / ____|    | |    |  __ \    (_)     | |                                              / _|          | |        /_ |/ _ \   
+ | |     __ _| | ___| |__) | __ _ _ __ | |_     ___ ___  _ __   ___    __  __  _   _   | |_ ___  _ __ | |_ ___    | | | | |  
+ | |    / _` | |/ __|  ___/ '__| | '_ \| __|   / __/ _ \| '_ \ / __|   \ \/ / | | | |  |  _/ _ \| '_ \| __/ __|   | | | | |  
+ | |___| (_| | | (__| |   | |  | | | | | |_   | (_| (_) | | | | (__     >  <  | |_| |  | || (_) | | | | |_\__ \   | | |_| |  
+  \_____\__,_|_|\___|_|   |_|  |_|_| |_|\__|   \___\___/|_| |_|\___|   /_/\_\  \__, |  |_| \___/|_| |_|\__|___/   |_|\___/   
+                                                                                __/ |                                        
+                                                                               |___/   */                                      
+//****************************************************************************************************************************************************
+void CalcPrint_Percent_xy(unsigned int bin,unsigned int x,unsigned int y)
+{
+     Formula_ConcConvers_Percent(bin);
+  
+     SelectFont(CALIBRI_10);
+     
+     CleanArea_Ram_and_Screen(x,x+40,y,y+10);
+     BinToBCDisp(struct_conc_print.conc_to_print,struct_conc_print.decimali_to_print,x,y);
+     
+     LCD_CopyPartialScreen(x,x+40,y,y+10);
+}
+//****************************************************************************************************************************************************
+void CalcPrint_PuntTitol_xy(unsigned int bin,unsigned int x,unsigned int y)
+{
+      Formula_ConcConvers_PuntTitol(bin);
+   
+      SelectFont(CALIBRI_10);
+     
+      CleanArea_Ram_and_Screen(x,x+40,y,y+10);
+      BinToBCDisp(struct_conc_print.conc_to_print,struct_conc_print.decimali_to_print,x,y);
+      LCD_CopyPartialScreen(x,x+40,y,y+10);
+}
+//****************************************************************************************************************************************************
+void CalcPrint_GrammiLitro_xy(unsigned int bin,unsigned int x,unsigned int y)
+{
+      Formula_ConcConvers_grammiLitro(bin);
+  
+      SelectFont(CALIBRI_10);
+       
+      CleanArea_Ram_and_Screen(x,x+40,y,y+10);
+      BinToBCDisp(struct_conc_print.conc_to_print,struct_conc_print.decimali_to_print,x,y);
+      LCD_CopyPartialScreen(x,x+40,y,y+10);
+
+}
+//****************************************************************************************************************************************************
+void CalcPrint_uSiemens_xy(unsigned int bin,unsigned int x,unsigned int y)
+{
+    Formula_ConcConvers_uSiemens(bin);  
+    SelectFont(CALIBRI_10);
+   
+    CleanArea_Ram_and_Screen(x,x+40,y,y+10);
+    BinToBCDisp(struct_conc_print.conc_to_print,struct_conc_print.decimali_to_print,x,y);
+    LCD_CopyPartialScreen(x,x+40,y,y+10);
+
+}
+//****************************************************************************************************************************************************
+void CalcPrint_milliSiemens_xy(unsigned int bin,unsigned int x,unsigned int y)
+{
+    Formula_ConcConvers_milliSiemens(bin);
+  
+    SelectFont(CALIBRI_10);
+   
+    CleanArea_Ram_and_Screen(x,x+40,y,y+10);
+    BinToBCDisp(struct_conc_print.conc_to_print,struct_conc_print.decimali_to_print,x,y);
+    LCD_CopyPartialScreen(x,x+40,y,y+10);
+}
+
+//****************************************************************************************************************************************************
+void IncrPrintConc_Percent_xy(unsigned short* val_to_incr,unsigned int x,unsigned int y,unsigned int incr)
+{
+  unsigned short decimillesimi,num_to_print;
+  unsigned int   multiplied;
+  unsigned short resto;
+  unsigned int temp_test; 
+  
+  multiplied=*val_to_incr*10;
+  decimillesimi=multiplied/64;
+  resto=multiplied%64;
+  if(decimillesimi>999)	{	 num_to_print=decimillesimi/10;  }
+  else		  	{	 num_to_print=decimillesimi;	 }
+
+  num_to_print-=incr;
+
+  if(decimillesimi>999)	{	 decimillesimi=num_to_print*10;  }
+  else		  	{	 decimillesimi=num_to_print;	 }
+  multiplied=decimillesimi*64;
+  multiplied+=resto;
+  temp_test=multiplied/10;//prima di assegnare il nuovo valore alla varibile alla quale il programma farà riferimento lo testo
+  if(!(temp_test>conc_soglie_limit_up.setp_e_soglie_arr[SET_CONC_INDEX]))
+  {
+         /* RamSettings.ptype_arr[RamSettings.selected_program_id].setp_e_soglie.setp_e_soglie_arr[index]*/*val_to_incr= temp_test;
+  }
+  else
+  {
+
+  }
+  
+  
+}
+//****************************************************************************************************************************************************
+void IncrPrintConc_PuntTitol_xy(unsigned short* val_to_incr,unsigned int x,unsigned int y,unsigned int incr)
+{
+  
+}
+//****************************************************************************************************************************************************
+void IncrPrintConc_GrammiLitro_xy(unsigned short* val_to_incr,unsigned int x,unsigned int y,unsigned int incr)
+{
+}
+//****************************************************************************************************************************************************
+void IncrPrintConc_uSiemens_xy(unsigned short* val_to_incr,unsigned int x,unsigned int y,unsigned int incr)
+{
+}
+//****************************************************************************************************************************************************
+void IncrPrintConc_milliSiemens_xy(unsigned short* val_to_incr,unsigned int x,unsigned int y,unsigned int incr)
+{
+  
+}
+
+//****************************************************************************************************************************************************
+void LoadDisplay_Logo(void)
+{
+  
+}
+//****************************************************************************************************************************************************
+
+
+
+
+
+
+
+
+
+

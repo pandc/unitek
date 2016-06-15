@@ -40,9 +40,6 @@ unsigned char incr_step,incr_counter;
 
 extern bitmap_struct_type mybmp_struct1,mybmp_struct2;
 
-
-
-extern unsigned char menuchange;
 extern unsigned char MenuFunction_Index;
 
 
@@ -64,13 +61,13 @@ extern unsigned int key_flags;
 extern unsigned int triangolino_inversion_timer;
 extern unsigned char loop_flag;
 
-extern const char StringsSubmenuProg      		[5][20];
-extern const char StringsSubmenuSelezProg 		[5][20];
-extern const char StringsSubmenuLingua    		[4][10];
-extern const char StringsSubmenuImpostaSimboli	[5][20];
-extern const char StringsSubmenuImpostaSoglie 	[8][20];
-extern const char StringsSubmenuImpostaTimer  	[9][20];
-extern const char StringsSubmenuSimboliConc   	[5][4];
+extern const char StringsSubmenuProg      	[4][5][22];
+extern const char StringsSubmenuSelezProg 	[4][5][20];
+extern const char StringsSubmenuLingua    	   [4][10];
+extern const char StringsSubmenuImpostaSimboli	[4][5][20];
+extern const char StringsSubmenuImpostaSoglie 	[4][8][20];
+extern const char StringsSubmenuImpostaTimer  	[4][9][20];
+extern const char StringsSubmenuSimboliConc   	    [5][4];
 
 extern setp_e_soglie_type setp_e_soglie;
 extern setp_e_soglie_type conc_soglie_limit_up,conc_soglie_limit_dn;
@@ -87,7 +84,7 @@ void SubmenuINOUT(void)
 
 	menu_triang_limit_up=26;
 	menu_triang_limit_dn=38;
-	abilita_disabilita=FlashImage.abilita_disabilita;
+	abilita_disabilita=RamSettings.abilita_disabilita;
 
 	if(abilita_disabilita)	submenuINOUT_index=0;
 	else 					submenuINOUT_index=1;
@@ -140,7 +137,7 @@ void SubmenuINOUT(void)
 
 			DisegnaMarker(92,menu_triang_y,y_old);
 			y_old=menu_triang_y;
-			//FlashImage.abilita_disabilita=abilita_disabilita;
+			//RamSettings.abilita_disabilita=abilita_disabilita;
 			//SaveImageInFlash();
 
 
@@ -169,19 +166,19 @@ void SubmenuSelProgr(void)
 {
 	uint8_t key;
 	unsigned short string_index=0,strings_y=2,y_old;
-	unsigned char loop_flag=1;
+	unsigned char loop_flag=1,test;
 /*
 	unsigned char x_prova=0,half_x=0;
 	unsigned char y_prova=0,half_y=0;
 */
 	unsigned short submenuSelProg_index;
 
-	selected_progr_index=FlashImage.selected_program_id;
-	submenuSelProg_index=FlashImage.selected_program_id;
+	
+	submenuSelProg_index=RamSettings.selected_program_id;
 
 	menu_triang_limit_up=2;
 	menu_triang_limit_dn=50;
-	menu_triang_y=2+(selected_progr_index*12);
+	menu_triang_y=2+(submenuSelProg_index*12);
 
 	LCD_Fill_ImageRAM(0x00);
 #ifdef DISEGNA_CORNICE
@@ -212,20 +209,28 @@ void SubmenuSelProgr(void)
 			CLEAR_TASTO_PROG_PRESSED;
 			MenuFunction_Index=MENU_PROGR;
 			loop_flag=0;
-
 		}
 
 		if (key == KEY_OK)
 		//if(CHECK_TASTO_OK_PRESSED)
 		{
 			CLEAR_TASTO_OK_PRESSED;
-			//selected_progr_index=submenuSelProg_index;
+			
 			//program_arr=saved_prog_arr[selected_progr_index];
 			DisegnaMarker(72,menu_triang_y,y_old);
 			y_old=menu_triang_y;
 			MenuFunction_Index=SUBMENU_SELECTED_PROGR;
 			loop_flag=0;
-			//FlashImage.selected_program_id=selected_progr_index;
+			
+                        RamSettings.selected_program_id=submenuSelProg_index;
+                        test=SaveRamSettings_in_External_DataFlash();
+                        if(!test)
+                        {
+                              LCD_Fill_ImageRAM(0x00);
+                              SelectFont(CALIBRI_10);
+                              LCDPrintString("File system error",4,24);
+                              LCD_CopyPartialScreen(4,80,24,36);
+                        }
 			//SaveImageInFlash();
 		}
 
@@ -288,7 +293,7 @@ void SubmenuSelectedProgr(void)
 
 	for(string_index=0;string_index<5;string_index++)
 	{
-		LCDPrintString(StringsSubmenuSelezProg[string_index],12,strings_y);
+		LCDPrintString(StringsSubmenuSelezProg[RamSettings.Linguaggio][string_index],12,strings_y);
 		strings_y+=12;
 	}
 
@@ -321,11 +326,11 @@ void SubmenuSelectedProgr(void)
 					break;
 
 				case 2:
-					MenuFunction_Index=SUB2MENU_SEL_TIPO_CURV_LAV;
+					MenuFunction_Index=SUB2MENU_IMPOSTA_SOGLIE ;
 					break;
 
 				case 3:
-					MenuFunction_Index=SUB2MENU_IMPOSTA_SOGLIE;
+					MenuFunction_Index=SUB2MENU_SEL_TIPO_CURV_LAV;
 					break;
 
 				case 4:
@@ -381,8 +386,8 @@ void SubmenuComunic(void)
 
 	LCD_Fill_ImageRAM(0x00);
 
-	stato_RS485=FlashImage.ComunRS485;
-	stato_USB  =FlashImage.ComunUSB;
+	stato_RS485=RamSettings.ComunRS485;
+	stato_USB  =RamSettings.ComunUSB;
 
 
 	menu_triang_y=26+(submenuComunic_index*12);
@@ -466,8 +471,8 @@ void SubmenuComunic(void)
 					CLEAR_ARROW_KEYS_MOVE_SXDX;
 					CLEAR_PIU_MENO_ENABLED;
 
-					//FlashImage.ComunRS485=stato_RS485;
-					//FlashImage.ComunUSB=stato_USB;
+					//RamSettings.ComunRS485=stato_RS485;
+					//RamSettings.ComunUSB=stato_USB;
 					//SaveImageInFlash();
 				}
 			}
@@ -604,21 +609,21 @@ void SumMenuSelLingua(void)
 	uint8_t key;
 
 	unsigned short string_index=0,strings_y=2,y_old;
-		unsigned char loop_flag=1;
-	/*
-		unsigned char x_prova=0,half_x=0;
-		unsigned char y_prova=0,half_y=0;
-	*/
-		unsigned short submenuSelLing_index;
+        unsigned char loop_flag=1,test;
+/*
+        unsigned char x_prova=0,half_x=0;
+        unsigned char y_prova=0,half_y=0;
+*/
+        unsigned short submenuSelLing_index;
 
 
-		linguaggio=FlashImage.Linguaggio;
-		submenuSelLing_index=FlashImage.Linguaggio;
 
-		menu_triang_limit_up=2;
-		menu_triang_limit_dn=38;
+        submenuSelLing_index=RamSettings.Linguaggio;
 
-		menu_triang_y=2+(linguaggio*12);
+        menu_triang_limit_up=2;
+        menu_triang_limit_dn=38;
+
+        menu_triang_y=2+(submenuSelLing_index*12);
 
 		LCD_Fill_ImageRAM(0x00);
 	#ifdef DISEGNA_CORNICE
@@ -626,14 +631,14 @@ void SumMenuSelLingua(void)
 	#endif
 		DisegnaTriangolinoMenu(0,menu_triang_y);
 		DisegnaMarker(72,menu_triang_y,menu_triang_y);
-	    y_old=menu_triang_y;
+                y_old=menu_triang_y;
 		SelectFont(CALIBRI_10);
 
 
 		for(string_index=0;string_index<4;string_index++)
 		{
-				LCDPrintString(StringsSubmenuLingua[string_index],12,strings_y);
-				strings_y+=12;
+                    LCDPrintString(StringsSubmenuLingua[string_index],12,strings_y);
+                    strings_y+=12;
 		}
 
 		LCD_CopyScreen();
@@ -654,13 +659,21 @@ void SumMenuSelLingua(void)
 			//if(CHECK_TASTO_OK_PRESSED)
 			{
 				CLEAR_TASTO_OK_PRESSED;
-				linguaggio=submenuSelLing_index;
-
+				RamSettings.Linguaggio=submenuSelLing_index;
+                                test=SaveRamSettings_in_External_DataFlash();
+                                if(!test)
+                                {
+                                      LCD_Fill_ImageRAM(0x00);
+                                      SelectFont(CALIBRI_10);
+                                      LCDPrintString("File system error",4,24);
+                                      LCD_CopyPartialScreen(4,80,24,36);
+                                }
+                                
 				DisegnaMarker(72,menu_triang_y,y_old);
 				y_old=menu_triang_y;
 
 				loop_flag=0;
-				//FlashImage.Linguaggio=linguaggio;
+				//RamSettings.Linguaggio=linguaggio;
 				//SaveImageInFlash();
 			}
 
@@ -691,94 +704,72 @@ void SumMenuSelLingua(void)
 
 			}
 		}
-
-
 }
 //***************************************************************************************
 void SubmenuServizio(void)
 {
-	menuchange=MENU_STAY;
+
 #ifdef DISEGNA_CORNICE
 	DisegnaCornice();
 #endif
 	DisegnaTriangolinoMenu(0,menu_triang_y);
 
-	MenuFunction_Index=menuchange;
+	//MenuFunction_Index=1;
 	vTaskSuspend(NULL);
 }
 //***************************************************************************************
 void PrintSoglia(unsigned short index,unsigned short x ,unsigned short y)//viene chiamata riga per riga quindi stampa solo 1 valore
 {
-	unsigned short decimillesimi,num_to_print;
 	unsigned int   multiplied;
+        unsigned int selected_progr=RamSettings.selected_program_id;
 	SelectFont(CALIBRI_10);
 	if(index<4)//solo concentrazioni
 	{
-		switch(program_arr.unita_mis_concentr)
+		switch(RamSettings.ptype_arr[RamSettings.selected_program_id].unita_mis_concentr)
 		{
 		  case UNIT_MIS_CONCENTR_PERCENTUALE:
 			  //64000=100%  qui vogliono la risoluzione dello 0,1% quindi 64000=>10000
-			  multiplied=program_arr.setp_e_soglie.setp_e_soglie_arr[index]*10;
-			  decimillesimi=multiplied/64;
-			  if(decimillesimi>999)		  	{	 num_to_print=decimillesimi/10;  }
-			  else		  					{	 num_to_print=decimillesimi;	 }
+			  Formula_ConcConvers_Percent(RamSettings.ptype_arr[selected_progr].setp_e_soglie.setp_e_soglie_arr[index]);
 			  CleanArea_Ram_and_Screen(x,x+30,y,y+10);
-			  if(decimillesimi>999){  BinToBCDisp(num_to_print,UN_DECIMALE,x,y);	  }
-			  else		           {  BinToBCDisp(num_to_print,DUE_DECIMALI,x,y);	  }
-			  //LCD_CopyPartialScreen(x,x+30,y,y+10);
+			  BinToBCDisp(struct_conc_print.conc_to_print,struct_conc_print.decimali_to_print,x,y);
 			  break;
 
 		  case UNIT_MIS_CONCENTR_PUNT_TITOL:
 			  //64000=100%  qui vogliono la risoluzione dello 0,1% quindi 64000=>10000
-			  multiplied=program_arr.setp_e_soglie.setp_e_soglie_arr[index]*10;
-			  decimillesimi=multiplied/64;
-			  if(decimillesimi>999)	  	{  num_to_print=decimillesimi/10; }
-			  else		  				{  num_to_print=decimillesimi;    }
+			  Formula_ConcConvers_PuntTitol(RamSettings.ptype_arr[selected_progr].setp_e_soglie.setp_e_soglie_arr[index]);
 			  CleanArea_Ram_and_Screen(x,x+30,y,y+10);
-			  if(decimillesimi>999) { BinToBCDisp(num_to_print,INTERO,x,y);		  }
-			  else		  			{ BinToBCDisp(num_to_print,UN_DECIMALE,x,y);  }
-			  //LCD_CopyPartialScreen(x,x+30,y,y+10);
+			  BinToBCDisp(struct_conc_print.conc_to_print,struct_conc_print.decimali_to_print,x,y);
 			  break;
 
 		  case UNIT_MIS_CONCENTR_GRAMMILITRO:
 			  //64000=100%  qui vogliono la risoluzione dello 0,1% quindi 64000=>10000
-			  multiplied=program_arr.setp_e_soglie.setp_e_soglie_arr[index]*10;
-			  decimillesimi=multiplied/64;
-			  if(decimillesimi>999) { num_to_print=decimillesimi/10;  }
-			  else		  			{ num_to_print=decimillesimi;     }
+			  Formula_ConcConvers_grammiLitro(RamSettings.ptype_arr[selected_progr].setp_e_soglie.setp_e_soglie_arr[index]);
 			  CleanArea_Ram_and_Screen(x,x+30,y,y+10);
-			  if(decimillesimi>999) {  BinToBCDisp(num_to_print,INTERO,x,y);     }
-			  else		 			{  BinToBCDisp(num_to_print,UN_DECIMALE,x,y);}
-			  //LCD_CopyPartialScreen(x,x+30,y,y+10);
+			  BinToBCDisp(struct_conc_print.conc_to_print,struct_conc_print.decimali_to_print,x,y);
 			  break;
 
 		  case UNIT_MIS_CONCENTR_uSIEMENS:
 			  //64000=100%  qui vogliono la risoluzione dello 0,1% quindi 64000=>10000
-			  multiplied=program_arr.setp_e_soglie.setp_e_soglie_arr[index]*1;
-			  decimillesimi=multiplied/64;
-			  num_to_print=decimillesimi;
+			  Formula_ConcConvers_uSiemens(RamSettings.ptype_arr[selected_progr].setp_e_soglie.setp_e_soglie_arr[index]);
 			  CleanArea_Ram_and_Screen(x,x+30,y,y+10);
-			  BinToBCDisp(num_to_print,INTERO,x,y);
-			  //LCD_CopyPartialScreen(x,x+30,y,y+10);
+			  BinToBCDisp(struct_conc_print.conc_to_print,struct_conc_print.decimali_to_print,x,y);
 			  break;
 
 		  case UNIT_MIS_CONCENTR_mSIEMENS:
 			  //64000=100%  qui vogliono la risoluzione dello 0,1% quindi 64000=>10000
-			  multiplied=program_arr.setp_e_soglie.setp_e_soglie_arr[index]*1;
-			  decimillesimi=multiplied/64;
-			  num_to_print=decimillesimi;
+			  Formula_ConcConvers_milliSiemens(RamSettings.ptype_arr[selected_progr].setp_e_soglie.setp_e_soglie_arr[index]);
 			  CleanArea_Ram_and_Screen(x,x+30,y,y+10);
-			  BinToBCDisp(num_to_print,INTERO,x,y);
-			  //LCD_CopyPartialScreen(x,x+30,y,y+10);
+			  BinToBCDisp(struct_conc_print.conc_to_print,struct_conc_print.decimali_to_print,x,y);
 			  break;
 
 		  default:
 			  break;
 		}
+                LCD_CopyPartialScreen(x,x+30,y,y+10);
 	}
 	else//solo temperature
 	{
-		multiplied=program_arr.setp_e_soglie.setp_e_soglie_arr[index]*3;
+		multiplied=RamSettings.ptype_arr[RamSettings.selected_program_id].setp_e_soglie.setp_e_soglie_arr[index]*3; ;
 		multiplied/=128;
 
 		CleanArea_Ram_and_Screen(x,x+30,y,y+10);
@@ -788,24 +779,25 @@ void PrintSoglia(unsigned short index,unsigned short x ,unsigned short y)//viene
 //***************************************************************************************
 void IncrSoglia(unsigned short index,unsigned short incr)//viene chiamata riga per riga quindi stampa solo 1 valore
 {
-	unsigned short decimillesimi,num_to_print;
+	//unsigned short decimillesimi/*,num_to_print*/;
 	unsigned int   multiplied;
 	unsigned short resto;
-
 	unsigned int temp_test;
 
 	//controllo che il valore minimo non sia superiore al massimo
 	if(index==SOGLIE_ALL_CONC_MIN_INDEX)
 	{
-		if(!(program_arr.setp_e_soglie.setp_e_soglie_arr[SOGLIE_ALL_CONC_MIN_INDEX]<program_arr.setp_e_soglie.setp_e_soglie_arr[SOGLIE_ALL_CONC_MAX_INDEX]))
-		{
+		if(!(RamSettings.ptype_arr[RamSettings.selected_program_id].setp_e_soglie.setp_e_soglie_arr[SOGLIE_ALL_CONC_MIN_INDEX] <
+                      RamSettings.ptype_arr[RamSettings.selected_program_id].setp_e_soglie.setp_e_soglie_arr[SOGLIE_ALL_CONC_MAX_INDEX] ))
+                {
 			return;
 		}
 	}
 
 	if(index==SOGLIE_ALL_TEMP_MIN_INDEX)
 	{
-		if(!(program_arr.setp_e_soglie.setp_e_soglie_arr[SOGLIE_ALL_TEMP_MIN_INDEX]< program_arr.setp_e_soglie.setp_e_soglie_arr[SOGLIE_ALL_TEMP_MAX_INDEX]))
+		if(!(RamSettings.ptype_arr[RamSettings.selected_program_id].setp_e_soglie.setp_e_soglie_arr[SOGLIE_ALL_TEMP_MIN_INDEX] <
+                      RamSettings.ptype_arr[RamSettings.selected_program_id].setp_e_soglie.setp_e_soglie_arr[SOGLIE_ALL_TEMP_MAX_INDEX] ))
 		{
 			return;
 		}
@@ -813,139 +805,59 @@ void IncrSoglia(unsigned short index,unsigned short incr)//viene chiamata riga p
 
 	SelectFont(CALIBRI_10);
 	if(index<4)//solo per le concentrazioni
-	{
-		switch(program_arr.unita_mis_concentr)
+	{       //potrei usare puntatore a funzione ,ma per comodità di debug uso lo switch
+		switch(RamSettings.ptype_arr[RamSettings.selected_program_id]. unita_mis_concentr)
 		{
 		  case UNIT_MIS_CONCENTR_PERCENTUALE:
 			  //64000=100%  qui vogliono la risoluzione dello 0,1% quindi 64000=>10000
-			  multiplied=program_arr.setp_e_soglie.setp_e_soglie_arr[index]*10;
-			  decimillesimi=multiplied/64;
-			  resto=multiplied%64;
-			  if(decimillesimi>999)		  	{	 num_to_print=decimillesimi/10;  }
-			  else		  					{	 num_to_print=decimillesimi;	 }
-
-			  num_to_print+=incr;
-
-			  if(decimillesimi>999)		  	{	 decimillesimi=num_to_print*10;  }
-			  else		  					{	 decimillesimi=num_to_print;	 }
-			  multiplied=decimillesimi*64;
-			  multiplied+=resto;
-			  temp_test=multiplied/10;//prima di assegnare il nuovo valore alla varibile alla quale il programma farà riferimento lo testo
-			  if(!(temp_test>conc_soglie_limit_up.setp_e_soglie_arr[index]))
-			  {
-				  program_arr.setp_e_soglie.setp_e_soglie_arr[index]= temp_test;
-			  }
-			  else
-			  {
-
-			  }
-
+			  Formula_ConcConvers_Percent(RamSettings.ptype_arr[RamSettings.selected_program_id].setp_e_soglie.setp_e_soglie_arr[index]);
+                          struct_conc_print.conc_to_print+=incr;
+                          temp_test=FormulaInversa_Conc_Percent();
+			 //prima di assegnare il nuovo valore alla varibile alla quale il programma farà riferimento lo testo
 			  break;
 
 		  case UNIT_MIS_CONCENTR_PUNT_TITOL:
 			  //64000=100%  qui vogliono la risoluzione dello 0,1% quindi 64000=>10000
-			  multiplied=program_arr.setp_e_soglie.setp_e_soglie_arr[index]*10;
-			  decimillesimi=multiplied/64;
-			  resto=multiplied%64;
-			  if(decimillesimi>999)	  	{  num_to_print=decimillesimi/10; }
-			  else		  				{  num_to_print=decimillesimi;    }
-
-			  num_to_print+=incr;
-
-			  if(decimillesimi>999)		  	{	 decimillesimi=num_to_print*10;  }
-			  else		  					{	 decimillesimi=num_to_print;	 }
-			  multiplied=decimillesimi*64;
-			  multiplied+=resto;
-			  temp_test=multiplied/10;//prima di assegnare il nuovo valore alla varibile alla quale il programma farà riferimento lo testo
-			  if(!(temp_test>conc_soglie_limit_up.setp_e_soglie_arr[index]))
-			  {
-				  program_arr.setp_e_soglie.setp_e_soglie_arr[index]= temp_test;
-			  }
-			  else
-			  {
-
-			  }
-
-			  break;
+                          Formula_ConcConvers_PuntTitol(RamSettings.ptype_arr[RamSettings.selected_program_id].setp_e_soglie.setp_e_soglie_arr[index]);
+                          struct_conc_print.conc_to_print+=incr;
+                          temp_test=FormulaInversa_Conc_PuntTitol();
+ 			  break;
 
 		  case UNIT_MIS_CONCENTR_GRAMMILITRO:
 			  //64000=100%  qui vogliono la risoluzione dello 0,1% quindi 64000=>10000
-			  multiplied=program_arr.setp_e_soglie.setp_e_soglie_arr[index]*10;
-			  decimillesimi=multiplied/64;
-			  resto=multiplied%64;
-			  if(decimillesimi>999) { num_to_print=decimillesimi/10;  }
-			  else		  			{ num_to_print=decimillesimi;     }
-
-			  num_to_print+=incr;
-
-			  if(decimillesimi>999)		  	{	 decimillesimi=num_to_print*10;  }
-			  else		  					{	 decimillesimi=num_to_print;	 }
-			  multiplied=decimillesimi*64;
-			  multiplied+=resto;
-			  temp_test=multiplied/10;//prima di assegnare il nuovo valore alla varibile alla quale il programma farà riferimento lo testo
-			  if(!(temp_test>conc_soglie_limit_up.setp_e_soglie_arr[index]))
-			  {
-				  program_arr.setp_e_soglie.setp_e_soglie_arr[index]= temp_test;
-			  }
-			  else
-			  {
-
-			  }
+			  Formula_ConcConvers_grammiLitro(RamSettings.ptype_arr[RamSettings.selected_program_id].setp_e_soglie.setp_e_soglie_arr[index]);
+			  struct_conc_print.conc_to_print+=incr;
+			  temp_test=FormulaInversa_Conc_grammiLitro();//prima di assegnare il nuovo valore alla varibile alla quale il programma farà riferimento lo testo
 			  break;
 
 		  case UNIT_MIS_CONCENTR_uSIEMENS:
 			  //64000=100%  qui vogliono la risoluzione dello 0,1% quindi 64000=>10000
-			  multiplied=program_arr.setp_e_soglie.setp_e_soglie_arr[index]*1;
-			  decimillesimi=multiplied/64;
-			  resto=multiplied%64;
-			  num_to_print=decimillesimi;
-
-			  num_to_print+=incr;
-
-			  decimillesimi=num_to_print;
-			  multiplied=decimillesimi*64;
-			  multiplied+=resto;
-			  temp_test=multiplied;//prima di assegnare il nuovo valore alla varibile alla quale il programma farà riferimento lo testo
-			  if(!(temp_test>conc_soglie_limit_up.setp_e_soglie_arr[index]))
-			  {
-				  program_arr.setp_e_soglie.setp_e_soglie_arr[index]= temp_test;
-			  }
-			  else
-			  {
-
-			  }
+			  Formula_ConcConvers_uSiemens(RamSettings.ptype_arr[RamSettings.selected_program_id].setp_e_soglie.setp_e_soglie_arr[index]);
+			  struct_conc_print.conc_to_print+=incr;
+			  temp_test=FormulaInversa_Conc_uSiemens();//prima di assegnare il nuovo valore alla varibile alla quale il programma farà riferimento lo testo
 			  break;
 
 		  case UNIT_MIS_CONCENTR_mSIEMENS:
 			  //64000=100%  qui vogliono la risoluzione dello 0,1% quindi 64000=>10000
-			  multiplied=program_arr.setp_e_soglie.setp_e_soglie_arr[index]*1;
-			  decimillesimi=multiplied/64;
-			  resto=multiplied%64;
-			  num_to_print=decimillesimi;
-
-			  num_to_print+=incr;
-
-			  decimillesimi=num_to_print;
-			  multiplied=decimillesimi*64;
-			  multiplied+=resto;
-			  temp_test=multiplied;//prima di assegnare il nuovo valore alla varibile alla quale il programma farà riferimento lo testo
-			  if(!(temp_test>conc_soglie_limit_up.setp_e_soglie_arr[index]))
-			  {
-				  program_arr.setp_e_soglie.setp_e_soglie_arr[index]= temp_test;
-			  }
-			  else
-			  {
-
-			  }
+			  Formula_ConcConvers_milliSiemens(RamSettings.ptype_arr[RamSettings.selected_program_id].setp_e_soglie.setp_e_soglie_arr[index]);
+			  struct_conc_print.conc_to_print+=incr;
+			  temp_test=FormulaInversa_Conc_milliSiemens();//prima di assegnare il nuovo valore alla varibile alla quale il programma farà riferimento lo testo
 			  break;
 
 		  default:
 			  break;
 		}
+          if(!(temp_test>conc_soglie_limit_up.setp_e_soglie_arr[index]))
+          {
+                  RamSettings.ptype_arr[RamSettings.selected_program_id].setp_e_soglie.setp_e_soglie_arr[index]= temp_test;
+          }
+          else
+          {}      
+                
 	}
 	else//temperature
 	{
-		multiplied=program_arr.setp_e_soglie.setp_e_soglie_arr[index]*3;
+		multiplied=RamSettings.ptype_arr[RamSettings.selected_program_id].setp_e_soglie.setp_e_soglie_arr[index]*3;
 		multiplied/=128;
 		resto=multiplied % 128;
 
@@ -953,23 +865,24 @@ void IncrSoglia(unsigned short index,unsigned short incr)//viene chiamata riga p
 
 		multiplied*=128;
 		multiplied+=resto;
-		program_arr.setp_e_soglie.setp_e_soglie_arr[index]=multiplied /3;
+		RamSettings.ptype_arr[RamSettings.selected_program_id].setp_e_soglie.setp_e_soglie_arr[index]=multiplied /3;
 
 	}
 }
 //***************************************************************************************
 void DecrSoglia(unsigned short index,unsigned short incr)//viene chiamata riga per riga quindi stampa solo 1 valore
 {
-	unsigned short decimillesimi,num_to_print;
+
 	unsigned int   multiplied;
 	unsigned short resto;
-	unsigned int temp_test;
+        unsigned int temp_test;
+
 
 
 	//controllo che il valore minimo non sia superiore al massimo
 	if(index==SOGLIE_ALL_CONC_MAX_INDEX)
 	{
-		if(!(program_arr.setp_e_soglie.setp_e_soglie_arr[SOGLIE_ALL_CONC_MAX_INDEX]> program_arr.setp_e_soglie.setp_e_soglie_arr[SOGLIE_ALL_CONC_MIN_INDEX]))
+		if(!(RamSettings.ptype_arr[RamSettings.selected_program_id].setp_e_soglie.setp_e_soglie_arr[SOGLIE_ALL_CONC_MAX_INDEX]> RamSettings.ptype_arr[RamSettings.selected_program_id].setp_e_soglie.setp_e_soglie_arr[SOGLIE_ALL_CONC_MIN_INDEX]))
 		{
 			return;
 		}
@@ -977,7 +890,7 @@ void DecrSoglia(unsigned short index,unsigned short incr)//viene chiamata riga p
 
 	if(index==SOGLIE_ALL_TEMP_MIN_INDEX)
 	{
-		if(!(program_arr.setp_e_soglie.setp_e_soglie_arr[SOGLIE_ALL_TEMP_MAX_INDEX]> program_arr.setp_e_soglie.setp_e_soglie_arr[SOGLIE_ALL_TEMP_MIN_INDEX]))
+		if(!(RamSettings.ptype_arr[RamSettings.selected_program_id].setp_e_soglie.setp_e_soglie_arr[SOGLIE_ALL_TEMP_MAX_INDEX]> RamSettings.ptype_arr[RamSettings.selected_program_id].setp_e_soglie.setp_e_soglie_arr[SOGLIE_ALL_TEMP_MIN_INDEX]))
 		{
 			return;
 		}
@@ -987,139 +900,64 @@ void DecrSoglia(unsigned short index,unsigned short incr)//viene chiamata riga p
 	SelectFont(CALIBRI_10);
 	if(index<4)//solo per le concentrazioni
 	{
-		switch(program_arr.unita_mis_concentr)
+         
+          switch(RamSettings.ptype_arr[RamSettings.selected_program_id].unita_mis_concentr)
 		{
 		  case UNIT_MIS_CONCENTR_PERCENTUALE:
 			  //64000=100%  qui vogliono la risoluzione dello 0,1% quindi 64000=>10000
-			  multiplied=program_arr.setp_e_soglie.setp_e_soglie_arr[index]*10;
-			  decimillesimi=multiplied/64;
-			  resto=multiplied%64;
-			  if(decimillesimi>999)		  	{	 num_to_print=decimillesimi/10;  }
-			  else		  					{	 num_to_print=decimillesimi;	 }
-
-			  num_to_print-=incr;
-
-			  if(decimillesimi>999)		  	{	 decimillesimi=num_to_print*10;  }
-			  else		  					{	 decimillesimi=num_to_print;	 }
-			  multiplied=decimillesimi*64;
-			  multiplied+=resto;
-			  temp_test=multiplied/10;//prima di assegnare il nuovo valore alla varibile alla quale il programma farà riferimento lo testo
-			  if(!(temp_test>conc_soglie_limit_up.setp_e_soglie_arr[index]))
-			  {
-				  program_arr.setp_e_soglie.setp_e_soglie_arr[index]= temp_test;
-			  }
-			  else
-			  {
-
-			  }
+			  Formula_ConcConvers_Percent(RamSettings.ptype_arr[RamSettings.selected_program_id].setp_e_soglie.setp_e_soglie_arr[index]);
+                          struct_conc_print.conc_to_print-=incr;
+                          temp_test=FormulaInversa_Conc_Percent();
 
 			  break;
 
 		  case UNIT_MIS_CONCENTR_PUNT_TITOL:
 			  //64000=100%  qui vogliono la risoluzione dello 0,1% quindi 64000=>10000
-			  multiplied=program_arr.setp_e_soglie.setp_e_soglie_arr[index]*10;
-			  decimillesimi=multiplied/64;
-			  resto=multiplied%64;
-			  if(decimillesimi>999)	  	{  num_to_print=decimillesimi/10; }
-			  else		  				{  num_to_print=decimillesimi;    }
-
-			  num_to_print-=incr;
-
-			  if(decimillesimi>999)		  	{	 decimillesimi=num_to_print*10;  }
-			  else		  					{	 decimillesimi=num_to_print;	 }
-			  multiplied=decimillesimi*64;
-			  multiplied+=resto;
-			  temp_test=multiplied/10;//prima di assegnare il nuovo valore alla varibile alla quale il programma farà riferimento lo testo
-			  if(!(temp_test>conc_soglie_limit_up.setp_e_soglie_arr[index]))
-			  {
-				  program_arr.setp_e_soglie.setp_e_soglie_arr[index]= temp_test;
-			  }
-			  else
-			  {
-
-			  }
+			  Formula_ConcConvers_PuntTitol(RamSettings.ptype_arr[RamSettings.selected_program_id].setp_e_soglie.setp_e_soglie_arr[index]);
+                          struct_conc_print.conc_to_print-=incr;
+                          temp_test=FormulaInversa_Conc_PuntTitol();
 
 			  break;
 
 		  case UNIT_MIS_CONCENTR_GRAMMILITRO:
 			  //64000=100%  qui vogliono la risoluzione dello 0,1% quindi 64000=>10000
-			  multiplied=program_arr.setp_e_soglie.setp_e_soglie_arr[index]*10;
-			  decimillesimi=multiplied/64;
-			  resto=multiplied%64;
-			  if(decimillesimi>999) { num_to_print=decimillesimi/10;  }
-			  else		  			{ num_to_print=decimillesimi;     }
-
-			  num_to_print-=incr;
-
-			  if(decimillesimi>999)		  	{	 decimillesimi=num_to_print*10;  }
-			  else		  					{	 decimillesimi=num_to_print;	 }
-			  multiplied=decimillesimi*64;
-			  multiplied+=resto;
-			  temp_test=multiplied/10;//prima di assegnare il nuovo valore alla varibile alla quale il programma farà riferimento lo testo
-			  if(!(temp_test>conc_soglie_limit_up.setp_e_soglie_arr[index]))
-			  {
-				  program_arr.setp_e_soglie.setp_e_soglie_arr[index]= temp_test;
-			  }
-			  else
-			  {
-
-			  }
+			  Formula_ConcConvers_grammiLitro(RamSettings.ptype_arr[RamSettings.selected_program_id].setp_e_soglie.setp_e_soglie_arr[index]);
+			  struct_conc_print.conc_to_print+=incr;
+			  temp_test=FormulaInversa_Conc_grammiLitro();//prima di assegnare il nuovo valore alla varibile alla quale il programma farà riferimento lo testo
+			  
 			  break;
 
 		  case UNIT_MIS_CONCENTR_uSIEMENS:
 			  //64000=100%  qui vogliono la risoluzione dello 0,1% quindi 64000=>10000
-			  multiplied=program_arr.setp_e_soglie.setp_e_soglie_arr[index]*1;
-			  decimillesimi=multiplied/64;
-			  resto=multiplied%64;
-			  num_to_print=decimillesimi;
-
-			  num_to_print-=incr;
-
-			  decimillesimi=num_to_print;
-			  multiplied=decimillesimi*64;
-			  multiplied+=resto;
-
-			  temp_test=multiplied;//prima di assegnare il nuovo valore alla varibile alla quale il programma farà riferimento lo testo
-			  if(!(temp_test>conc_soglie_limit_up.setp_e_soglie_arr[index]))
-			  {
-				  program_arr.setp_e_soglie.setp_e_soglie_arr[index]= temp_test;
-			  }
-			  else
-			  {
-
-			  }
+			  Formula_ConcConvers_uSiemens(RamSettings.ptype_arr[RamSettings.selected_program_id].setp_e_soglie.setp_e_soglie_arr[index]);
+			  struct_conc_print.conc_to_print-=incr;
+			  temp_test=FormulaInversa_Conc_uSiemens();//prima di assegnare il nuovo valore alla varibile alla quale il programma farà riferimento lo testo
 			  break;
 
 		  case UNIT_MIS_CONCENTR_mSIEMENS:
 			  //64000=100%  qui vogliono la risoluzione dello 0,1% quindi 64000=>10000
-			  multiplied=program_arr.setp_e_soglie.setp_e_soglie_arr[index]*1;
-			  decimillesimi=multiplied/64;
-			  resto=multiplied%64;
-			  num_to_print=decimillesimi;
-
-			  num_to_print-=incr;
-
-			  decimillesimi=num_to_print;
-			  multiplied=decimillesimi*64;
-			  multiplied+=resto;
-			  temp_test=multiplied;//prima di assegnare il nuovo valore alla varibile alla quale il programma farà riferimento lo testo
-			  if(!(temp_test>conc_soglie_limit_up.setp_e_soglie_arr[index]))
-			  {
-				  program_arr.setp_e_soglie.setp_e_soglie_arr[index]= temp_test;
-			  }
-			  else
-			  {
-
-			  }
+			  Formula_ConcConvers_milliSiemens(RamSettings.ptype_arr[RamSettings.selected_program_id].setp_e_soglie.setp_e_soglie_arr[index]);
+			  struct_conc_print.conc_to_print-=incr;
+			  temp_test=FormulaInversa_Conc_milliSiemens();//prima di assegnare il nuovo valore alla varibile alla quale il programma farà riferimento lo testo
 			  break;
 
 		  default:
 			  break;
 		}
+                
+              if(!(temp_test>conc_soglie_limit_up.setp_e_soglie_arr[index]))
+              {
+                      RamSettings.ptype_arr[RamSettings.selected_program_id].setp_e_soglie.setp_e_soglie_arr[index]= temp_test;
+              }
+              else
+              {
+
+              }
+
 	}
 	else
 	{
-		multiplied=program_arr.setp_e_soglie.setp_e_soglie_arr[index]*3;
+		multiplied=RamSettings.ptype_arr[RamSettings.selected_program_id].setp_e_soglie.setp_e_soglie_arr[index]*3;
 		multiplied/=128;
 		resto=multiplied % 128;
 
@@ -1127,7 +965,7 @@ void DecrSoglia(unsigned short index,unsigned short incr)//viene chiamata riga p
 
 		multiplied*=128;
 		multiplied+=resto;
-		program_arr.setp_e_soglie.setp_e_soglie_arr[index]=multiplied /3;
+		RamSettings.ptype_arr[RamSettings.selected_program_id].setp_e_soglie.setp_e_soglie_arr[index]=multiplied /3;
 	}
 }
 //***************************************************************************************
@@ -1136,11 +974,62 @@ void PrintUnitMis(unsigned short index,unsigned short x ,unsigned short y)//vien
 	SelectFont(CALIBRI_10);
 	if(index<4)
 	{
-		LCDPrintString(StringsSubmenuSimboliConc[program_arr.unita_mis_concentr],x,y);
+		LCDPrintString(StringsSubmenuSimboliConc[RamSettings.ptype_arr[RamSettings.selected_program_id].unita_mis_concentr],x,y);
 	}
 	else
 	{
 		LCDPrintString("'C",x,y);
 	}
 }
-//***************************************************************************************
+//***************************************************************************************************************************************
+void DecrParamConc(unsigned short* par_pt,unsigned short incr)//viene chiamata riga per riga quindi stampa solo 1 valore
+{
+
+
+  switch(RamSettings.ptype_arr[RamSettings.selected_program_id].unita_mis_concentr)
+  {
+    case UNIT_MIS_CONCENTR_PERCENTUALE:
+            //64000=100%  qui vogliono la risoluzione dello 0,1% quindi 64000=>10000
+            Formula_ConcConvers_Percent(*par_pt);
+            struct_conc_print.conc_to_print-=incr;
+            *par_pt=FormulaInversa_Conc_Percent();
+
+            break;
+
+    case UNIT_MIS_CONCENTR_PUNT_TITOL:
+            //64000=100%  qui vogliono la risoluzione dello 0,1% quindi 64000=>10000
+            Formula_ConcConvers_PuntTitol(*par_pt);
+            struct_conc_print.conc_to_print-=incr;
+            *par_pt=FormulaInversa_Conc_PuntTitol();
+
+            break;
+
+    case UNIT_MIS_CONCENTR_GRAMMILITRO:
+            //64000=100%  qui vogliono la risoluzione dello 0,1% quindi 64000=>10000
+            Formula_ConcConvers_grammiLitro(*par_pt);
+            struct_conc_print.conc_to_print+=incr;
+            *par_pt=FormulaInversa_Conc_grammiLitro();//prima di assegnare il nuovo valore alla varibile alla quale il programma farà riferimento lo testo
+            
+            break;
+
+    case UNIT_MIS_CONCENTR_uSIEMENS:
+            //64000=100%  qui vogliono la risoluzione dello 0,1% quindi 64000=>10000
+            Formula_ConcConvers_uSiemens(*par_pt);
+            struct_conc_print.conc_to_print-=incr;
+            *par_pt=FormulaInversa_Conc_uSiemens();//prima di assegnare il nuovo valore alla varibile alla quale il programma farà riferimento lo testo
+            break;
+
+    case UNIT_MIS_CONCENTR_mSIEMENS:
+            //64000=100%  qui vogliono la risoluzione dello 0,1% quindi 64000=>10000
+            Formula_ConcConvers_milliSiemens(*par_pt);
+            struct_conc_print.conc_to_print-=incr;
+            *par_pt=FormulaInversa_Conc_milliSiemens();//prima di assegnare il nuovo valore alla varibile alla quale il programma farà riferimento lo testo
+            break;
+
+    default:
+            break;
+  }
+          
+        
+	
+}

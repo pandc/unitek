@@ -44,7 +44,7 @@ static const SPI_InitTypeDef SPI_InitStructure[2] = {
 		.SPI_CPOL = SPI_CPOL_High,
 		.SPI_CPHA = SPI_CPHA_2Edge,
 		.SPI_NSS = SPI_NSS_Soft,
-		.SPI_BaudRatePrescaler = SPI_BaudRatePrescaler_32,
+		.SPI_BaudRatePrescaler = SPI_BaudRatePrescaler_32,//era 32
 		.SPI_FirstBit = SPI_FirstBit_MSB,
 		.SPI_CRCPolynomial = 7
 	},

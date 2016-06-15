@@ -10,6 +10,8 @@
 
 
 
+
+
 typedef union
 {
  unsigned char  u08data[40];
@@ -56,7 +58,7 @@ typedef struct
 	TK_type TK;						 //8
 
 	unsigned short curva_lavoro[16]; //32
-
+        unsigned short curva_lavoro3pt[16]; //32
 	unsigned char curva_lav_cal_type;//1
 	unsigned char curva_lav1_C_index;//1
 	unsigned char curva_lav3_L_index;//1
@@ -80,7 +82,7 @@ typedef struct
 	unsigned char ComunRS485;
 	unsigned char ComunUSB;
 	unsigned char Linguaggio;
-}my_FlashImage_type;
+}my_RamSettings_type;
 
 typedef struct
 {
@@ -124,6 +126,13 @@ typedef struct
 }my_RTC_type1;
 
 
+
+typedef struct
+{
+  unsigned int conc_to_print;
+  unsigned int decimali_to_print;
+  unsigned int resto;
+}print_conc_var;
 
 
 #endif /* MY_TYPES_H_ */

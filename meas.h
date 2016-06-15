@@ -17,6 +17,14 @@ extern struct meas_calpar_st {
 } mcp[CALIB_Items];
 extern uint8_t mcpok;
 
+struct measures_st {
+	uint16_t temp_ok;
+	float temp_resist;
+	uint16_t meas_ok;
+	float resist,condut,conduc;
+};
+extern struct measures_st measures;
+
 extern const float calib_resist[6];
 extern const float calib_condutt[4];
 
@@ -27,5 +35,6 @@ int meas(float *resist,float *condut,float *conduc);
 int meas_temp(float *val);
 int set_meas_chan(int chan);
 float meas_getkcell(void);
+void meas_start(void);
 
 #endif

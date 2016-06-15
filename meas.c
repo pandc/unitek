@@ -363,3 +363,44 @@ float tphase,val;
         *resist=((val-mcp[CALIB_Ptc].nos)*mcp[CALIB_Ptc].gf)*cos(tphase);
 	return TRUE;
 }
+
+#define MEAS_PERIOD		kSec*3
+struct measures_st measures;
+static void meas_task(void *par)
+{
+	if (!meas_init())
+	{
+		Dprintf(DBGLVL_Meas,"meas_task: invalid calibration parameters");
+		vTaskSuspend(NULL);
+	}
+	for (;;)
+	{
+		vTaskDelay(MEAS_PERIOD);
+		if (meas_temp(&measures.temp_resist))
+		{
+			Dprintf(DBGLVL_Meas,"meas_task: temper resist=%.10eOhm",measures.temp_resist);
+			measures.temp_ok = TRUE;
+		}
+		else
+		{
+			Dprintf(DBGLVL_Meas,"meas_task: error getting temper measure");
+			measures.temp_ok = FALSE;
+		}
+		if (meas(&measures.resist,&measures.condut,&measures.conduc))
+		{
+			Dprintf(DBGLVL_Meas,"meas_task: %.10eS,%.10eOhm,%.10eS/cm2\r\n",
+				measures.condut,measures.resist,measures.conduc);
+			measures.meas_ok = TRUE;
+		}
+		else
+		{
+			Dprintf(DBGLVL_Meas,"meas_task: error getting measures");
+			measures.meas_ok = FALSE;
+		}
+	}
+}
+
+void meas_start(void)
+{
+	xTaskCreate(meas_task, "measures", 256, NULL, tskIDLE_PRIORITY, NULL);
+}

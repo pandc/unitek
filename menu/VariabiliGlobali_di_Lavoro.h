@@ -13,6 +13,7 @@
 extern unsigned int global_flags;
 extern unsigned int key_flags;
 
+
 //extern unsigned char unita_mis_concentr;
 extern unsigned int var_concentr_to_print;
 extern unsigned int TK_attuale;
@@ -20,17 +21,16 @@ extern unsigned int TK_nuovo  ;
 extern unsigned int keyold_flags;
 
 extern setp_e_soglie_type setp_e_soglie;
-extern setp_e_soglie_type conc_soglie_limit_up,conc_soglie_limit_dn;
-extern unsigned char c_index_Curva_di_lavoro;
-extern unsigned short curva_lavoro[5][16];
+//extern setp_e_soglie_type conc_soglie_limit_up,conc_soglie_limit_dn;
+
 extern unsigned char selected_curva_lavoro_index;
-extern unsigned char selected_progr_index;
-extern program_type program_arr;
+
+
 
 
 extern unsigned char stato_intervento_temper,stato_intervento_conc;
 
-extern TK_type TK;
+
 
 //variabili selezione in uso
 //menu IN OUT
@@ -47,7 +47,9 @@ extern unsigned char stato_USB;
 extern unsigned char linguaggio;
 
 extern unsigned int *sector_image;
-extern my_FlashImage_type FlashImage;
+extern my_RamSettings_type RamSettings;
+
+extern const program_type saved_prog_arr[5];
 
 //extern program_type __attribute__((section (".MySector"))) saved_prog_arr[5];
 //extern unsigned char __attribute__((section (".MySector"))) saved_selected_program_id;

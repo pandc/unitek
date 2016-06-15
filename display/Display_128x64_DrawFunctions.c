@@ -14,7 +14,7 @@
 #include "BitmapsImmagini.h"
 #include "Conversioni.h"
 
-#include "FontsCambria.h"
+
 #include "FontsCalibri.h"
 
 coordinate_struct_type coordinate_struct1;
@@ -311,8 +311,8 @@ void GetBitmap(void)
 //***************************************************************************************
 void FontPointerInit(void)
 {
-	cambria_10ptFontInfo.p_character_descriptor=cambria_10ptDescriptors;
-	cambria_10ptFontInfo.p_character_bitmaps   =cambria_10pt_bmp;
+	//cambria_10ptFontInfo.p_character_descriptor=cambria_10ptDescriptors;
+	//cambria_10ptFontInfo.p_character_bitmaps   =cambria_10pt_bmp;
 
 	calibri_10ptFontInfo.p_character_descriptor=calibri_10ptDescriptors;
 	calibri_10ptFontInfo.p_character_bitmaps   =calibri_10pt_bmp;
@@ -326,7 +326,7 @@ void FontPointerInit(void)
 
 
 
-	font_info_pt_table[CAMBRIA_10]	   =&cambria_10ptFontInfo;
+	//font_info_pt_table[CAMBRIA_10]	   =&cambria_10ptFontInfo;
 	font_info_pt_table[CALIBRI_10]	   =&calibri_10ptFontInfo;
 	font_info_pt_table[CALIBRI_20]	   =&calibri_20ptFontInfo;
 }
@@ -348,7 +348,7 @@ void SelectFont(unsigned char font_type)
 	height_font				 	= font_info_pt_table[font_type]->p_character_descriptor->height; //font_info_pt_table[font_type]->p_character_descriptor[0].height;//deve essere un numero tipo 13,20 ecc
 	mybmp_struct1.font_info_pt  = font_info_pt_table[font_type];
 	//width_font					= font_info_pt_table[font_type]->p_character_descriptor->width;
-	if(font_type==CAMBRIA_10)width_font=6;
+	//if(font_type==CAMBRIA_10)width_font=6;
 	if(font_type==CALIBRI_10)width_font=5;
 	if(font_type==CALIBRI_20)width_font=11;
 
