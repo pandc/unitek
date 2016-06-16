@@ -8,6 +8,7 @@
 #include "my_types.h"
 
 
+//stringhe uguali in ognuno dei 4 linguaggi
 const char StringsSubmenuLingua [4][10]={  	   "Italiano",
 												"English",
 												"Francais",
@@ -39,234 +40,187 @@ const char StringsSubmenuCurvaLavoro  [16][4]={ "osX",
 													};
 
 
-		//		***ITALIANO***ITALIANO***ITALIANO***ITALIANO***ITALIANO***ITALIANO***ITALIANO***
+//Stringhe in linguaggi diversi
 
-		const char StringsMenuProg [4] [6][20]={{   "IN-OUT (ON-OFF)",
-													"Seleziona Programma",
-													"Comunicazioni",
-													"Imposta Orologio",
-													"Seleziona Lingua",
-													"Servizio"},
+const char StringsMenuProg [4][6][20]={{   "IN-OUT (ON-OFF)",  //ITALIANO
+                                                                                        "Seleziona Programma",
+                                                                                        "Comunicazioni",
+                                                                                        "Imposta Orologio",
+                                                                                        "Seleziona Lingua",
+                                                                                        "Servizio"},
 
-												{ 	"IN-OUT (ON-OFF)",
-													"Select Program",
-													"Communications",
-													"Set Clock",
-													"Select Language",
-													"Service"},
+                                                                                { 	"IN-OUT (ON-OFF)",//ENGLISH
+                                                                                        "Select Program",
+                                                                                        "Communications",
+                                                                                        "Set Clock",
+                                                                                        "Select Language",
+                                                                                        "Service"},
 
-												{ 	"IN-OUT (ON-OFF)",
-													"Choix Program",
-													"Communications",
-													"Choix oralojon",
-													"Choix Languedoc",
-													"Service"},
+                                                                                { 	"IN-OUT (ON-OFF)",//FRANCAIS
+                                                                                        "Choix Program",
+                                                                                        "Communications",
+                                                                                        "Choix Horloge",
+                                                                                        "Choix Langue",
+                                                                                        "Service"},
 
-												{ 	"IN-OUT (ON-OFF)",
-													"Selecc Program",
-													"Communicacions",
-													"Arregla reloj",
-													" Languaje",
-													"Servicio"}
-
-
-		};
-
-		const char StringsSubmenuSelezProg [5][20]={"Imposta Simboli",
-													"TK",
-													"Curva di Lavoro",
-													"Imposta Soglie",
-													"Imposta Timer"};
+                                                                                { 	"IN-OUT (ON-OFF)",//ESPANOL
+                                                                                        "Selecc Program",
+                                                                                        "Communicaciones",
+                                                                                        "Arregla reloj",
+                                                                                        "Languaje",
+                                                                                        "Servicio"}
 
 
+};
 
+const char StringsSubmenuSelezProg[4][5][20]={{"Imposta Simboli",//ITALIANO
+                                                                                                "TK",
+                                                                                                "Imposta Soglie",
+                                                                                                "Curva di Lavoro",
+                                                                                                "Imposta Timer"},
 
-		const char StringsSubmenuImpostaSimboli [5][20]={"Simbolo   %",
-														"Simbolo    P",
-														"Simbolo    g/l",
-														"Simbolo    uS",
-														"Simbolo    mS"};
+                                                                                          { "Set Symbols",	//ENGLISH
+                                                                                                "TK",
+                                                                                                "Set Curve",
+                                                                                                "Set Thresholds",
+                                                                                                "Set timers"},
 
+                                                                                          { "Choix Symbols",//FRANCAIS
+                                                                                                "TK",
+                                                                                                "Choix Curvon",
+                                                                                                "Choix Seuils",
+                                                                                                "Choix Minuteur"},
 
-		const char StringsSubmenuImpostaSoglie [8][20]={"Set.Conc.",
-														"All.Conc.Min",
-														"All.Conc.Max",
-														"Isteresis.Conc",
-														"Set Temp",
-														"All. Temp.Min",
-														"All. Temp.Max",
-														"Ister. Temp"};
-
-		const char StringsSubmenuImpostaTimer [9][20]={	"T1 Rit.CH C",
-														"T2 Dosaggio",
-														"T3 Rit.Dos.",
-														"T4 All.Min. C.",
-														"T5 All.Max. C.",
-														"T6 Rit.CH T.",
-														"T7 Riscald.",
-														"T8 All.Min. T.",
-														"T9 All.Max. T."};
-
-
-
-		//anche per 2 stringhe strutturo così perchè poi ci saranno diverse lingue
-		const char StringsSubmenuTipoCurvLav [2][20]={ 	"Calibrazione Centr",
-															"Calibrazione L-C-H"
-														};
-
-
-		//		***ENGLISH***ENGLISH***ENGLISH***ENGLISH***ENGLISH***ENGLISH***ENGLISH***ENGLISH***
-
-		const char StringsMenuProgEngl [6][20]={ 	"IN-OUT (ON-OFF)",
-													"Select Program",
-													"Communications",
-													"Set Clock",
-													"Select Language",
-													"Service"};
-
-		const char StringsSubmenuSelezProgEngl [5][20]={ "Set Symbols",
-														"TK",
-														"Set Curve",
-														"Set Thresholds",
-														"Set timers"};
+                                                                                                { "Selecc Symbols",//ESPANOL
+                                                                                                  "TK",
+                                                                                                  "Selecc Curva",
+                                                                                                  "Selecc Umbrales",
+                                                                                                  "Establ Temporizador"}
+                                                                                                };
 
 
 
 
-		const char StringsSubmenuImpostaSimboliEngl [5][20]={"Symbol   %",
-														"Symbol    P",
-														"Symbol    g/l",
-														"Symbol    uS",
-														"Symbol    mS"};
+const char StringsSubmenuImpostaSimboli [4][5][20]={{                                           "Simbolo   %",	//ITALIANO
+                                                                                                "Simbolo    P",
+                                                                                                "Simbolo    g/l",
+                                                                                                "Simbolo    uS",
+                                                                                                "Simbolo    mS"},
+
+                                                                                              { "Symbol    %",	//ENGLISH
+                                                                                                "Symbol    P",
+                                                                                                "Symbol    g/l",
+                                                                                                "Symbol    uS",
+                                                                                                "Symbol    mS"},
+
+                                                                                              { "Symbole  %", //FRANCAIS
+                                                                                                "Symbole    P",
+                                                                                                "Symbole    g/l",
+                                                                                                "Symbole    uS",
+                                                                                                "Symbole    mS"},
+
+                                                                                              { "Simbolo  %", //ESPANOL
+                                                                                                "Simbolo    P",
+                                                                                                "Simbolo    g/l",
+                                                                                                "Simbolo    uS",
+                                                                                                "Simbolo    mS"}
+                                                                                                };//ITALIANO	//ENGLISH	//FRANCAIS	//ESPANOL
 
 
-		const char StringsSubmenuImpostaSoglieEngl [8][20]={"Set.Conc.",
-														"All.Conc.Min",
-														"All.Conc.Max",
-														"Hysteresis.Conc",
-														"Set Temp",
-														"All. Temp.Min",
-														"All. Temp.Max",
-														"Hysteresis.Temp"};
+const char StringsSubmenuImpostaSoglie[4][8][20]={{ "Set.Conc.", 	//ITALIANO
+                                                                                                "All.Conc.Min",
+                                                                                                "All.Conc.Max",
+                                                                                                "Isteresis.Conc",
+                                                                                                "Set Temp",
+                                                                                                "All. Temp.Min",
+                                                                                                "All. Temp.Max",
+                                                                                                "Ister. Temp"},
 
-		const char StringsSubmenuImpostaTimerEngl [9][20]={	"T1 Rit.CH C",
-														"T2 Dosing",
-														"T3 Rit.Dos.",
-														"T4 All.Min. C.",
-														"T5 All.Max. C.",
-														"T6 Rit.CH T.",
-														"T7 Heater.",
-														"T8 All.Min. T.",
-														"T9 All.Max. T."};
+                                                                                           {"Set.Conc.",	//ENGLISH
+                                                                                                "All.Conc.Min",
+                                                                                                "All.Conc.Max",
+                                                                                                "Hysteresis.Conc",
+                                                                                                "Set Temp",
+                                                                                                "All. Temp.Min",
+                                                                                                "All. Temp.Max",
+                                                                                                "Hysteresis.Temp"},
 
+                                                                                           {"Choix.Conc.",	//FRANCAIS
+                                                                                                "All.Conc.Min",
+                                                                                                "All.Conc.Max",
+                                                                                                "Hysteresis.Conc",
+                                                                                                "Set Temp",
+                                                                                                "All. Temp.Min",
+                                                                                                "All. Temp.Max",
+                                                                                                "Hysteresis.Temp"},
 
-		//anche per 2 stringhe strutturo così perchè poi ci saranno diverse lingue
-		const char StringsSubmenuTipoCurvLavEngl [2][20]={ 	"Calibration Centr",
-															"Calibration L-C-H"
-														};
+                                                                                           {"Selecc.Conc.",	//ESPANOL
+                                                                                                "Al.Conc.Min",
+                                                                                                "Al.Conc.Max",
+                                                                                                "Histeresis.Conc",
+                                                                                                "Set Temp",
+                                                                                                "All. Temp.Min",
+                                                                                                "All. Temp.Max",
+                                                                                                "Histeresis.Temp"}
+                                                                                                };//ITALIANO	//ENGLISH	//FRANCAIS	//ESPANOL
 
+const char StringsSubmenuImpostaTimer [4][9][20]={{	                                        "T1 Rit.CH C",	//ITALIANO
+                                                                                                "T2 Dosaggio",
+                                                                                                "T3 Rit.Dos.",
+                                                                                                "T4 All.Min. C.",
+                                                                                                "T5 All.Max. C.",
+                                                                                                "T6 Rit.CH T.",
+                                                                                                "T7 Riscald.",
+                                                                                                "T8 All.Min. T.",
+                                                                                                "T9 All.Max. T."},
 
-		//		***FRANCAIS***FRANCAIS***FRANCAIS***FRANCAIS***FRANCAIS***FRANCAIS***FRANCAIS***FRANCAIS***
+                                                                                           {    "T1 Rit.CH C",	//ENGLISH
+                                                                                                "T2 Dosing",
+                                                                                                "T3 Rit.Dos.",
+                                                                                                "T4 All.Min. C.",
+                                                                                                "T5 All.Max. C.",
+                                                                                                "T6 Rit.CH T.",
+                                                                                                "T7 Heater.",
+                                                                                                "T8 All.Min. T.",
+                                                                                                "T9 All.Max. T."},
 
-		const char StringsMenuProgFran [6][20]={ 	"IN-OUT (ON-OFF)",
-													"Choix Program",
-													"Communications",
-													"Choix oralojon",
-													"Choix Languedoc",
-													"Servis"};
+                                                                                           {    "T1 Rit.CH C",	//FRANCAIS
+                                                                                                "T2 Dosage",
+                                                                                                "T3 Rit.Dos.",
+                                                                                                "T4 All.Min. C.",
+                                                                                                "T5 All.Max. C.",
+                                                                                                "T6 Rit.CH T.",
+                                                                                                "T7 Chauffage.",
+                                                                                                "T8 All.Min. T.",
+                                                                                                "T9 All.Max. T."},
 
-		const char StringsSubmenuSelezProgFran [5][20]={ "Choix Symbols",
-														"TK",
-														"Choix Curvon",
-														"Choix Seuils",
-														"Choix timeron"};
+                                                                                           {    "T1 Rit.CH C",	//ESPANOL
+                                                                                                "T2 Dosific",
+                                                                                                "T3 Rit.Dos.",
+                                                                                                "T4 All.Min. C.",
+                                                                                                "T5 All.Max. C.",
+                                                                                                "T6 Rit.CH T.",
+                                                                                                "T7 Calefaccion.",
+                                                                                                "T8 All.Min. T.",
+                                                                                                "T9 All.Max. T."}
 
-
-
-
-		const char StringsSubmenuImpostaSimboliFran [5][20]={"Symbole  %",
-														"Symbole    P",
-														"Symbole    g/l",
-														"Symbole    uS",
-														"Symbole    mS"};
-
-
-		const char StringsSubmenuImpostaSoglieFran [8][20]={"Choix.Conc.",
-														"All.Conc.Min",
-														"All.Conc.Max",
-														"Hysteresis.Conc",
-														"Set Temp",
-														"All. Temp.Min",
-														"All. Temp.Max",
-														"Hysteresis.Temp"};
-
-		const char StringsSubmenuImpostaTimerFran [9][20]={	"T1 Rit.CH C",
-														"T2 Dosage",
-														"T3 Rit.Dos.",
-														"T4 All.Min. C.",
-														"T5 All.Max. C.",
-														"T6 Rit.CH T.",
-														"T7 Chauffage.",
-														"T8 All.Min. T.",
-														"T9 All.Max. T."};
-
-
-		//anche per 2 stringhe strutturo così perchè poi ci saranno diverse lingue
-		const char StringsSubmenuTipoCurvLavFran [2][20]={ 	"Calibration Centr",
-															"Calibration L-C-H"
-														};
-
-
-		//		***ESPANOL***ESPANOL***ESPANOL***ESPANOL***ESPANOL***ESPANOL***ESPANOL***ESPANOL***
-
-		const char StringsMenuProgEsp [6][20]={ 	"IN-OUT (ON-OFF)",
-													"Selecc Program",
-													"Communicacions",
-													"Arregla reloj",
-													"Languaje",
-													"Servicio"};
-
-		const char StringsSubmenuSelezProgEsp [5][20]={ "Selecc Symbols",
-														"TK",
-														"Selecc Curva",
-														"Selecc Umbrales",
-														"Selecc timer"};
+                                                                                                };//ITALIANO	//ENGLISH	//FRANCAIS	//ESPANOL
 
 
 
+//anche per 2 stringhe strutturo così perchè poi ci saranno diverse lingue
+const char StringsSubmenuTipoCurvLav [4][2][20]={{ 	"Calibrazione Centr",//ITALIANO
+                                                                                                        "Calibrazione L-C-H"},
 
-		const char StringsSubmenuImpostaSimboliEsp [5][20]={"Simbolo  %",
-														"Simbolo    P",
-														"Simbolo    g/l",
-														"Simbolo    uS",
-														"Simbolo    mS"};
+                                                                                                    {"Calibration Centr",//ENGLISH
+                                                                                                         "Calibration L-C-H"},
 
+                                                                                                        {"Calibration Centr",
+                                                                                                         "Calibration L-C-H"},
 
-		const char StringsSubmenuImpostaSoglieEsp [8][20]={"Selecc.Conc.",
-														"Al.Conc.Min",
-														"Al.Conc.Max",
-														"Histeresis.Conc",
-														"Set Temp",
-														"All. Temp.Min",
-														"All. Temp.Max",
-														"Histeresis.Temp"};
-
-		const char StringsSubmenuImpostaTimerEsp [9][20]={	"T1 Rit.CH C",
-														"T2 Dosific",
-														"T3 Rit.Dos.",
-														"T4 All.Min. C.",
-														"T5 All.Max. C.",
-														"T6 Rit.CH T.",
-														"T7 Calefaccion.",
-														"T8 All.Min. T.",
-														"T9 All.Max. T."};
-
-
-		//anche per 2 stringhe strutturo così perchè poi ci saranno diverse lingue
-		const char StringsSubmenuTipoCurvLavEsp [2][20]={ 	"Calibraccion Centr",
-															"Calibraccion L-C-H"
-														};
-
+                                                                                                        {"Calibraccion Centr",
+                                                                                                         "Calibraccion L-C-H"}
+                                                                                                };//ITALIANO	//ENGLISH	//FRANCAIS	//ESPANOL
 
 
 

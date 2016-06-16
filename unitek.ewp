@@ -2938,6 +2938,9 @@
     <group>
       <name>Menu</name>
       <file>
+        <name>$PROJ_DIR$\menu\Formule.c</name>
+      </file>
+      <file>
         <name>$PROJ_DIR$\menu\Menu.c</name>
       </file>
       <file>
@@ -2975,15 +2978,6 @@
       </file>
       <file>
         <name>$PROJ_DIR$\display\fontscalibri20.c</name>
-      </file>
-      <file>
-        <name>$PROJ_DIR$\display\fontscambria10pt.c</name>
-      </file>
-      <file>
-        <name>$PROJ_DIR$\display\fontscambria12pt.c</name>
-      </file>
-      <file>
-        <name>$PROJ_DIR$\display\fontscambria16pt.c</name>
       </file>
     </group>
     <file>

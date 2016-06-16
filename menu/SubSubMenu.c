@@ -41,10 +41,9 @@ extern unsigned char incr_step,incr_counter;
 
 extern bitmap_struct_type mybmp_struct1,mybmp_struct2;
 
-extern unsigned char menuchange;
 extern unsigned char MenuFunction_Index;
 extern unsigned char unita_mis_concentr;
-extern unsigned int var_concentr_to_print;
+
 
 extern unsigned int keyold_flags;
 
@@ -67,125 +66,312 @@ extern unsigned int triangolino_inversion_timer;
 extern unsigned char loop_flag;
 extern unsigned int blink_timer_on;
 
-extern const char StringsSubmenuProg      		[5][20];
-extern const char StringsSubmenuSelezProg 		[5][20];
-extern const char StringsSubmenuLingua    		[4][10];
-extern const char StringsSubmenuImpostaSimboli	[5][20];
-extern const char StringsSubmenuImpostaSoglie 	[8][20];
-extern const char StringsSubmenuImpostaTimer  	[9][20];
-extern const char StringsSubmenuSimboliConc     [5][4];
+
+extern const char StringsSubmenuProg      	[4][5][20];
+extern const char StringsSubmenuSelezProg 	[4][5][20];
+extern const char StringsSubmenuLingua    	   [4][10];
+extern const char StringsSubmenuImpostaSimboli	[4][5][20];
+extern const char StringsSubmenuImpostaSoglie 	[4][8][20];
+extern const char StringsSubmenuImpostaTimer  	[4][9][20];
+extern const char StringsSubmenuSimboliConc   	[5][4];
 extern const char StringsSubmenuCurvaLavoro  	[16][4];
-extern const char StringsSubmenuTipoCurvLav     [2][20];
+extern const char StringsSubmenuTipoCurvLav     [4][2][20];
 
 //***************************************************************************************
 void  Sub2MenuSelTipoCurvaLavoro(void)
 {
 	uint8_t key;
-	unsigned short string_index=0,strings_y=2,y_old;
-		unsigned char loop_flag=1;
-	/*
-		unsigned char x_prova=0,half_x=0;
-		unsigned char y_prova=0,half_y=0;
-	*/
-		static unsigned short submenuCurLavType_index=0;
-		submenuCurLavType_index=program_arr.curva_lav_cal_type;
+	unsigned short string_index=0,strings_y=26,y_old;
+        unsigned char loop_flag=1,test;
+        unsigned char selected_progr=RamSettings.selected_program_id;
+        static unsigned short submenuCurLavType_index=0;
+         
+        submenuCurLavType_index=RamSettings.ptype_arr[selected_progr].curva_lav_cal_type;
 
-		menu_triang_limit_up=26;
-		menu_triang_limit_dn=38;
-		menu_triang_y=2+(submenuCurLavType_index*12);
+        menu_triang_limit_up=14;
+        menu_triang_limit_dn=26;
+        menu_triang_y=14+(submenuCurLavType_index*12);
 
-		LCD_Fill_ImageRAM(0x00);
+        LCD_Fill_ImageRAM(0x00);
 	#ifdef DISEGNA_CORNICE
-		DisegnaCornice();
+	DisegnaCornice();
 	#endif
-		DisegnaTriangolinoMenu(0,menu_triang_y);
-		DisegnaMarker(102,menu_triang_y,menu_triang_y);
-	    y_old=menu_triang_y;
-		SelectFont(CALIBRI_10);
+        DisegnaTriangolinoMenu(0,menu_triang_y);
+        DisegnaMarker(102,menu_triang_y,menu_triang_y);
+        y_old=menu_triang_y;
+        SelectFont(CALIBRI_10);
 
 
-		for(string_index=0;string_index<2;string_index++)
-		{
-			LCDPrintString(StringsSubmenuTipoCurvLav[string_index],12,strings_y);
-			strings_y+=12;
-		}
+        for(string_index=0;string_index<2;string_index++)
+        {
+                LCDPrintString(StringsSubmenuTipoCurvLav[RamSettings.Linguaggio][string_index],12,strings_y);
+                strings_y+=12;
+        }
 
-		LCD_CopyScreen();
+        LCD_CopyScreen();
 
-		while(loop_flag)
-		{
-			key_getstroke(&key,portMAX_DELAY);
-			if (key == KEY_PROG)
-			//if(CHECK_TASTO_PROG_PRESSED)
-			{
-				CLEAR_TASTO_PROG_PRESSED;
-				MenuFunction_Index=MENU_PROGR;
-				loop_flag=0;
+        while(loop_flag)
+        {
+                key_getstroke(&key,portMAX_DELAY);
+                if (key == KEY_PROG)
+                //if(CHECK_TASTO_PROG_PRESSED)
+                {
+                        CLEAR_TASTO_PROG_PRESSED;
+                        MenuFunction_Index=MENU_PROGR;
+                        loop_flag=0;
 
-			}
+                }
 
-			if (key == KEY_OK)
-			//if(CHECK_TASTO_OK_PRESSED)
-			{
-				CLEAR_TASTO_OK_PRESSED;
-				program_arr.curva_lav_cal_type=submenuCurLavType_index;
+                if (key == KEY_OK)
+                //if(CHECK_TASTO_OK_PRESSED)
+                {
+                        CLEAR_TASTO_OK_PRESSED;
+                        RamSettings.ptype_arr[selected_progr].curva_lav_cal_type=submenuCurLavType_index;
+                        test=SaveRamSettings_in_External_DataFlash();
+                        if(!test)
+                        {
+                              LCD_Fill_ImageRAM(0x00);
+                              SelectFont(CALIBRI_10);
+                              LCDPrintString("File system error",4,24);
+                              LCD_CopyPartialScreen(4,80,24,36);
+                        }
 
-				DisegnaMarker(102,menu_triang_y,y_old);
-				y_old=menu_triang_y;
-				if(program_arr.curva_lav_cal_type==CALIBR_CENTR)
-					MenuFunction_Index=SUB3MENU_CURVA_DI_LAVORO;
-				else
-					MenuFunction_Index=SUB3MENU_CURVA_DI_LAVORO3pt;
+                        DisegnaMarker(102,menu_triang_y,y_old);
+                        y_old=menu_triang_y;
+                        if(submenuCurLavType_index==CALIBR_CENTR)MenuFunction_Index=SUB3MENU_CURVA_DI_LAVORO;
+                        else					MenuFunction_Index=SUB3MENU_SEL_LCH;
 
-				loop_flag=0;
-			}
-
-
-			if(CHECK_ARROW_KEYS_MOVE_UPDOWN)
-			{
-				if (key == KEY_DOWNRIGHT)
-				//if(CHECK_TASTO_DN_DX_PRESSED)
-				{
-					MoveTriangolinoDown();
-					if(submenuCurLavType_index<5)submenuCurLavType_index+=1;
-					CLEAR_TASTO_DN_DX_PRESSED;
-				}
-
-				if (key == KEY_UPLEFT)
-				//if(CHECK_TASTO_UP_SX_PRESSED)
-				{
-					MoveTriangolinoUp();
-					if(submenuCurLavType_index)submenuCurLavType_index-=1;
-					CLEAR_TASTO_UP_SX_PRESSED;
-				}
-			}
-
-			//if(CHECK_ARROW_KEYS_MOVE_SXDX)
-			{
+                        loop_flag=0;
+                }
 
 
+                if(CHECK_ARROW_KEYS_MOVE_UPDOWN)
+                {
+                        if (key == KEY_DOWNRIGHT)
+                        //if(CHECK_TASTO_DN_DX_PRESSED)
+                        {
+                                MoveTriangolinoDown();
+                                if(submenuCurLavType_index<5)submenuCurLavType_index+=1;
+                                CLEAR_TASTO_DN_DX_PRESSED;
+                        }
 
-			}
-		}
+                        if (key == KEY_UPLEFT)
+                        //if(CHECK_TASTO_UP_SX_PRESSED)
+                        {
+                                MoveTriangolinoUp();
+                                if(submenuCurLavType_index)submenuCurLavType_index-=1;
+                                CLEAR_TASTO_UP_SX_PRESSED;
+                        }
+                }
+
+                //if(CHECK_ARROW_KEYS_MOVE_SXDX)
+                {
+
+
+
+                }
+        }
 }
 //***************************************************************************************
-void Sub2MenuCurvadiLavoro(void)
+void Sub2Sel_L_C_H(void)
+{
+	uint8_t key,last_key;
+        unsigned short string_index=0,strings_y=2,temp;
+	unsigned short menu_CurvaLavoro_index=0;
+	unsigned char loop_flag=1,test;
+	unsigned char to_print=1;
+	unsigned char L_index,C_index,H_index;
+
+	L_index=RamSettings.ptype_arr[RamSettings.selected_program_id].curva_lav3_L_index;
+	C_index=RamSettings.ptype_arr[RamSettings.selected_program_id].curva_lav3_C_index;
+	H_index=RamSettings.ptype_arr[RamSettings.selected_program_id].curva_lav3_H_index;
+
+	LCD_Fill_ImageRAM(0x00);
+	SelectFont(CALIBRI_10);
+	LCDPrintString("L=",8,2);
+	LCDPrintString("C=",8,26);
+	LCDPrintString("H=",8,50);
+        
+        
+
+	LCDPrintString("@  0x",68,2);
+	LCDPrintString("@  0x",68,26);
+	LCDPrintString("@  0x",68,50);
+
+	
+
+	menu_triang_limit_up=2;
+	menu_triang_limit_dn=50;
+	menu_triang_y=menu_triang_limit_up;
+	DisegnaTriangolinoMenu(0,menu_triang_y);
+        
+        LCD_CopyScreen();
+
+    while(loop_flag)
+    {
+    	//key_getstroke(&key,portMAX_DELAY);
+        if (key_getstroke(&key, kDec*2))
+			last_key = key;
+	
+        if(CHECK_ARROW_KEYS_MOVE_UPDOWN)
+        {
+               
+          if(key==KEY_DOWNRIGHT)
+          {
+                  MoveTriangolinoDown();
+                  MoveTriangolinoDown();
+                  if(menu_CurvaLavoro_index<15)menu_CurvaLavoro_index+=1;
+                  CLEAR_TASTO_DN_DX_PRESSED;
+          }
+
+          if(key==KEY_UPLEFT)
+          {
+                  MoveTriangolinoUp();
+                  MoveTriangolinoUp();
+                  if(menu_CurvaLavoro_index)menu_CurvaLavoro_index-=1;
+                  CLEAR_TASTO_UP_SX_PRESSED;
+          }
+        }
+        else//cioè if(CHECK_ARROW_KEYS_MOVE_SXDX)
+        {
+                if(CHECK_TASTO_DN_DX_PRESSED)CLEAR_TASTO_DN_DX_PRESSED;
+                if(CHECK_TASTO_UP_SX_PRESSED)CLEAR_TASTO_UP_SX_PRESSED;
+        }
+
+    	if(CHECK_PIU_MENO_ENABLED)
+        {
+            if(key==KEY_PLUS)
+            {
+
+                    if(menu_triang_x==menu_triang_limit_dx)//se vario il valore
+                    {
+                            incr_counter++;
+                            if(incr_counter>10) incr_step=10;
+                            if(incr_counter>20)
+                            {
+                                    incr_step=100;
+                                    incr_counter=21;
+                            }
+
+
+                            string_index=menu_triang_index;
+
+                           if(string_index==0)IncrPrint_UnMisura_Conc[RamSettings.ptype_arr[RamSettings.selected_program_id].unita_mis_concentr](&RamSettings.ptype_arr[RamSettings.selected_program_id].curva_lavoro3pt[L_index],3,4,5);
+                    }
+
+                    else//se vario la posizione
+                    {
+                            //se è L deve essere minore di C che deve essere minore di H
+                    }
+            }
+
+            if(key == (KEY_PLUS | KEY_RELEASED))
+            {
+                    incr_step=1;
+                    incr_counter=0;
+                    CLEAR_TASTO_PLUS_RELEASED;
+            }
+
+
+
+
+            if(key == KEY_MINUS)
+            {
+
+                    if(menu_triang_x==menu_triang_limit_dx)
+                    {
+                            incr_counter++;
+                            if(incr_counter>10)
+                            {
+                                    incr_step=10;
+                            }
+                            if(incr_counter>20)
+                            {
+                                    incr_step=100;
+                                    incr_counter=21;
+                            }
+
+
+                            string_index=menu_triang_index;
+
+                            //sistemare...per step>1 può scendere sotto 0
+                            if(RamSettings.ptype_arr[RamSettings.selected_program_id].curva_lavoro[string_index]-incr_step)RamSettings.ptype_arr[RamSettings.selected_program_id].curva_lavoro[string_index]-=incr_step;
+                            CleanArea_Ram_and_Screen(92,120,menu_triang_y,menu_triang_y+10);
+                            temp=RamSettings.ptype_arr[RamSettings.selected_program_id].curva_lavoro[string_index];
+                            BinToBCDisp(temp,DUE_DECIMALI,92,menu_triang_y);
+                            LCD_CopyPartialScreen(92,120,menu_triang_y,menu_triang_y+10);
+                            //PrintUnitMis(string_index,112,strings_y);
+                    }
+                }
+
+                if(key == (KEY_MINUS | KEY_RELEASED))
+                {
+                        incr_step=1;
+                        incr_counter=0;
+                        CLEAR_TASTO_MENO_RELEASED;
+                }
+
+        }
+        
+        
+        
+        if(key == KEY_OK)
+	{
+		CLEAR_TASTO_OK_PRESSED;
+		MenuFunction_Index=SUB3MENU_CURVA_DI_LAVORO3pt;
+                test=SaveRamSettings_in_External_DataFlash();
+                if(!test)
+                {
+                      LCD_Fill_ImageRAM(0x00);
+                      SelectFont(CALIBRI_10);
+                      LCDPrintString("File system error",4,24);
+                      LCD_CopyPartialScreen(4,80,24,36);
+                }
+		return;
+	}
+
+
+
+	if(to_print)
+	{
+		 to_print=0; 
+                 BinToBCDisp(L_index,INTERO,86,2);
+                 BinToBCDisp(C_index,INTERO,86,26);
+                 BinToBCDisp(H_index,INTERO,86,50);
+                 
+                 
+                 //scelgo funzione da puntare a seconda dell unità misura concentrazione 
+                 CalcPrint_UnMisura_Conc[RamSettings.ptype_arr[RamSettings.selected_program_id].unita_mis_concentr](RamSettings.ptype_arr[RamSettings.selected_program_id].curva_lavoro[L_index],18,2);
+                 CalcPrint_UnMisura_Conc[RamSettings.ptype_arr[RamSettings.selected_program_id].unita_mis_concentr](RamSettings.ptype_arr[RamSettings.selected_program_id].curva_lavoro[C_index],18,26);
+                 CalcPrint_UnMisura_Conc[RamSettings.ptype_arr[RamSettings.selected_program_id].unita_mis_concentr](RamSettings.ptype_arr[RamSettings.selected_program_id].curva_lavoro[H_index],18,50);
+         
+	}
+    }
+
+	
+}
+//***************************************************************************************
+void Sub2MenuCurvadiLavoro(void)  
 {
 	uint8_t key,last_key;
 	unsigned short string_index=0,strings_y=2,temp;
-	unsigned short menu_CurvaLavoro_index=0;
+	unsigned short menu_CurvaLavoro_index;
 	unsigned short page=0,page_old;
-	unsigned char loop_flag=1;
+	unsigned char loop_flag=1,test;
 	unsigned char first_string_to_print=0,last_string_to_print;
 	unsigned char to_print=1,resto;
-	unsigned char blink_enable=0,toggler = 0;
+        unsigned int sel_progr_num=RamSettings.selected_program_id;
+	//unsigned char blink_enable=0,toggler = 0;
 
-	menu_triang_limit_up=2;
+	menu_CurvaLavoro_index=RamSettings.ptype_arr[sel_progr_num].curva_lav1_C_index;
+        menu_triang_limit_up=2;
 	menu_triang_limit_dn=50;
 	menu_triang_limit_dx=74;
 	menu_triang_y=2+(menu_CurvaLavoro_index*H_RIGA_CALIBRI10);
 	menu_triang_index=menu_CurvaLavoro_index;
 	incr_step=1;
+        
+        RicalcolaCurvaLavoro();
 
 	key = last_key = 0;
 	while(loop_flag)
@@ -194,9 +380,8 @@ void Sub2MenuCurvadiLavoro(void)
 			last_key = key;
 		else
 		{
-			if (blink_enable)
-				DisegnaCarattereBlink('R',40,menu_triang_y,&toggler);
-			key = 0;
+			//if (blink_enable)DisegnaCarattereBlink('R',40,menu_triang_y,&toggler);
+			//key = 0;
 		}
 		//if(CHECK_KEY_READY)
 		{
@@ -221,8 +406,15 @@ void Sub2MenuCurvadiLavoro(void)
 					MARK_ARROW_KEYS_MOVE_UPDOWN;
 					CLEAR_ARROW_KEYS_MOVE_SXDX;
 					CLEAR_PIU_MENO_ENABLED;
-					program_arr.curva_lav1_C_index=page*5+menu_triang_index;
-
+					RamSettings.ptype_arr[sel_progr_num].curva_lav1_C_index=page*5+menu_triang_index;
+                                        test=SaveRamSettings_in_External_DataFlash();
+                                        if(!test)
+                                        {
+                                              LCD_Fill_ImageRAM(0x00);
+                                              SelectFont(CALIBRI_10);
+                                              LCDPrintString("File system error",4,24);
+                                              LCD_CopyPartialScreen(4,80,24,36);
+                                        }
 
 					RicalcolaCurvaLavoro();
 
@@ -235,7 +427,7 @@ void Sub2MenuCurvadiLavoro(void)
 			//if(CHECK_TASTO_PROG_PRESSED)
 			{
 				CLEAR_TASTO_PROG_PRESSED;
-				MenuFunction_Index=SUBMENU_SELEZIONA_PROG;
+				MenuFunction_Index=SUB2MENU_SEL_TIPO_CURV_LAV;
 				loop_flag=0;
 
 			}
@@ -257,11 +449,12 @@ void Sub2MenuCurvadiLavoro(void)
 						}
 
 						string_index=menu_triang_index+ page*5;
-
-						if((program_arr.curva_lavoro[string_index]+incr_step)<10000)
-							program_arr.curva_lavoro[string_index]+=incr_step;
-						CleanArea_Ram_and_Screen(92,118,menu_triang_y,menu_triang_y+10);
-						//temp=program_arr.curva_lavoro[string_index];
+                                                //incremento
+						if((RamSettings.ptype_arr[sel_progr_num].curva_lavoro[string_index]+incr_step)<10000)
+							  RamSettings.ptype_arr[sel_progr_num].curva_lavoro[string_index]+=incr_step;
+						
+                                                CleanArea_Ram_and_Screen(92,118,menu_triang_y,menu_triang_y+10);
+						temp=RamSettings.ptype_arr[sel_progr_num].curva_lavoro[string_index];
 						BinToBCDisp(temp,DUE_DECIMALI,92,menu_triang_y);
 						LCD_CopyPartialScreen(92,118,menu_triang_y,menu_triang_y+10);
 					}
@@ -295,9 +488,10 @@ void Sub2MenuCurvadiLavoro(void)
 						string_index=menu_triang_index+ page*5;
 
 						//sistemare...per step>1 può scendere sotto 0
-						if(program_arr.curva_lavoro[string_index]-incr_step)program_arr.curva_lavoro[string_index]-=incr_step;
+						if(RamSettings.ptype_arr[sel_progr_num].curva_lavoro[string_index]-incr_step)
+                                                    RamSettings.ptype_arr[sel_progr_num].curva_lavoro[string_index]-=incr_step;
 						CleanArea_Ram_and_Screen(92,120,menu_triang_y,menu_triang_y+10);
-						temp=program_arr.curva_lavoro[string_index];
+						temp=RamSettings.ptype_arr[sel_progr_num].curva_lavoro[string_index];
 						BinToBCDisp(temp,DUE_DECIMALI,92,menu_triang_y);
 						LCD_CopyPartialScreen(92,120,menu_triang_y,menu_triang_y+10);
 						//PrintUnitMis(string_index,112,strings_y);
@@ -414,16 +608,16 @@ void Sub2MenuCurvadiLavoro(void)
 			for(string_index=first_string_to_print;string_index < last_string_to_print;string_index++)
 			{
 				LCDPrintString(StringsSubmenuCurvaLavoro[string_index],10,strings_y);
-				BinToBCDisp(program_arr.curva_lavoro[string_index],DUE_DECIMALI,92,strings_y);
-				//PrintUnitMis(string_index,118,strings_y);
-				LCDPrintString("%",118,strings_y);
+				BinToBCDisp(RamSettings.ptype_arr[RamSettings.selected_program_id].curva_lavoro[string_index],DUE_DECIMALI,92,strings_y);
+				PrintUnitMis(string_index,118,strings_y);
+				//LCDPrintString("%",118,strings_y);
 
 
 				strings_y+=H_RIGA_CALIBRI10;
 			}
 			//uso la variabile page_old perchè tanto verrà aggiornata tra poco
-			page_old=	program_arr.curva_lav1_C_index / 5;
-			resto=		program_arr.curva_lav1_C_index % 5;//es scelgo 7,è nella pag 1 riga 2(0,1,2)
+			page_old=	RamSettings.ptype_arr[RamSettings.selected_program_id].curva_lav1_C_index / 5;
+			resto=		RamSettings.ptype_arr[RamSettings.selected_program_id].curva_lav1_C_index % 5;//es scelgo 7,è nella pag 1 riga 2(0,1,2)
 			if(page==page_old)
 			{
 				strings_y=(resto*H_RIGA_CALIBRI10)+2;
@@ -476,15 +670,7 @@ void Sub2MenuCurvadiLavoro3Punti(void)
 
 				switch(menu_triang_y)
 				{
-
-
 				}
-
-
-
-
-
-
 
 				if(menu_triang_x==0)
 				{
@@ -499,7 +685,7 @@ void Sub2MenuCurvadiLavoro3Punti(void)
 					MARK_ARROW_KEYS_MOVE_UPDOWN;
 					CLEAR_ARROW_KEYS_MOVE_SXDX;
 					CLEAR_PIU_MENO_ENABLED;
-					program_arr.curva_lav1_C_index=page*5+menu_triang_index;
+					RamSettings.ptype_arr[RamSettings.selected_program_id].curva_lav1_C_index=page*5+menu_triang_index;
 
 					RicalcolaCurvaLavoro();
 
@@ -535,9 +721,9 @@ void Sub2MenuCurvadiLavoro3Punti(void)
 
 						string_index=menu_triang_index+ page*5;
 
-						if((program_arr.curva_lavoro[string_index]+incr_step)<10000)program_arr.curva_lavoro[string_index]+=incr_step;
+						if((RamSettings.ptype_arr[RamSettings.selected_program_id].curva_lavoro[string_index]+incr_step)<10000)RamSettings.ptype_arr[RamSettings.selected_program_id].curva_lavoro[string_index]+=incr_step;
 						CleanArea_Ram_and_Screen(92,118,menu_triang_y,menu_triang_y+10);
-						temp=program_arr.curva_lavoro[string_index];
+						temp=RamSettings.ptype_arr[RamSettings.selected_program_id].curva_lavoro[string_index];
 						BinToBCDisp(temp,DUE_DECIMALI,92,menu_triang_y);
 						LCD_CopyPartialScreen(92,118,menu_triang_y,menu_triang_y+10);
 					}
@@ -571,9 +757,9 @@ void Sub2MenuCurvadiLavoro3Punti(void)
 						string_index=menu_triang_index+ page*5;
 
 						//sistemare...per step>1 può scendere sotto 0
-						if(program_arr.curva_lavoro[string_index]-incr_step)program_arr.curva_lavoro[string_index]-=incr_step;
+						if(RamSettings.ptype_arr[RamSettings.selected_program_id].curva_lavoro[string_index]-incr_step)RamSettings.ptype_arr[RamSettings.selected_program_id].curva_lavoro[string_index]-=incr_step;
 						CleanArea_Ram_and_Screen(92,120,menu_triang_y,menu_triang_y+10);
-						temp=program_arr.curva_lavoro[string_index];
+						temp=RamSettings.ptype_arr[RamSettings.selected_program_id].curva_lavoro[string_index];
 						BinToBCDisp(temp,DUE_DECIMALI,92,menu_triang_y);
 						LCD_CopyPartialScreen(92,120,menu_triang_y,menu_triang_y+10);
 						//PrintUnitMis(string_index,112,strings_y);
@@ -691,7 +877,7 @@ void Sub2MenuCurvadiLavoro3Punti(void)
 			for(string_index=first_string_to_print;string_index < last_string_to_print;string_index++)
 			{
 				LCDPrintString(StringsSubmenuCurvaLavoro[string_index],10,strings_y);
-				BinToBCDisp(program_arr.curva_lavoro[string_index],DUE_DECIMALI,92,strings_y);
+				BinToBCDisp(RamSettings.ptype_arr[RamSettings.selected_program_id].curva_lavoro[string_index],DUE_DECIMALI,92,strings_y);
 				//PrintUnitMis(string_index,118,strings_y);
 				LCDPrintString("%",118,strings_y);
 
@@ -699,24 +885,24 @@ void Sub2MenuCurvadiLavoro3Punti(void)
 				strings_y+=H_RIGA_CALIBRI10;
 			}
 			//uso la variabile page_old perchè tanto verrà aggiornata tra poco
-			page_old=	program_arr.curva_lav3_L_index / 5;
-			resto=		program_arr.curva_lav3_L_index % 5;
+			page_old=	RamSettings.ptype_arr[RamSettings.selected_program_id].curva_lav3_L_index / 5;
+			resto=		RamSettings.ptype_arr[RamSettings.selected_program_id].curva_lav3_L_index % 5;
 			if(page==page_old)
 			{
 				strings_y=(resto*H_RIGA_CALIBRI10)+2;
 				LCDPrintString("L",80,strings_y);
 			}
 
-			page_old=	program_arr.curva_lav3_C_index / 5;
-			resto=		program_arr.curva_lav3_C_index % 5;
+			page_old=	RamSettings.ptype_arr[RamSettings.selected_program_id].curva_lav3_C_index / 5;
+			resto=		RamSettings.ptype_arr[RamSettings.selected_program_id].curva_lav3_C_index % 5;
 			if(page==page_old)
 			{
 				strings_y=(resto*H_RIGA_CALIBRI10)+2;
 				LCDPrintString("C",80,strings_y);
 			}
 
-			page_old=	program_arr.curva_lav3_H_index / 5;
-			resto=		program_arr.curva_lav3_H_index % 5;
+			page_old=	RamSettings.ptype_arr[RamSettings.selected_program_id].curva_lav3_H_index / 5;
+			resto=		RamSettings.ptype_arr[RamSettings.selected_program_id].curva_lav3_H_index % 5;
 			if(page==page_old)
 			{
 				strings_y=(resto*H_RIGA_CALIBRI10)+2;
@@ -738,9 +924,10 @@ void Sub2MenuImpostaSoglie(void)
 	unsigned short string_index=0,strings_y=2;
 	static unsigned short menu_ImpostaSoglie_index=0;
 	static unsigned short scroll_old=0;
-	unsigned char loop_flag=1;
+	unsigned char loop_flag=1,test;
 	unsigned char first_string_to_print,last_string_to_print;
 	unsigned char to_print=1;
+        unsigned int sel_progr_num=RamSettings.selected_program_id;
 
 	menu_triang_limit_up=2;
 	menu_triang_limit_dn=50;
@@ -779,6 +966,17 @@ void Sub2MenuImpostaSoglie(void)
 					MARK_ARROW_KEYS_MOVE_UPDOWN;
 					CLEAR_ARROW_KEYS_MOVE_SXDX;
 					CLEAR_PIU_MENO_ENABLED;
+                                        
+                                        
+                                        test=SaveRamSettings_in_External_DataFlash();
+                                        if(!test)
+                                        {
+                                              LCD_Fill_ImageRAM(0x00);
+                                              SelectFont(CALIBRI_10);
+                                              LCDPrintString("File system error",4,24);
+                                              LCD_CopyPartialScreen(4,80,24,36);
+                                        }
+
 				}
 			}
 
@@ -948,7 +1146,7 @@ void Sub2MenuImpostaSoglie(void)
 			last_string_to_print=first_string_to_print + 5;
 			for(string_index=first_string_to_print;string_index<last_string_to_print;string_index++)
 			{
-				LCDPrintString(StringsSubmenuImpostaSoglie[string_index],10,strings_y);
+				LCDPrintString(StringsSubmenuImpostaSoglie[RamSettings.Linguaggio][string_index],10,strings_y);
 				PrintSoglia(string_index,82,strings_y);
 				PrintUnitMis(string_index,112,strings_y);
 
@@ -1016,14 +1214,14 @@ void Sub2MenuImpostaTimer(void)
 void Sub2MenuImpostaSimboli(void)
 {
 	uint8_t key;
-	menuchange=MENU_STAY;
+
 	unsigned short string_index=0,strings_y=2,y_old;
 
 
 	unsigned short submenuImpostaSimboli_index;
-	unsigned char loop_flag=1;
+	unsigned char loop_flag=1,test;
 
-	submenuImpostaSimboli_index=program_arr.unita_mis_concentr;
+	submenuImpostaSimboli_index=RamSettings.ptype_arr[RamSettings.selected_program_id].unita_mis_concentr;
 
 	loop_flag=1;
 
@@ -1045,7 +1243,7 @@ void Sub2MenuImpostaSimboli(void)
 	SelectFont(CALIBRI_10);
 	for(string_index=0;string_index<5;string_index++)
 	{
-		LCDPrintString(StringsSubmenuImpostaSimboli[string_index],H_RIGA_CALIBRI10,strings_y);
+		LCDPrintString(StringsSubmenuImpostaSimboli[RamSettings.Linguaggio][string_index],H_RIGA_CALIBRI10,strings_y);
 		strings_y+=H_RIGA_CALIBRI10;
 	}
 
@@ -1070,7 +1268,7 @@ void Sub2MenuImpostaSimboli(void)
 			{
 				MoveTriangolinoDown();
 				if(submenuImpostaSimboli_index<4)submenuImpostaSimboli_index+=1;
-				else							 submenuImpostaSimboli_index=5;
+				else				 submenuImpostaSimboli_index=5;
 				CLEAR_TASTO_DN_DX_PRESSED;
 			}
 
@@ -1093,8 +1291,16 @@ void Sub2MenuImpostaSimboli(void)
 		if (key == KEY_OK)
 		//if(CHECK_TASTO_OK_PRESSED)
 		{
-			program_arr.unita_mis_concentr=submenuImpostaSimboli_index;
-			program_arr.unita_mis_concentr=submenuImpostaSimboli_index;
+			RamSettings.ptype_arr[RamSettings.selected_program_id].unita_mis_concentr=submenuImpostaSimboli_index;
+			
+                        test=SaveRamSettings_in_External_DataFlash();
+                        if(!test)
+                        {
+                              LCD_Fill_ImageRAM(0x00);
+                              SelectFont(CALIBRI_10);
+                              LCDPrintString("File system error",4,24);
+                              LCD_CopyPartialScreen(4,80,24,36);
+                        }
 			DisegnaMarker(80,menu_triang_y,y_old);//il 3° parametro è la y del triangolino da cancellare
 
 			y_old=menu_triang_y;
@@ -1115,7 +1321,7 @@ void Sub2MenuImpostaSimboli(void)
 void Sub2MenuTK(void)
 {
 	uint8_t key,last_key;
-	unsigned char loop_flag=1,to_print=1;
+	unsigned char loop_flag=1,to_print=1,test;
 	static unsigned short submenuTK_index=0;
 	//unsigned int nuovo_TK=2345;
 
@@ -1128,7 +1334,9 @@ void Sub2MenuTK(void)
 
 	menu_triang_y=menu_triang_limit_up+(H_RIGA_CALIBRI10*submenuTK_index);
 
-	TK.tk2.nuovo_TK=TK.tk2.old_TK;
+	RamSettings.ptype_arr[RamSettings.selected_program_id].TK.tk2.nuovo_TK=RamSettings.ptype_arr[RamSettings.selected_program_id].TK.tk2.old_TK;
+        
+
 
 #ifdef DISEGNA_CORNICE
 	DisegnaCornice();
@@ -1160,7 +1368,7 @@ void Sub2MenuTK(void)
 				{
 					MoveTriangolinoDown();
 					if(submenuTK_index<1)submenuTK_index+=1;
-					else				 submenuTK_index=1;
+					else		     submenuTK_index=1;
 					CLEAR_TASTO_DN_DX_PRESSED;
 				}
 
@@ -1169,7 +1377,7 @@ void Sub2MenuTK(void)
 				{
 					MoveTriangolinoUp();
 					if(submenuTK_index)submenuTK_index-=1;
-					else 			   submenuTK_index =0;
+					else 		   submenuTK_index =0;
 					CLEAR_TASTO_UP_SX_PRESSED;
 				}
 			}
@@ -1184,8 +1392,8 @@ void Sub2MenuTK(void)
 			//if(CHECK_TASTO_OK_PRESSED)
 			{
 				CLEAR_TASTO_OK_PRESSED;
-                if(menu_triang_y==menu_triang_limit_dn)
-                {
+                                if(menu_triang_y==menu_triang_limit_dn)
+                                {
 
 					if(menu_triang_x==0)
 					{
@@ -1201,11 +1409,18 @@ void Sub2MenuTK(void)
 						CLEAR_ARROW_KEYS_MOVE_SXDX;
 						CLEAR_PIU_MENO_ENABLED;
 
-						TK.tk2.old_TK=TK.tk2.nuovo_TK;
-
+						RamSettings.ptype_arr[RamSettings.selected_program_id].TK.tk2.old_TK=RamSettings.ptype_arr[RamSettings.selected_program_id].TK.tk2.nuovo_TK;
+                                                test=SaveRamSettings_in_External_DataFlash();
+                                                if(!test)
+                                                {
+                                                      LCD_Fill_ImageRAM(0x00);
+                                                      SelectFont(CALIBRI_10);
+                                                      LCDPrintString("File system error",4,24);
+                                                      LCD_CopyPartialScreen(4,80,24,36);
+                                                }
 
 					}
-                }
+                            }
 			}
 
 			if(CHECK_PIU_MENO_ENABLED)
@@ -1223,10 +1438,10 @@ void Sub2MenuTK(void)
 								incr_step=100;
 								incr_counter=21;
 							}
-							if((TK.TK_array[submenuTK_index]+incr_step)<9999)
-							{
-								TK.TK_array[submenuTK_index]+=incr_step;
-								to_print=1;
+							if(RamSettings.ptype_arr[RamSettings.selected_program_id].TK.TK_array[submenuTK_index]<9999)
+                                                        {
+                                                              RamSettings.ptype_arr[RamSettings.selected_program_id].TK.TK_array[submenuTK_index]+=incr_step;
+                                                              to_print=1;
 							}
 
 
@@ -1260,9 +1475,9 @@ void Sub2MenuTK(void)
 							}
 
 
-							if(!((TK.TK_array[submenuTK_index]-incr_step)<0))
+							if(!((RamSettings.ptype_arr[RamSettings.selected_program_id].TK.TK_array[submenuTK_index]-incr_step)<0))
 							{
-								TK.TK_array[submenuTK_index]-=incr_step;
+								RamSettings.ptype_arr[RamSettings.selected_program_id].TK.TK_array[submenuTK_index]-=incr_step;
 								to_print=1;
 							}
 						}
@@ -1289,8 +1504,8 @@ void Sub2MenuTK(void)
 			if(to_print)
 			{
 				CleanArea_Ram_and_Screen(90,124,14,40);
-				BinToBCDisp(TK.tk2.old_TK,DUE_DECIMALI,90,14);
-				BinToBCDisp(TK.tk2.nuovo_TK  ,DUE_DECIMALI,90,26);
+				BinToBCDisp(RamSettings.ptype_arr[RamSettings.selected_program_id].TK.tk2.old_TK,DUE_DECIMALI,90,14);
+				BinToBCDisp(RamSettings.ptype_arr[RamSettings.selected_program_id].TK.tk2.nuovo_TK  ,DUE_DECIMALI,90,26);
 				LCD_CopyPartialScreen(90,124,14,40);
 
 				to_print=0;
@@ -1338,17 +1553,17 @@ void RicalcolaCurvaLavoro(void)
 	unsigned char i;
 	unsigned short step;
 
-	step=program_arr.curva_lavoro[program_arr.curva_lav1_C_index]/program_arr.curva_lav1_C_index;//curva_lavoro[0][selected_curva_lavoro_index]/selected_curva_lavoro_index;
+	step=RamSettings.ptype_arr[RamSettings.selected_program_id].curva_lavoro[RamSettings.ptype_arr[RamSettings.selected_program_id].curva_lav1_C_index]/RamSettings.ptype_arr[RamSettings.selected_program_id].curva_lav1_C_index;//curva_lavoro[0][selected_curva_lavoro_index]/selected_curva_lavoro_index;
 	//per i valori inferiori al punto centrale
-	for(i=0;i<program_arr.curva_lav1_C_index;i++)
+	for(i=0;i<RamSettings.ptype_arr[RamSettings.selected_program_id].curva_lav1_C_index;i++)
 	{
-		program_arr.curva_lavoro[i]=i*step;
+		RamSettings.ptype_arr[RamSettings.selected_program_id].curva_lavoro[i]=i*step;
 	}
 
 	//per i valori superiori al punto centrale
-	for(i=program_arr.curva_lav1_C_index+1;i<16;i++)
+	for(i=RamSettings.ptype_arr[RamSettings.selected_program_id].curva_lav1_C_index+1;i<16;i++)
 	{
-		program_arr.curva_lavoro[i]=i*step;
+		RamSettings.ptype_arr[RamSettings.selected_program_id].curva_lavoro[i]=i*step;
 	}
 
 

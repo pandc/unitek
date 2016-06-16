@@ -359,7 +359,8 @@ float tphase,val;
 		return FALSE;
 	Dprintf(DBGLVL_Meas,"meas_temp: nch=%.10e ncl=%.10e gf=%.10e nos=%.10e sp=%.10e",mcp[CALIB_Ptc].nch,mcp[CALIB_Ptc].ncl,mcp[CALIB_Ptc].gf,mcp[CALIB_Ptc].nos);
 	tphase -= mcp[CALIB_Ptc].sp;
-	*resist = (1.0 / (((val - mcp[CALIB_Ptc].nos) * mcp[CALIB_Ptc].gf) * cos(tphase) - gcable)) - RES_ADD;
+	//*resist = (1.0 / (((val - mcp[CALIB_Ptc].nos) * mcp[CALIB_Ptc].gf) * cos(tphase) - gcable)) - RES_ADD;
+        *resist=((val-mcp[CALIB_Ptc].nos)*mcp[CALIB_Ptc].gf)*cos(tphase);
 	return TRUE;
 }
 

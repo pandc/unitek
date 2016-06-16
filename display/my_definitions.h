@@ -54,41 +54,7 @@ typedef struct
 
 
 
-#define OLED_CS_AS_OUTPUT 		GPIOC_PDDR |=1<<2;
-#define OLED_CS_HIGH 			GPIOC_PSOR  =1<<2;
-#define OLED_CS_LOW  			GPIOC_PCOR  =1<<2;
-
-#define OLED_DC_AS_OUTPUT 		GPIOC_PDDR |=1<<3;
-#define OLED_DC_HIGH 			GPIOC_PSOR  =1<<3;
-#define OLED_DC_LOW  			GPIOC_PCOR  =1<<3;
-
-#define OLED_RST_AS_OUTPUT 		GPIOB_PDDR |=1<<23;
-#define OLED_RST_HIGH 			GPIOB_PSOR  =1<<23;
-#define OLED_RST_LOW  			GPIOB_PCOR  =1<<23;
-
-#define DCDC_ENABLE_AS_OUTPUT 	GPIOB_PDDR |=1<<9;
-#define DCDC_ENABLE_HIGH 		GPIOB_PSOR  =1<<9;
-#define DCDC_ENABLE_LOW  		GPIOB_PCOR  =1<<9;
-
 #define PROVA_SHIFT             provashift &=~(1<<9)
-#define TASTO_PROG_AS_INPUT     GPIOC_PDDR &=~ 0x80   	//PTC7 era PTC0
-#define TASTO_UPSX_AS_INPUT     GPIOC_PDDR &=~ 0x200   	//PTC9
-#define TASTO_DNDX_AS_INPUT     GPIOC_PDDR &=~ 0x100   	//PTC8
-#define TASTO_PLUS_AS_INPUT     GPIOC_PDDR &=~ 0x20   	//PTC5 era PTC1
-#define TASTO_MENO_AS_INPUT     GPIOB_PDDR &=~ 0x80000  //PTB19
-#define TASTO_OK_AS_INPUT       GPIOB_PDDR &=~ 0x40000  //PTB18
-
-#define TASTO_PROG_LOW     (!(GPIOC_PDIR & 1<< 7))   //PTC7
-#define TASTO_UP_SX_LOW    (!(GPIOC_PDIR & 1<< 9))   //PTC9
-#define TASTO_DN_DX_LOW    (!(GPIOC_PDIR & 1<< 8))   //PTC8
-#define TASTO_PLUS_LOW     (!(GPIOC_PDIR & 1<<5))    //PTC5
-#define TASTO_MENO_LOW     (!(GPIOB_PDIR & 1<<19))   //PTB19
-#define TASTO_OK_LOW       (!(GPIOB_PDIR & 1<<18))   //PTB18
-
-#define BUZZER_OUT_AS_OUTPUT 		GPIOB_PDDR |=1<<20;
-#define BUZZER_OUT_HIGH 			GPIOB_PCOR  =1<<20;//era PSOR
-#define BUZZER_OUT_LOW  			GPIOB_PCOR  =1<<20;
-
 
 
 #define ADC_WAIT_FOR_INTERRUPT_ON_END 0
@@ -107,6 +73,10 @@ typedef struct
 #define DUE_DECIMALI 2
 #define UN_DECIMALE  1
 #define INTERO       0
+
+
+
+
 
 #define H_RIGA_CALIBRI10 		12
 #define PRIMA_RIGA_CALIBRI10 	 2
@@ -130,6 +100,7 @@ void Sub2MenuCurvadiLavoro3Punti(void);
 void Sub2MenuSelTipoCurvaLavoro(void);
 void Sub2MenuImpostaSoglie(void);
 void Sub2MenuImpostaTimer (void);
+void Sub2Sel_L_C_H(void);
 
 void PrintSoglia(unsigned short index,unsigned short x ,unsigned short y);
 void IncrSoglia(unsigned short index,unsigned short incr);
@@ -152,23 +123,24 @@ void WriteMyFlashSector(void);
 
 
 
-#define MENU_TEMPHUM  				0
-#define MENU_PROGR 					1
-#define SUBMENU_INOUT  				2
+#define MENU_TEMPHUM  			0
+#define MENU_PROGR 			1
+#define SUBMENU_INOUT  			2
 #define SUBMENU_SELEZIONA_PROG 		3
-#define SUBMENU_COMUNIC				4
-#define SUBMENU_SETCLOCK 			5
-#define SUBMENU_SEL_LINGUA			6
-#define SUBMENU_SERVIZIO  			7
+#define SUBMENU_COMUNIC			4
+#define SUBMENU_SETCLOCK 		5
+#define SUBMENU_SEL_LINGUA		6
+#define SUBMENU_SERVIZIO  		7
 #define SUBMENU_SELECTED_PROGR		8
 
 #define SUB2MENU_IMPOSTA_SIMBOLI	9
-#define SUB2MENU_TK					10
-#define SUB2MENU_SEL_TIPO_CURV_LAV  11
+#define SUB2MENU_TK			10
+#define SUB2MENU_SEL_TIPO_CURV_LAV      11
 #define SUB2MENU_IMPOSTA_SOGLIE		12
 #define SUB2MENU_IMPOSTA_TIMER		13
 #define SUB3MENU_CURVA_DI_LAVORO	14
 #define SUB3MENU_CURVA_DI_LAVORO3pt	15
+#define SUB3MENU_SEL_LCH		16
 
 
 #define SPOSTA_TRIANGOLINO  10
@@ -177,17 +149,17 @@ void WriteMyFlashSector(void);
 #define UNIT_MIS_CONCENTR_PUNT_TITOL  1
 #define UNIT_MIS_CONCENTR_GRAMMILITRO 2
 #define UNIT_MIS_CONCENTR_uSIEMENS    3
-#define UNIT_MIS_CONCENTR_mSIEMENS 	  4
+#define UNIT_MIS_CONCENTR_mSIEMENS    4
 
 #define UN_MIS_Y_START 2
 
-#define SOGLIE_SET_CONC_INDEX 		0
+#define SOGLIE_SET_CONC_INDEX 	    0
 #define SOGLIE_ALL_CONC_MIN_INDEX   1
 #define SOGLIE_ALL_CONC_MAX_INDEX   2
 #define SOGLIE_ISTERESI_CONC_INDEX  3
-#define SOGLIE_SET_TEMP_INDEX 		4
-#define SOGLIE_ALL_TEMP_MIN_INDEX 	5
-#define SOGLIE_ALL_TEMP_MAX_INDEX 	6
+#define SOGLIE_SET_TEMP_INDEX 	    4
+#define SOGLIE_ALL_TEMP_MIN_INDEX   5
+#define SOGLIE_ALL_TEMP_MAX_INDEX   6
 #define SOGLIE_ISTERESI_TEMP_INDEX  7
 
 #define LETTURA_CONC	1
@@ -280,14 +252,14 @@ void WriteMyFlashSector(void);
 #define CHECK_KEY_READY 	(key_flags &  KEY_READY )
 
 
-#define STATO_POMPA_RIPOSO 				0
-#define STATO_POMPA_ON_CONC_SCARSA		1
-#define STATO_POMPA_TIMEOUT				2
-#define STATO_INIZIALE				    3
+#define STATO_POMPA_RIPOSO 			0
+#define STATO_POMPA_ON_CONC_SCARSA	        1
+#define STATO_POMPA_TIMEOUT			2
+#define STATO_INIZIALE			        3
 
-#define STATO_RISC_RIPOSO 				0
-#define STATO_RISC_ON_TEMP_SCARSA		1
-#define STATO_RISC_TIMEOUT				2
+#define STATO_RISC_RIPOSO 			0
+#define STATO_RISC_ON_TEMP_SCARSA	        1
+#define STATO_RISC_TIMEOUT			2
 
 
 
