@@ -551,7 +551,7 @@ uint32_t freq = 0;
 				}
 				if (c != '\r')
 					return CALLBACKRET_Error;
-				if (!domeas(res+i,(i == 1)? &sp: NULL))
+				if (!domeas(res+i,(i == 1)? NULL:&sp))
 				{
 					COM_Puts("Measure error\r\n");
 					return CALLBACKRET_Error;
