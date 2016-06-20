@@ -49,7 +49,9 @@ extern unsigned char linguaggio;
 extern unsigned int *sector_image;
 extern my_RamSettings_type RamSettings;
 
-extern const program_type saved_prog_arr[5];
+extern const my_RamSettings_type  ucFlash_Settings;
+
+extern const float TabLinPT100[24];
 
 //extern program_type __attribute__((section (".MySector"))) saved_prog_arr[5];
 //extern unsigned char __attribute__((section (".MySector"))) saved_selected_program_id;

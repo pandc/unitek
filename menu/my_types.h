@@ -21,21 +21,21 @@ typedef union
 
 typedef struct
 {
-	unsigned short SetConc;
-	unsigned short AllConcMin;
-	unsigned short AllConcMax;
-	unsigned short IsteresiConc;
-	unsigned short SetTemp;
-	unsigned short AllTempMin;
-	unsigned short AllTempMax;
-	unsigned short IsteresiTemp;
+	unsigned int SetConc;
+	unsigned int AllConcMin;
+	unsigned int AllConcMax;
+	unsigned int IsteresiConc;
+	unsigned int SetTemp;
+	unsigned int AllTempMin;
+	unsigned int AllTempMax;
+	unsigned int IsteresiTemp;
 }setp_e_soglie_struct;
 
 typedef union
 {
 	setp_e_soglie_struct ses_struct;
 
-	unsigned short setp_e_soglie_arr[8];
+	unsigned int setp_e_soglie_arr[8];
 }setp_e_soglie_type;
 
 typedef struct
@@ -54,17 +54,27 @@ typedef union
 
 typedef struct
 {
-	setp_e_soglie_type setp_e_soglie;//16 bytes
+	unsigned char unita_mis_concentr;//1
+        setp_e_soglie_type setp_e_soglie;//16 bytes
 	TK_type TK;						 //8
 
-	unsigned short curva_lavoro[16]; //32
-        unsigned short curva_lavoro3pt[16]; //32
+        
+       
 	unsigned char curva_lav_cal_type;//1
-	unsigned char curva_lav1_C_index;//1
-	unsigned char curva_lav3_L_index;//1
-	unsigned char curva_lav3_C_index;//1
-	unsigned char curva_lav3_H_index;//1
-	unsigned char unita_mis_concentr;//1
+ 
+        unsigned int curva_lav_Yconcent[16]; //32 non indispensabile da salvare perchè ricalcolabile
+        
+        float curva_lav_XconducL;
+        float curva_lav_XconducC;
+        float curva_lav_XconducH;
+        
+	unsigned char curva_lav_L_index;//1
+	unsigned char curva_lav_C_index;//1
+	unsigned char curva_lav_H_index;//1
+        
+	float temp_acq_curva_lav;
+        
+        unsigned int curva_lav_YconcentC_intero;
 }program_type;
 
 

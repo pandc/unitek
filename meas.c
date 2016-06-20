@@ -27,7 +27,7 @@
 
 #define DEFAULT_FREQ				8000
 
-#define AD5934_MCLK					16000000.0
+#define AD5934_MCLK				16000000.0
 
 #define MAX_RVAL_DELTA				20
 #define MAX_IVAL_DELTA				20
@@ -122,43 +122,45 @@ int i;
 float f;
 
 	mcpok = FALSE;
+
+	EEP_Read(EEP_Freq_addr,&ad5934_freq,4);
+	if (ad5934_freq == 0xffffffff)
+		ad5934_freq = DEFAULT_FREQ;
+
 	for (i = 0; i < 4; i++)
 	{
-		EEP_Read(EEP_HNch_addr+i*20,&f,4);
+		EEP_Read(EEP_HNch_addr+(i*20),&f,4);
 		if (isnan(f))
 			return FALSE;
-		EEP_Read(EEP_HNcl_addr+i*20,&f,4);
+		EEP_Read(EEP_HNcl_addr+(i*20),&f,4);
 		if (isnan(f))
 			return FALSE;
-		EEP_Read(EEP_HGF_addr+i*20,&f,4);
+		EEP_Read(EEP_HGF_addr+(i*20),&f,4);
 		if (isnan(f))
 			return FALSE;
-		EEP_Read(EEP_HNos_addr+i*20,&f,4);
+		EEP_Read(EEP_HNos_addr+(i*20),&f,4);
 		if (isnan(f))
 			return FALSE;
-		EEP_Read(EEP_HPhase_addr+i*20,&f,4);
+		EEP_Read(EEP_HPhase_addr+(i*20),&f,4);
 		if (isnan(f))
 			return FALSE;
 	}
 	for (i = 0; i < 4; i++)
 	{
-		EEP_Read(EEP_HNch_addr+i*20,&mcp[i].nch,4);
+		EEP_Read(EEP_HNch_addr+(i*20),&mcp[i].nch,4);
 
-		EEP_Read(EEP_HNcl_addr+i*20,&mcp[i].ncl,4);
+		EEP_Read(EEP_HNcl_addr+(i*20),&mcp[i].ncl,4);
 
-		EEP_Read(EEP_HGF_addr+i*20,&mcp[i].gf,4);
+		EEP_Read(EEP_HGF_addr+(i*20),&mcp[i].gf,4);
 
-		EEP_Read(EEP_HNos_addr+i*20,&mcp[i].nos,4);
+		EEP_Read(EEP_HNos_addr+(i*20),&mcp[i].nos,4);
 
-		EEP_Read(EEP_HPhase_addr+i*20,&mcp[i].sp,4);
+		EEP_Read(EEP_HPhase_addr+(i*20),&mcp[i].sp,4);
 	}
 	EEP_Read(EEP_KCell_addr,&kcell_factor,4);
 	if (isnan(kcell_factor))
 		kcell_factor = 1.0;
 
-	EEP_Read(EEP_Freq_addr,&ad5934_freq,4);
-	if (ad5934_freq == 0xffffffff)
-		ad5934_freq = DEFAULT_FREQ;
 
 	EEP_Read(EEP_GCable_addr,&gcable,4);
 	if (isnan(gcable))
@@ -366,6 +368,8 @@ float tphase,val;
 
 #define MEAS_PERIOD		kSec*3
 struct measures_st measures;
+
+
 static void meas_task(void *par)
 {
 	if (!meas_init())

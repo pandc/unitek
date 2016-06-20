@@ -10,6 +10,7 @@
 
 #include "freertos.h"
 #include "task.h"
+#include "meas.h"
 
 #include "my_definitions.h"
 #include "Display_128x64.h"
@@ -187,9 +188,9 @@ void Sub2Sel_L_C_H(void)
         //unsigned int sel_progr_num=RamSettings.selected_program_id;
         unsigned int un_misura=PROGR_IN_USO.unita_mis_concentr;
 
-	L_index=&PROGR_IN_USO.curva_lav3_L_index;
-	C_index=&PROGR_IN_USO.curva_lav3_C_index;
-	H_index=&PROGR_IN_USO.curva_lav3_H_index;
+	L_index=&PROGR_IN_USO.curva_lav_L_index;
+	C_index=&PROGR_IN_USO.curva_lav_C_index;
+	H_index=&PROGR_IN_USO.curva_lav_H_index;
 
 	LCD_Fill_ImageRAM(0x00);
 	SelectFont(CALIBRI_10);
@@ -220,6 +221,9 @@ void Sub2Sel_L_C_H(void)
         if (key_getstroke(&key, kDec*2))
 			//last_key = key;
 	
+          
+          
+          
         if(CHECK_ARROW_KEYS_MOVE_UPDOWN)
         {
                
@@ -268,21 +272,21 @@ void Sub2Sel_L_C_H(void)
 
                              if(menu_triang_index==0)
                             {  
-                              IncrParamConc(&PROGR_IN_USO.curva_lavoro3pt[PROGR_IN_USO.curva_lav3_L_index],incr_step);
-                              CalcPrint_UnMisura_Conc[un_misura](PROGR_IN_USO.curva_lavoro3pt[string_index],80,menu_triang_y);
+                              IncrParamConc(&PROGR_IN_USO.curva_lav_Yconcent[PROGR_IN_USO.curva_lav_L_index],incr_step);
+                              CalcPrint_UnMisura_Conc[un_misura](PROGR_IN_USO.curva_lav_Yconcent[string_index],80,menu_triang_y);
                               
                             }
                             
                            if(menu_triang_index==2)
                             {  
-                              IncrParamConc(&PROGR_IN_USO.curva_lavoro3pt[PROGR_IN_USO.curva_lav3_C_index],incr_step);
-                              CalcPrint_UnMisura_Conc[un_misura](PROGR_IN_USO.curva_lavoro3pt[string_index],80,menu_triang_y);
+                              IncrParamConc(&PROGR_IN_USO.curva_lav_Yconcent[PROGR_IN_USO.curva_lav_C_index],incr_step);
+                              CalcPrint_UnMisura_Conc[un_misura](PROGR_IN_USO.curva_lav_Yconcent[string_index],80,menu_triang_y);
                             }
                             
                            if(menu_triang_index==4)
                             {  
-                               IncrParamConc(&PROGR_IN_USO.curva_lavoro3pt[PROGR_IN_USO.curva_lav3_H_index],incr_step);
-                               CalcPrint_UnMisura_Conc[un_misura](PROGR_IN_USO.curva_lavoro3pt[string_index],80,menu_triang_y);
+                               IncrParamConc(&PROGR_IN_USO.curva_lav_Yconcent[PROGR_IN_USO.curva_lav_H_index],incr_step);
+                               CalcPrint_UnMisura_Conc[un_misura](PROGR_IN_USO.curva_lav_Yconcent[string_index],80,menu_triang_y);
                             } 
                             
                             to_print=1;
@@ -346,21 +350,21 @@ void Sub2Sel_L_C_H(void)
                                                   
                             if(menu_triang_index==0)
                             {  
-                              DecrParamConc(&PROGR_IN_USO.curva_lavoro3pt[PROGR_IN_USO.curva_lav3_L_index],incr_step);
-                              CalcPrint_UnMisura_Conc[un_misura](PROGR_IN_USO.curva_lavoro3pt[string_index],80,menu_triang_y);
+                              DecrParamConc(&PROGR_IN_USO.curva_lav_Yconcent[PROGR_IN_USO.curva_lav_L_index],incr_step);
+                              CalcPrint_UnMisura_Conc[un_misura](PROGR_IN_USO.curva_lav_Yconcent[string_index],80,menu_triang_y);
                               
                             }
                             
                            if(menu_triang_index==2)
                             {  
-                              DecrParamConc(&PROGR_IN_USO.curva_lavoro3pt[PROGR_IN_USO.curva_lav3_C_index],incr_step);
-                              CalcPrint_UnMisura_Conc[un_misura](PROGR_IN_USO.curva_lavoro3pt[string_index],80,menu_triang_y);
+                              DecrParamConc(&PROGR_IN_USO.curva_lav_Yconcent[PROGR_IN_USO.curva_lav_C_index],incr_step);
+                              CalcPrint_UnMisura_Conc[un_misura](PROGR_IN_USO.curva_lav_Yconcent[string_index],80,menu_triang_y);
                             }
                             
                            if(menu_triang_index==4)
                             {  
-                               DecrParamConc(&PROGR_IN_USO.curva_lavoro3pt[PROGR_IN_USO.curva_lav3_H_index],incr_step);
-                               CalcPrint_UnMisura_Conc[un_misura](PROGR_IN_USO.curva_lavoro3pt[string_index],80,menu_triang_y);
+                               DecrParamConc(&PROGR_IN_USO.curva_lav_Yconcent[PROGR_IN_USO.curva_lav_H_index],incr_step);
+                               CalcPrint_UnMisura_Conc[un_misura](PROGR_IN_USO.curva_lav_Yconcent[string_index],80,menu_triang_y);
                             } 
                             
                             to_print=1;
@@ -417,7 +421,8 @@ void Sub2Sel_L_C_H(void)
         
         if(key == KEY_OK)
 	{
-	       RicalcolaCurvaLavoro3pt();
+	       
+               
                if(menu_triang_x==menu_triang_limit_sx)//se devo variare la posizione
                {
                   MoveTriangolinoDx();
@@ -429,18 +434,53 @@ void Sub2Sel_L_C_H(void)
                
                    if(menu_triang_x==menu_triang_limit_dx)//se devo variare la posizione
                    {
-                        MoveTriangolinoSx();
-                        CLEAR_TASTO_OK_PRESSED;
-                        MenuFunction_Index=SUB3MENU_CURVA_DI_LAVORO3pt;
-                        test=SaveRamSettings_in_External_DataFlash();
-                        if(!test)
-                        {
-                              LCD_Fill_ImageRAM(0x00);
-                              SelectFont(CALIBRI_10);
-                              LCDPrintString("File system error",4,24);
-                              LCD_CopyPartialScreen(4,80,24,36);
+                        
+                       RicalcolaCurvaLavoro3pt();
+                       if(measures.temp_ok)
+                       {
+                            measures.temp_ok=0;
+                            
+                            
+
+                            if(menu_triang_index==0)
+                            {  
+                            PROGR_IN_USO.curva_lav_XconducL=measures.conduc;
+                            }
+
+                            if(menu_triang_index==2)
+                            {  
+                             PROGR_IN_USO.curva_lav_XconducC=measures.conduc;
+                             PROGR_IN_USO.temp_acq_curva_lav=measures.temp_resist;
+                             Convers_Res_to_Temp(&PROGR_IN_USO.temp_acq_curva_lav);//NB questa funzione modifica il parametro stesso che le viene passato
+                            }
+
+                            if(menu_triang_index==4)
+                            {  
+                             PROGR_IN_USO.curva_lav_XconducH=measures.conduc;
+                            } 
+                            MoveTriangolinoSx();
+                            CLEAR_TASTO_OK_PRESSED;
+                            MenuFunction_Index=SUB3MENU_CURVA_DI_LAVORO3pt;
+                            
+                            test=SaveRamSettings_in_External_DataFlash();
+                            if(!test)
+                            {
+                                LCD_Fill_ImageRAM(0x00);
+                                SelectFont(CALIBRI_10);
+                                LCDPrintString("File system error",4,24);
+                                LCD_CopyPartialScreen(4,80,24,36);
+                            }
+                            return;
+  
+                        
+                        
                         }
-                        return;
+                     
+                     
+                     
+                     
+                     
+                        
               
                    }
                }
@@ -466,9 +506,9 @@ void Sub2Sel_L_C_H(void)
                  LCD_CopyPartialScreen(20,40,50,60);
                  
                  //scelgo funzione da puntare a seconda dell unità misura concentrazione 
-                 CalcPrint_UnMisura_Conc[un_misura](PROGR_IN_USO.curva_lavoro3pt[*L_index],80,2);
-                 CalcPrint_UnMisura_Conc[un_misura](PROGR_IN_USO.curva_lavoro3pt[*C_index],80,26);
-                 CalcPrint_UnMisura_Conc[un_misura](PROGR_IN_USO.curva_lavoro3pt[*H_index],80,50);
+                 CalcPrint_UnMisura_Conc[un_misura](PROGR_IN_USO.curva_lav_Yconcent[*L_index],80,2);
+                 CalcPrint_UnMisura_Conc[un_misura](PROGR_IN_USO.curva_lav_Yconcent[*C_index],80,26);
+                 CalcPrint_UnMisura_Conc[un_misura](PROGR_IN_USO.curva_lav_Yconcent[*H_index],80,50);
          
 	}
     }
@@ -491,7 +531,7 @@ void Sub2MenuCurvadiLavoro(void)
         unsigned int prova=80;
 	//unsigned char blink_enable=0,toggler = 0;
 
-	//menu_CurvaLavoro_index=PROGR_IN_USO.curva_lav1_C_index;
+	//menu_CurvaLavoro_index=PROGR_IN_USO.curva_lav_C_index;
         menu_triang_limit_up=2;
 	menu_triang_limit_dn=50;
 	menu_triang_limit_dx=74;
@@ -514,176 +554,185 @@ void Sub2MenuCurvadiLavoro(void)
 			//if (blink_enable)DisegnaCarattereBlink('R',40,menu_triang_y,&toggler);
 			//key = 0;
 		}
-		//if(CHECK_KEY_READY)
-		{
-			//CLEAR_KEY_READY;
 
-			if (key == KEY_OK)
-			//if(CHECK_TASTO_OK_PRESSED)
-			{
-				CLEAR_TASTO_OK_PRESSED;
+                if (key == KEY_OK)
+                //if(CHECK_TASTO_OK_PRESSED)
+                {
+                        CLEAR_TASTO_OK_PRESSED;
 
 
-				if(menu_triang_x==0)
-				{
-					MoveTriangolinoDx();
-					//non marcare MOVE_SXDX!!
-					CLEAR_ARROW_KEYS_MOVE_UPDOWN;
-					MARK_PIU_MENO_ENABLED;
-				}
-				else  //se quindi confermo la scelta
-				{
-					MoveTriangolinoSx();
-					MARK_ARROW_KEYS_MOVE_UPDOWN;
-					CLEAR_ARROW_KEYS_MOVE_SXDX;
-					CLEAR_PIU_MENO_ENABLED;
-					PROGR_IN_USO.curva_lav1_C_index=page*5+menu_triang_index;
-                                        
-                                        RicalcolaCurvaLavoro();
-                                        
-                                        test=SaveRamSettings_in_External_DataFlash();
-                                        if(!test)
+                        if(menu_triang_x==0)
+                        {
+                                MoveTriangolinoDx();
+                                //non marcare MOVE_SXDX!!
+                                CLEAR_ARROW_KEYS_MOVE_UPDOWN;
+                                MARK_PIU_MENO_ENABLED;
+                        }
+                        else  //se quindi confermo la scelta
+                        {
+                                MoveTriangolinoSx();
+                                MARK_ARROW_KEYS_MOVE_UPDOWN;
+                                CLEAR_ARROW_KEYS_MOVE_SXDX;
+                                CLEAR_PIU_MENO_ENABLED;
+                                PROGR_IN_USO.curva_lav_C_index=page*5+menu_triang_index;
+                                
+                                RicalcolaCurvaLavoro();
+                                if(measures.temp_ok)
+                                {
+                                    measures.temp_ok=0;
+                                    
+                                
+                                     PROGR_IN_USO.curva_lav_XconducC=measures.conduc;
+                                     PROGR_IN_USO.temp_acq_curva_lav=measures.temp_resist;
+                                     Convers_Res_to_Temp(&PROGR_IN_USO.temp_acq_curva_lav);//NB questa funzione modifica il parametro stesso che le viene passato
+                                    
+                               
+                                }
+                                
+                                test=SaveRamSettings_in_External_DataFlash();
+                                if(!test)
+                                {
+                                      LCD_Fill_ImageRAM(0x00);
+                                      SelectFont(CALIBRI_10);
+                                      LCDPrintString("File system error",4,24);
+                                      LCD_CopyPartialScreen(4,80,24,36);
+                                }
+
+                                
+
+
+                                to_print=1;
+                        }
+                }
+
+                if (key == KEY_PROG)
+                //if(CHECK_TASTO_PROG_PRESSED)
+                {
+                        CLEAR_TASTO_PROG_PRESSED;
+                        MenuFunction_Index=SUB2MENU_SEL_TIPO_CURV_LAV;
+                        loop_flag=0;
+
+                }
+
+                if(CHECK_PIU_MENO_ENABLED)
+                {
+                        if ((key == KEY_PLUS) || (last_key == KEY_PLUS))
+                        //if(CHECK_TASTO_PLUS_PRESSED)
+                        {
+
+                                if(menu_triang_x==menu_triang_limit_dx)
+                                {
+                                        incr_counter++;
+                                        if(incr_counter>10) incr_step=10;
+                                        if(incr_counter>20)
                                         {
-                                              LCD_Fill_ImageRAM(0x00);
-                                              SelectFont(CALIBRI_10);
-                                              LCDPrintString("File system error",4,24);
-                                              LCD_CopyPartialScreen(4,80,24,36);
+                                                incr_step=100;
+                                                incr_counter=21;
                                         }
 
-					
+                                        string_index=menu_triang_index+ page*5;
+                                        //incremento
+
+                                        IncrParamConc(&PROGR_IN_USO.curva_lav_Yconcent[string_index],incr_step);
+                                        CalcPrint_UnMisura_Conc[un_mis_conc](PROGR_IN_USO.curva_lav_Yconcent[string_index],prova,menu_triang_y);
+                                        LCD_CopyPartialScreen(92,120,menu_triang_y,menu_triang_y+10);
+                                }
+                        }
+                        else if (key == (KEY_PLUS | KEY_RELEASED))
+                        //if(CHECK_TASTO_PLUS_RELEASED)
+                        {
+                                incr_step=1;
+                                incr_counter=0;
+                                CLEAR_TASTO_PLUS_RELEASED;
+                        }
+
+                        if ((key == KEY_MINUS) || (last_key == KEY_MINUS))
+                        //if(CHECK_TASTO_MENO_PRESSED)
+                        {
+
+                                if(menu_triang_x==menu_triang_limit_dx)
+                                {
+                                        incr_counter++;
+                                        if(incr_counter>10)
+                                        {
+                                                incr_step=10;
+                                        }
+                                        if(incr_counter>20)
+                                        {
+                                                incr_step=100;
+                                                incr_counter=21;
+                                        }
 
 
-					to_print=1;
-				}
-			}
+                                        string_index=menu_triang_index+ page*5;
 
-			if (key == KEY_PROG)
-			//if(CHECK_TASTO_PROG_PRESSED)
-			{
-				CLEAR_TASTO_PROG_PRESSED;
-				MenuFunction_Index=SUB2MENU_SEL_TIPO_CURV_LAV;
-				loop_flag=0;
+                                        //sistemare...per step>1 può scendere sotto 0
+                                        DecrParamConc(&PROGR_IN_USO.curva_lav_Yconcent[string_index],incr_step);
+                                        CalcPrint_UnMisura_Conc[un_mis_conc](PROGR_IN_USO.curva_lav_Yconcent[string_index],prova,menu_triang_y);
+                                        LCD_CopyPartialScreen(92,120,menu_triang_y,menu_triang_y+10);
+                                        
+                                }
+                        }
+                        else if (key == (KEY_MINUS | KEY_RELEASED))
+                        //if(CHECK_TASTO_MENO_RELEASED)
+                        {
+                                incr_step=1;
+                                incr_counter=0;
+                                CLEAR_TASTO_MENO_RELEASED;
+                        }
+                }
 
-			}
+                if(CHECK_ARROW_KEYS_MOVE_UPDOWN)
+                {
+                        if (key == KEY_DOWNRIGHT)
+                        //if(CHECK_TASTO_DN_DX_PRESSED)
+                        {
+                                MoveTriangolinoDown();
+                                if(menu_CurvaLavoro_index<15)menu_CurvaLavoro_index+=1;
+                                page=(menu_CurvaLavoro_index)/5;
 
-			if(CHECK_PIU_MENO_ENABLED)
-			{
-				if ((key == KEY_PLUS) || (last_key == KEY_PLUS))
-				//if(CHECK_TASTO_PLUS_PRESSED)
-				{
-
-					if(menu_triang_x==menu_triang_limit_dx)
-					{
-						incr_counter++;
-						if(incr_counter>10) incr_step=10;
-						if(incr_counter>20)
-						{
-							incr_step=100;
-							incr_counter=21;
-						}
-
-						string_index=menu_triang_index+ page*5;
-                                                //incremento
-						IncrParamConc(&PROGR_IN_USO.curva_lavoro[string_index],incr_step);
-						CalcPrint_UnMisura_Conc[un_mis_conc](PROGR_IN_USO.curva_lavoro[string_index],prova,menu_triang_y);
-						LCD_CopyPartialScreen(92,120,menu_triang_y,menu_triang_y+10);
-					}
-				}
-				else if (key == (KEY_PLUS | KEY_RELEASED))
-				//if(CHECK_TASTO_PLUS_RELEASED)
-				{
-					incr_step=1;
-					incr_counter=0;
-					CLEAR_TASTO_PLUS_RELEASED;
-				}
-
-				if ((key == KEY_MINUS) || (last_key == KEY_MINUS))
-				//if(CHECK_TASTO_MENO_PRESSED)
-				{
-
-					if(menu_triang_x==menu_triang_limit_dx)
-					{
-						incr_counter++;
-						if(incr_counter>10)
-						{
-							incr_step=10;
-						}
-						if(incr_counter>20)
-						{
-							incr_step=100;
-							incr_counter=21;
-						}
+                                if(page!=page_old)
+                                {
+                                        to_print=1;
+                                        if(page==3)menu_triang_limit_dn=2;
+                                        else 	  menu_triang_limit_dn=50;
+                                        menu_triang_index=0;
+                                        menu_triang_y=menu_triang_limit_up;
+                                }
+                                else              to_print=0;
 
 
-						string_index=menu_triang_index+ page*5;
+                                CLEAR_TASTO_DN_DX_PRESSED;
+                        }
 
-						//sistemare...per step>1 può scendere sotto 0
-                                                DecrParamConc(&PROGR_IN_USO.curva_lavoro[string_index],incr_step);
-						CalcPrint_UnMisura_Conc[un_mis_conc](PROGR_IN_USO.curva_lavoro[string_index],prova,menu_triang_y);
-						LCD_CopyPartialScreen(92,120,menu_triang_y,menu_triang_y+10);
-						
-					}
-				}
-				else if (key == (KEY_MINUS | KEY_RELEASED))
-				//if(CHECK_TASTO_MENO_RELEASED)
-				{
-					incr_step=1;
-					incr_counter=0;
-					CLEAR_TASTO_MENO_RELEASED;
-				}
-			}
+                        if (key == KEY_UPLEFT)
+                        //if(CHECK_TASTO_UP_SX_PRESSED)
+                        {
+                                MoveTriangolinoUp();
+                                if(menu_CurvaLavoro_index)menu_CurvaLavoro_index-=1;
 
-			if(CHECK_ARROW_KEYS_MOVE_UPDOWN)
-			{
-				if (key == KEY_DOWNRIGHT)
-				//if(CHECK_TASTO_DN_DX_PRESSED)
-				{
-					MoveTriangolinoDown();
-					if(menu_CurvaLavoro_index<15)menu_CurvaLavoro_index+=1;
-					page=(menu_CurvaLavoro_index)/5;
+                                page=(menu_CurvaLavoro_index)/5;
 
-					if(page!=page_old)
-					{
-						to_print=1;
-						if(page==3)menu_triang_limit_dn=2;
-						else 	  menu_triang_limit_dn=50;
-						menu_triang_index=0;
-						menu_triang_y=menu_triang_limit_up;
-					}
-					else              to_print=0;
+                                if(page!=page_old)
+                                {
+                                        to_print=1;
+                                        if(page==3)menu_triang_limit_dn=2;
+                                        else 	  menu_triang_limit_dn=50;
+                                        menu_triang_index=4;
+                                        menu_triang_y=menu_triang_limit_dn;
 
+                                }
+                                else              to_print=0;
 
-					CLEAR_TASTO_DN_DX_PRESSED;
-				}
-
-				if (key == KEY_UPLEFT)
-				//if(CHECK_TASTO_UP_SX_PRESSED)
-				{
-					MoveTriangolinoUp();
-					if(menu_CurvaLavoro_index)menu_CurvaLavoro_index-=1;
-
-					page=(menu_CurvaLavoro_index)/5;
-
-					if(page!=page_old)
-					{
-						to_print=1;
-						if(page==3)menu_triang_limit_dn=2;
-						else 	  menu_triang_limit_dn=50;
-						menu_triang_index=4;
-						menu_triang_y=menu_triang_limit_dn;
-
-					}
-					else              to_print=0;
-
-					CLEAR_TASTO_UP_SX_PRESSED;
-				}
-			}
-			else//cioè if(CHECK_ARROW_KEYS_MOVE_SXDX)
-			{
-				//if(CHECK_TASTO_DN_DX_PRESSED)CLEAR_TASTO_DN_DX_PRESSED;
-				//if(CHECK_TASTO_UP_SX_PRESSED)CLEAR_TASTO_UP_SX_PRESSED;
-			}
-		}//fine if(CHECK_KEY_READY)
+                                CLEAR_TASTO_UP_SX_PRESSED;
+                        }
+                }
+                else//cioè if(CHECK_ARROW_KEYS_MOVE_SXDX)
+                {
+                        //if(CHECK_TASTO_DN_DX_PRESSED)CLEAR_TASTO_DN_DX_PRESSED;
+                        //if(CHECK_TASTO_UP_SX_PRESSED)CLEAR_TASTO_UP_SX_PRESSED;
+                }
+		
 
 
 
@@ -736,7 +785,7 @@ void Sub2MenuCurvadiLavoro(void)
 			{
 				LCDPrintString(StringsSubmenuCurvaLavoro[string_index],10,strings_y);
                                 
-                                CalcPrint_UnMisura_Conc[un_mis_conc](PROGR_IN_USO.curva_lavoro[string_index],prova,strings_y);
+                                CalcPrint_UnMisura_Conc[un_mis_conc](PROGR_IN_USO.curva_lav_Yconcent[string_index],prova,strings_y);
         
 				//BinToBCDisp(PROGR_IN_USO.curva_lavoro[string_index],DUE_DECIMALI,92,strings_y);
 				//PrintUnitMis(string_index,118,strings_y);
@@ -746,8 +795,8 @@ void Sub2MenuCurvadiLavoro(void)
 				strings_y+=H_RIGA_CALIBRI10;
 			}
 			//uso la variabile page_old perchè tanto verrà aggiornata tra poco
-			page_old=	PROGR_IN_USO.curva_lav1_C_index / 5;
-			resto=		PROGR_IN_USO.curva_lav1_C_index % 5;//es scelgo 7,è nella pag 1 riga 2(0,1,2)
+			page_old=	PROGR_IN_USO.curva_lav_C_index / 5;
+			resto=		PROGR_IN_USO.curva_lav_C_index % 5;//es scelgo 7,è nella pag 1 riga 2(0,1,2)
 			if(page==page_old)
 			{
 				strings_y=(resto*H_RIGA_CALIBRI10)+2;
@@ -762,7 +811,11 @@ void Sub2MenuCurvadiLavoro(void)
 		}
 	}
 }//fine Sub2MenuCurvaDiLavoro();
+/*
+I menu curva di lavoro servono per inserire una concentrazione misurata e legarla alla conducibilità misurata
+Quindi al momento dell'inserimento della concentrazione va aanche fatta partire l'acquisizione di conducibilità che andrà salvata
 
+*/
 //***************************************************************************************
 void Sub2MenuCurvadiLavoro3Punti(void)
 {
@@ -793,9 +846,9 @@ void Sub2MenuCurvadiLavoro3Punti(void)
 		else
 			key = 0;
 		
-		//if(CHECK_KEY_READY)
+		
 		{
-			CLEAR_KEY_READY;
+			
 
 			if (key == KEY_OK)
 			//if(CHECK_TASTO_OK_PRESSED)
@@ -819,7 +872,7 @@ void Sub2MenuCurvadiLavoro3Punti(void)
 					MARK_ARROW_KEYS_MOVE_UPDOWN;
 					CLEAR_ARROW_KEYS_MOVE_SXDX;
 					CLEAR_PIU_MENO_ENABLED;
-					PROGR_IN_USO.curva_lav1_C_index=page*5+menu_triang_index;
+					PROGR_IN_USO.curva_lav_C_index=page*5+menu_triang_index;
 
 					RicalcolaCurvaLavoro();
                                         
@@ -979,29 +1032,29 @@ void Sub2MenuCurvadiLavoro3Punti(void)
 			for(string_index=first_string_to_print;string_index < last_string_to_print;string_index++)
 			{
 				LCDPrintString(StringsSubmenuCurvaLavoro[string_index],10,strings_y);
-                                CalcPrint_UnMisura_Conc[un_mis_conc](PROGR_IN_USO.curva_lavoro3pt[string_index],80,strings_y);
+                                CalcPrint_UnMisura_Conc[un_mis_conc](PROGR_IN_USO.curva_lav_Yconcent[string_index],80,strings_y);
 
 				strings_y+=H_RIGA_CALIBRI10;
 			}
 			//uso la variabile page_old perchè tanto verrà aggiornata tra poco
-			page_old=	PROGR_IN_USO.curva_lav3_L_index / 5;
-			resto=		PROGR_IN_USO.curva_lav3_L_index % 5;
+			page_old=	PROGR_IN_USO.curva_lav_L_index / 5;
+			resto=		PROGR_IN_USO.curva_lav_L_index % 5;
 			if(page==page_old)
 			{
 				strings_y=(resto*H_RIGA_CALIBRI10)+2;
 				LCDPrintString("L",74,strings_y);
 			}
 
-			page_old=	PROGR_IN_USO.curva_lav3_C_index / 5;
-			resto=		PROGR_IN_USO.curva_lav3_C_index % 5;
+			page_old=	PROGR_IN_USO.curva_lav_C_index / 5;
+			resto=		PROGR_IN_USO.curva_lav_C_index % 5;
 			if(page==page_old)
 			{
 				strings_y=(resto*H_RIGA_CALIBRI10)+2;
 				LCDPrintString("C",74,strings_y);
 			}
 
-			page_old=	PROGR_IN_USO.curva_lav3_H_index / 5;
-			resto=		PROGR_IN_USO.curva_lav3_H_index % 5;
+			page_old=	PROGR_IN_USO.curva_lav_H_index / 5;
+			resto=		PROGR_IN_USO.curva_lav_H_index % 5;
 			if(page==page_old)
 			{
 				strings_y=(resto*H_RIGA_CALIBRI10)+2;
@@ -1044,8 +1097,7 @@ void Sub2MenuImpostaSoglie(void)
 			key = 0;
 		//if(CHECK_KEY_READY)
 		{
-			CLEAR_KEY_READY;
-
+			
 			if (key == KEY_OK)
 			//if(CHECK_TASTO_OK_PRESSED)
 			{
@@ -1457,9 +1509,8 @@ void Sub2MenuTK(void)
 			last_key = key;
 		else
 			key = 0;
-		//if(CHECK_KEY_READY)
+		
 		{
-			CLEAR_KEY_READY;
 			//if(CHECK_ARROW_KEYS_MOVE_UPDOWN)
 			{
 				if (key == KEY_DOWNRIGHT)
@@ -1652,20 +1703,18 @@ void RicalcolaCurvaLavoro(void)
 	unsigned char i;
 	unsigned short step;
 
-	step=PROGR_IN_USO.curva_lavoro[PROGR_IN_USO.curva_lav1_C_index]/PROGR_IN_USO.curva_lav1_C_index;//curva_lavoro[0][selected_curva_lavoro_index]/selected_curva_lavoro_index;
+	step=(unsigned short)(PROGR_IN_USO.curva_lav_Yconcent[PROGR_IN_USO.curva_lav_C_index]/PROGR_IN_USO.curva_lav_C_index);//curva_lavoro[0][selected_curva_lavoro_index]/selected_curva_lavoro_index;
 	//per i valori inferiori al punto centrale
-	for(i=0;i<PROGR_IN_USO.curva_lav1_C_index;i++)
+	for(i=0;i<PROGR_IN_USO.curva_lav_C_index;i++)
 	{
-		PROGR_IN_USO.curva_lavoro[i]=i*step;
+		PROGR_IN_USO.curva_lav_Yconcent[i]=i*step;
 	}
 
 	//per i valori superiori al punto centrale
-	for(i=PROGR_IN_USO.curva_lav1_C_index+1;i<16;i++)
+	for(i=PROGR_IN_USO.curva_lav_C_index+1;i<16;i++)
 	{
-		PROGR_IN_USO.curva_lavoro[i]=i*step;
+		PROGR_IN_USO.curva_lav_Yconcent[i]=i*step;
 	}
-
-
 }
 
 //***************************************************************************************
@@ -1676,43 +1725,43 @@ void RicalcolaCurvaLavoro3pt(void)
       unsigned short step0_L,stepL_C,stepC_H,stepH_15;
       
       
-      step0_L =PROGR_IN_USO.curva_lavoro3pt[PROGR_IN_USO.curva_lav3_L_index]/PROGR_IN_USO.curva_lav3_L_index;
+      step0_L =(unsigned short)(PROGR_IN_USO.curva_lav_Yconcent[PROGR_IN_USO.curva_lav_L_index]/PROGR_IN_USO.curva_lav_L_index);
       
-      stepL_C =(PROGR_IN_USO.curva_lavoro3pt[PROGR_IN_USO.curva_lav3_C_index]-PROGR_IN_USO.curva_lavoro3pt[PROGR_IN_USO.curva_lav3_L_index])/
-        (PROGR_IN_USO.curva_lav3_C_index-PROGR_IN_USO.curva_lav3_L_index);
+      stepL_C =(unsigned short)((PROGR_IN_USO.curva_lav_Yconcent[PROGR_IN_USO.curva_lav_C_index]-PROGR_IN_USO.curva_lav_Yconcent[PROGR_IN_USO.curva_lav_L_index])/
+        (PROGR_IN_USO.curva_lav_C_index-PROGR_IN_USO.curva_lav_L_index));
       
-       stepC_H =(PROGR_IN_USO.curva_lavoro3pt[PROGR_IN_USO.curva_lav3_H_index]-PROGR_IN_USO.curva_lavoro3pt[PROGR_IN_USO.curva_lav3_C_index])/
-        (PROGR_IN_USO.curva_lav3_H_index-PROGR_IN_USO.curva_lav3_C_index);
+       stepC_H =(unsigned short)((PROGR_IN_USO.curva_lav_Yconcent[PROGR_IN_USO.curva_lav_H_index]-PROGR_IN_USO.curva_lav_Yconcent[PROGR_IN_USO.curva_lav_C_index])/
+        (PROGR_IN_USO.curva_lav_H_index-PROGR_IN_USO.curva_lav_C_index));
       
-      stepH_15 =stepC_H;//(PROGR_IN_USO.curva_lavoro3pt[15]-PROGR_IN_USO.curva_lavoro3pt[PROGR_IN_USO.curva_lav3_H_index])/
-        //(15-PROGR_IN_USO.curva_lav3_H_index);
+      stepH_15 =stepC_H;//(PROGR_IN_USO.curva_lav_Yconcent[15]-PROGR_IN_USO.curva_lav_Yconcent[PROGR_IN_USO.curva_lav_H_index])/
+        //(15-PROGR_IN_USO.curva_lav_H_index);
       
       
       
      
       //per i valori inferiori al punto L e per L
-      for(i=0;i<(PROGR_IN_USO.curva_lav3_L_index);i++)//PROGR_IN_USO.curva_lav3_L_index+1  per comprendere anche L ma L è già impostato
+      for(i=0;i<(PROGR_IN_USO.curva_lav_L_index);i++)//PROGR_IN_USO.curva_lav_L_index+1  per comprendere anche L ma L è già impostato
       {
-              PROGR_IN_USO.curva_lavoro3pt[i]=i*step0_L;
+              PROGR_IN_USO.curva_lav_Yconcent[i]=i*step0_L;
       }
      
 
       //per i valori tra L e C,C compreso,L c'è già
-      for(i=(PROGR_IN_USO.curva_lav3_L_index+1);i<(PROGR_IN_USO.curva_lav3_C_index);i++)//PROGR_IN_USO.curva_lav3_L_index+1  L è già a posto
+      for(i=(PROGR_IN_USO.curva_lav_L_index+1);i<(PROGR_IN_USO.curva_lav_C_index);i++)//PROGR_IN_USO.curva_lav_L_index+1  L è già a posto
       {
-              PROGR_IN_USO.curva_lavoro3pt[i]=PROGR_IN_USO.curva_lavoro3pt[i-1]+stepL_C;//se L=100 e step =12 il 1° valore della seconda spezzata sarà 112
+              PROGR_IN_USO.curva_lav_Yconcent[i]=PROGR_IN_USO.curva_lav_Yconcent[i-1]+stepL_C;//se L=100 e step =12 il 1° valore della seconda spezzata sarà 112
       }
   
       
-      for(i=(PROGR_IN_USO.curva_lav3_C_index+1);i<(PROGR_IN_USO.curva_lav3_H_index);i++)//PROGR_IN_USO.curva_lav3_C_index+1  C è già  a posto
+      for(i=(PROGR_IN_USO.curva_lav_C_index+1);i<(PROGR_IN_USO.curva_lav_H_index);i++)//PROGR_IN_USO.curva_lav_C_index+1  C è già  a posto
       {
-              PROGR_IN_USO.curva_lavoro3pt[i]=PROGR_IN_USO.curva_lavoro3pt[i-1]+stepC_H;//se C=200 e step =8 il 1° valore della seconda spezzata sarà 208
+              PROGR_IN_USO.curva_lav_Yconcent[i]=PROGR_IN_USO.curva_lav_Yconcent[i-1]+stepC_H;//se C=200 e step =8 il 1° valore della seconda spezzata sarà 208
       }
     
       
-      for(i=(PROGR_IN_USO.curva_lav3_H_index+1);i<(15+1);i++)//15+1  per comprendere anche il 15° elemento
+      for(i=(PROGR_IN_USO.curva_lav_H_index+1);i<(15+1);i++)//15+1  per comprendere anche il 15° elemento
       {
-              PROGR_IN_USO.curva_lavoro3pt[i]=PROGR_IN_USO.curva_lavoro3pt[i-1]+stepH_15;//se C=200 e step =8 il 1° valore della seconda spezzata sarà 208
+              PROGR_IN_USO.curva_lav_Yconcent[i]=PROGR_IN_USO.curva_lav_Yconcent[i-1]+stepH_15;//se C=200 e step =8 il 1° valore della seconda spezzata sarà 208
       }
   
 }

@@ -106,6 +106,8 @@ void PrintSoglia(unsigned short index,unsigned short x ,unsigned short y);
 void IncrSoglia(unsigned short index,unsigned short incr);
 void DecrSoglia(unsigned short index,unsigned short incr);//viene chiamata riga per riga quindi stampa solo 1 valore
 void PrintUnitMis(unsigned short index,unsigned short x ,unsigned short y);
+void IncrParamConc(unsigned int* par_pt,unsigned short incr);
+void DecrParamConc(unsigned int* par_pt,unsigned short incr);
 
 
 void MoveTriangolinoDown(void);
@@ -117,6 +119,7 @@ void DisegnaCornice (void);
 void DisegnaMarker(unsigned short x,unsigned short y,unsigned short y_old);
 void DisegnaCarattereBlink(char char_to_blink,unsigned short x,unsigned short y,unsigned char *toggler);
 void RicalcolaCurvaLavoro(void);
+void RicalcolaCurvaLavoro3pt(void);
 
 void MenuInit(void);
 void WriteMyFlashSector(void);
@@ -176,15 +179,35 @@ void WriteMyFlashSector(void);
 #define CLEAR_BLINK_PUMP 			(global_flags &=~BLINK_PUMP )
 #define CHECK_BLINK_PUMP 			(global_flags &  BLINK_PUMP )
 
-#define ADC0_AQUIRED 								0x2
-#define MARK_ADC0_AQUIRED  			(global_flags |= ADC0_AQUIRED )
-#define CLEAR_ADC0_AQUIRED 			(global_flags &=~ADC0_AQUIRED )
-#define CHECK_ADC0_AQUIRED 			(global_flags &  ADC0_AQUIRED )
 
-#define ADC1_AQUIRED 								0x4
-#define MARK_ADC1_AQUIRED  			(global_flags |= ADC1_AQUIRED )
-#define CLEAR_ADC1_AQUIRED 			(global_flags &=~ADC1_AQUIRED )
-#define CHECK_ADC1_AQUIRED 			(global_flags &  ADC1_AQUIRED )
+
+#define PRINT_PUMP 								0x2
+#define MARK_PRINT_PUMP  			(global_flags |= PRINT_PUMP )
+#define CLEAR_PRINT_PUMP 			(global_flags &=~PRINT_PUMP )
+#define CHECK_PRINT_PUMP 			(global_flags &  PRINT_PUMP )
+
+
+#define PRINT_HEATER 								0x4
+#define MARK_PRINT_HEATER  			(global_flags |= PRINT_HEATER )
+#define CLEAR_PRINT_HEATER 			(global_flags &=~PRINT_HEATER )
+#define CHECK_PRINT_HEATER 			(global_flags &  PRINT_HEATER )
+
+
+#define PRINT_CONC_LIMITS 								0x8
+#define MARK_PRINT_CONC_LIMITS  			(global_flags |= PRINT_CONC_LIMITS )
+#define CLEAR_PRINT_CONC_LIMITS 			(global_flags &=~PRINT_CONC_LIMITS )
+#define CHECK_PRINT_CONC_LIMITS 			(global_flags &  PRINT_CONC_LIMITS )
+
+
+#define PRINT_TEMP_LIMITS 								0x10
+#define MARK_PRINT_TEMP_LIMITS  			(global_flags |= PRINT_TEMP_LIMITS )
+#define CLEAR_PRINT_TEMP_LIMITS 			(global_flags &=~PRINT_TEMP_LIMITS )
+#define CHECK_PRINT_TEMP_LIMITS 			(global_flags &  PRINT_TEMP_LIMITS )
+
+
+
+
+
 
 
 
@@ -264,8 +287,12 @@ void WriteMyFlashSector(void);
 
 
 
+#define CURVA_LAV_1PT 0
+#define CURVA_LAV_3PT 1
 
 
+#define CONDUC_H20_DISTILL 0.0000055
+#define SCALED_TK_DIV      10000
 
 
 
@@ -300,8 +327,8 @@ void WriteMyFlashSector(void);
 #define CHECK_TASTO_MENO_OLD 	(keyold_flags &  TASTO_MENO_OLD )
 
 #define TASTO_OK_OLD 						0x40
-#define MARK_TASTO_OK_OLD  		(keyold_flags |= TASTO_OK_OLD )
-#define CLEAR_TASTO_OK_OLD 		(keyold_flags &=~TASTO_OK_OLD )
-#define CHECK_TASTO_OK_OLD 		(keyold_flags &  TASTO_OK_OLD )
+#define MARK_TASTO_OK_OLD  	(keyold_flags |= TASTO_OK_OLD )
+#define CLEAR_TASTO_OK_OLD 	(keyold_flags &=~TASTO_OK_OLD )
+#define CHECK_TASTO_OK_OLD 	(keyold_flags &  TASTO_OK_OLD )
 
 #endif /* SOURCES_MY_DEFINITIONS_H_ */

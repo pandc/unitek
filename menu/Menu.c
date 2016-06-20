@@ -59,9 +59,9 @@ extern unsigned char width_font;
 //***************************************************************************************
 void (*MenuFunctionPt[30])(void);
 void (*WorkMenu_CalcPrint_UnMisura_Conc[8])(unsigned int);
-void (*CalcPrint_UnMisura_Conc[8])(unsigned int,unsigned int,unsigned int);
+void (*CalcPrint_UnMisura_Conc[8])(unsigned int ,unsigned int,unsigned int);
 void (*IncrPrint_UnMisura_Conc[8])(unsigned short*,unsigned int,unsigned int,unsigned int);
-void (*Formula_ConcConvers    [8])(unsigned int);
+void (*Formula_ConcConvers    [8])(unsigned int );
 unsigned int(* FormulaInversa_Conc [8])(void);
 //***************************************************************************************
 static void menu_task(void *par)
@@ -165,20 +165,18 @@ void MenuTempHum(void)
 	uint8_t key;
         
         float local_float;
-	
-	//unsigned char unit_misura_old;
-	//unsigned int decimillesimi,conc_to_print;
-	unsigned int temperature_to_print;
+        
+	float temperature_to_print;
 	unsigned int abilita_disabilita_old;
         char string_temper[16];
         unsigned int len;
-       // float myfloat_temper,my_float_conc;
-
+        
+        
 
 	//conc_to_print_old=0xFFFF;
 	
 	abilita_disabilita_old=0x3;
-      //  unsigned char test;
+        //  unsigned char test;
 
 	stato_intervento_conc=STATO_INIZIALE;
 	stato_intervento_temper=STATO_INIZIALE;
@@ -223,7 +221,7 @@ void MenuTempHum(void)
 
 	#endif
 	mybmp_struct2.bmp_pointer=gradi_bmp;
-	mybmp_struct2.righe		 =gradi_HeightPixels;
+	mybmp_struct2.righe	 =gradi_HeightPixels;
 	mybmp_struct2.colonne	 =gradi_WidthPages;
 	mybmp_struct2.start_x=94;
 	mybmp_struct2.start_y=2;
@@ -232,21 +230,17 @@ void MenuTempHum(void)
         
 
 	SelectFont(CALIBRI_10);
-
 	LCDPrintString("C",98,2);
-
 	LCD_CopyScreen();
+        
+        
+        
+     
+        CleanArea_Ram_and_Screen(24,48,2,14);
+        LCDPrintString(StringsSubmenuSimboliConc[PROGR_IN_USO.unita_mis_concentr],24,2);
+        LCD_CopyPartialScreen(24,48,2,14);
 
-	//unit_misura_old=10;
-       // LoadRamSettingsFrom_uC_Flash();
-       // test=SaveRamSettings_in_External_DataFlash();
-       /* if(!test)
-        {
-              LCD_Fill_ImageRAM(0x00);
-              SelectFont(CALIBRI_10);
-              LCDPrintString("File system error",4,24);
-              LCD_CopyPartialScreen(4,80,24,36);
-        }*/
+
 
 	while(1)
 	{
@@ -255,21 +249,18 @@ void MenuTempHum(void)
 		  MenuFunction_Index=MENU_PROGR;
 		  return;
 		}
-/*  _          _   _                      _                       
-   | |        | | | |                    | |                      
-   | |     ___| |_| |_ _   _ _ __ __ _   | |_ ___ _ __ ___  _ __  
-   | |    / _ \ __| __| | | | '__/ _` |  | __/ _ \ '_ ` _ \| '_ \ 
-   | |___|  __/ |_| |_| |_| | | | (_| |  | ||  __/ | | | | | |_) |
-   |______\___|\__|\__|\__,_|_|  \__,_|   \__\___|_| |_| |_| .__/ 
-                                                           | |    
-                                                           |_|    */
+    /* +-+-+-+-+-+-+-+ +-+-+-+-+-+-+-+-+-+-+-+ +-+ +-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+       |L|E|T|T|U|R|A| |T|E|M|P|E|R|A|T|U|R|A| |E| |C|O|N|C|E|N|T|R|A|Z|I|O|N|E|
+       +-+-+-+-+-+-+-+ +-+-+-+-+-+-+-+-+-+-+-+ +-+ +-+-+-+-+-+-+-+-+-+-+-+-+-+-+    */
                 if(measures.temp_ok)
                 {
                   measures.temp_ok=0;
                   local_float=measures.temp_resist;
                   Convers_Res_to_Temp(&local_float);
                   
-                 
+                 /*+-+-+-+-+-+-+ +-+-+-+-+-+-+-+-+-+-+-+ +-+-+-+-+ +-+-+
+                  |S|T|A|M|P|A| |T|E|M|P|E|R|A|T|U|R|A| |F|O|N|T| |2|0|
+                  +-+-+-+-+-+-+ +-+-+-+-+-+-+-+-+-+-+-+ +-+-+-+-+ +-+-+  */             
                  SelectFont(CALIBRI_20);
                  CleanArea_Ram_and_Screen(60,120,14,36);
                  //BinToBCDisp(ADC_array[LETTURA_TEMP]/*temperature_to_print*/,UN_DECIMALE,68,14);
@@ -277,9 +268,39 @@ void MenuTempHum(void)
                  len=strlen(string_temper);
                  LCDPrintString(string_temper,125-(width_font*len)-5,14);
                  LCD_CopyPartialScreen(60,120,14,36);
+                 CleanArea_Ram_and_Screen(00,62,14,36);
                  
                  
-                  WorkMenu_CalcPrint_UnMisura_Conc[PROGR_IN_USO.unita_mis_concentr](34578);
+                   /*  +-+-+-+-+-+-+-+-+-+-+-+-+-+ +-+-+
+                       |C|O|M|P|E|N|S|A|Z|I|O|N|E| |T|K|
+                       +-+-+-+-+-+-+-+-+-+-+-+-+-+ +-+-+  */    
+                 
+                 local_float=CompensConduc_TK(&measures.conduc);
+                 local_float=CalcoloConcent_Now(local_float)   ;
+                 
+                 switch (struct_conc_print.decimali_to_print)
+                 {
+                   case INTERO:
+                      sprintf(string_temper,"%.0f",local_float);//pot=206,5 ohm
+                      break;
+                                        
+                    case UN_DECIMALE:
+                      sprintf(string_temper,"%.1f",local_float);//pot=206,5 ohm
+                    break;
+                    
+                    case DUE_DECIMALI:
+                      sprintf(string_temper,"%.2f",local_float);//pot=206,5 ohm
+                    break;
+                    
+                    default:
+                    break;
+                   
+                   
+                 }
+                 
+                 len=strlen(string_temper);
+                 LCDPrintString(string_temper,62-(width_font*len)-5,14);
+                 LCD_CopyPartialScreen(00,62,14,36);
                 
                 }
                 
@@ -307,32 +328,7 @@ void MenuTempHum(void)
 			abilita_disabilita_old=abilita_disabilita;
 
 		}
-#define SHOW_ADC
-#if defined(SHOW_ADC)
 
-                   
-
-                 
-#endif
-/*
-		if(stato_intervento_conc==STATO_INIZIALE)
-		{
-		   //per stampare  "SETP xxx" o bitmpa pompa quando entro,solo la prima volta fingo di avere lettura ADC abbondante
-                   ADC_array[LETTURA_CONC] =1+ (PROGR_IN_USO.setp_e_soglie.ses_struct.SetConc +
-                                                    PROGR_IN_USO.setp_e_soglie.ses_struct.IsteresiConc);
-		  
-		   stato_intervento_conc=  STATO_POMPA_ON_CONC_SCARSA;
-		}
-
-		if(stato_intervento_temper==STATO_INIZIALE)
-		{
-			//se ne manca allora faccio saltare a stato riposo,come se da questo si accorgesse che ne manca
-			ADC_array[LETTURA_TEMP]= (PROGR_IN_USO.setp_e_soglie.ses_struct.SetTemp +
-                                                    PROGR_IN_USO.setp_e_soglie.ses_struct.IsteresiTemp);
-			stato_intervento_temper=STATO_RISC_ON_TEMP_SCARSA;
-		}
-
-*/
 		//**************** INTERVENTO!!!********************************************
 		//confronto con setpoint,isteresi ecc
 		switch(stato_intervento_conc)
@@ -340,22 +336,6 @@ void MenuTempHum(void)
 
 
 			case STATO_POMPA_RIPOSO:
-				//if((ADC_array[LETTURA_CONC]) < PROGR_IN_USO.setp_e_soglie.SetConc - PROGR_IN_USOses_struct.setp_e_soglie.ses_struct.IsteresiConc)
-				if((ADC_array[LETTURA_CONC]) < (PROGR_IN_USO.setp_e_soglie.ses_struct.SetConc - PROGR_IN_USO.setp_e_soglie.ses_struct.IsteresiConc))
-				{
-
-					stato_intervento_conc=STATO_POMPA_ON_CONC_SCARSA;
-					CleanArea_Ram_and_Screen(2,28,42,54);
-					mybmp_struct2.bmp_pointer=pompa_OK_bmp;
-					mybmp_struct2.righe		 =pompa_OKHeightPixels;
-					mybmp_struct2.colonne	 =pompa_OKWidthPages;
-					mybmp_struct2.start_x=2;
-					mybmp_struct2.start_y=42;
-					GetBitmap();
-					//LCD_CopyScreen();
-					LCD_CopyPartialScreen(2,26,42,64);
-
-				}
 				break;
 
 
@@ -398,42 +378,7 @@ void MenuTempHum(void)
 
 		switch(stato_intervento_temper)
 		{
-
-/*
-		 		 //se va bene faccio saltare in stato CONC_SCARSA come se si accorgesse da lì che conc è ok
-		 		if((ADC_array[LETTURA_TEMP]) < PROGR_IN_USOsetp_e_soglie.ses_struct.SetTemp - PROGR_IN_USOsetp_e_soglie.ses_struct.IsteresiTemp)
-		 		{
-		 			 stato_intervento_temper=  STATO_RISC_ON_TEMP_SCARSA;
-		 			CleanArea_Ram_and_Screen(68,128,42,64);
-					mybmp_struct2.bmp_pointer=riscaldatore_bmp;
-					mybmp_struct2.righe		 =riscaldatoreHeightPixels;
-					mybmp_struct2.colonne	 =riscaldatoreWidthPages;
-					mybmp_struct2.start_x=104;
-					mybmp_struct2.start_y=42;
-					GetBitmap();
-					//LCD_CopyScreen();
-					LCD_CopyPartialScreen(68,128,42,64);
-
-		 		 }
-		 		 break;
-*/
-
 			case STATO_RISC_RIPOSO:
-				if((ADC_array[LETTURA_TEMP]) < PROGR_IN_USO.setp_e_soglie.ses_struct.SetTemp - PROGR_IN_USO.setp_e_soglie.ses_struct.IsteresiTemp)
-					{
-					stato_intervento_temper=STATO_RISC_ON_TEMP_SCARSA;
-					CleanArea_Ram_and_Screen(68,128,42,64);
-					mybmp_struct2.bmp_pointer=riscaldatore_bmp;
-					mybmp_struct2.righe		 =riscaldatoreHeightPixels;
-					mybmp_struct2.colonne	 =riscaldatoreWidthPages;
-					mybmp_struct2.start_x=104;
-					mybmp_struct2.start_y=42;
-					GetBitmap();
-					//LCD_CopyScreen();
-					LCD_CopyPartialScreen(68,128,42,64);
-				}
-
-
 				break;
 
 
@@ -455,23 +400,17 @@ void MenuTempHum(void)
 
 					temperature_to_print/=128;
 
-					BinToBCDisp(temperature_to_print,UN_DECIMALE,90,42);
+					sprintf(string_temper,"%.1f",temperature_to_print);//pot=206,5 ohm
+                                        //len=strlen(string_temper);
+                                        LCDPrintString(string_temper,90,42);
+                                        //BinToBCDisp(temperature_to_print,UN_DECIMALE,90,42);
 					LCD_CopyPartialScreen(68,128,42,54);
 				}
 				else
 				{
 					if((ADC_array[LETTURA_TEMP]) < PROGR_IN_USO.setp_e_soglie.ses_struct.AllTempMin)
 					{
-						//CleanArea_Ram_and_Screen(104,128,42,64);
-/*
-						prova=PROGR_IN_USOses_struct.setp_e_soglie.ses_struct.AllTempMin;
-						mybmp_struct2.bmp_pointer=termometro_bmp;
-						mybmp_struct2.righe		 =termometroHeightPixels;
-						mybmp_struct2.colonne	 =termometroWidthPages;
-						mybmp_struct2.start_x=66;
-						mybmp_struct2.start_y=42;
-						GetBitmap();
-						LCD_CopyPartialScreen(66,80,42,64);*/
+						
 					}
 					else
 					{
@@ -481,15 +420,62 @@ void MenuTempHum(void)
 				}
 				break;
 
-
-
-
-
 			default:
 				break;
 		}
+                
+                
+                
+                
+                if(CHECK_PRINT_PUMP)
+                {
+                  CLEAR_PRINT_PUMP;
+                  CleanArea_Ram_and_Screen(2,28,42,54);
+                  mybmp_struct2.bmp_pointer=pompa_OK_bmp;
+                  mybmp_struct2.righe	 =pompa_OKHeightPixels;
+                  mybmp_struct2.colonne	 =pompa_OKWidthPages;
+                  mybmp_struct2.start_x=2;
+                  mybmp_struct2.start_y=42;
+                  GetBitmap();
+                  LCD_CopyPartialScreen(2,26,42,64);
+                }
+                
+                
+                if(CHECK_PRINT_CONC_LIMITS)  //print limiti concentrazione
+                {
+                  CLEAR_PRINT_CONC_LIMITS;
+                }
+                
+                
+                
+                
+                
+                if(CHECK_PRINT_HEATER)
+                {
+                  CLEAR_PRINT_HEATER;
+                  CleanArea_Ram_and_Screen(68,128,42,64);
+                  mybmp_struct2.bmp_pointer=riscaldatore_bmp;
+                  mybmp_struct2.righe	 =riscaldatoreHeightPixels;
+                  mybmp_struct2.colonne	 =riscaldatoreWidthPages;
+                  mybmp_struct2.start_x=104;
+                  mybmp_struct2.start_y=42;
+                  GetBitmap();
+                  LCD_CopyPartialScreen(68,128,42,64);
+                }
+                
+                if(CHECK_PRINT_TEMP_LIMITS ) //print limiti temperatura
+                {
+                  CLEAR_PRINT_TEMP_LIMITS;
+                }
+                
+                
+                
+                
+                
+                
+                
 
-	}
+	}//fine while(1) loop di lavoro
 }
 //***************************************************************************************
 void MenuProg(void)
@@ -996,9 +982,10 @@ void WorkMenu_CalcPrint_milliSiemens(unsigned int bin)
                                                                                 __/ |                                        
                                                                                |___/   */   
 
-#define LARGH_CON_UNITA_MISURA  30
+#define LARGH_CON_UNITA_MISURA  44
+#define START_UNITA_MISURA  26
 //****************************************************************************************************************************************************
-void CalcPrint_Percent_xy(unsigned int bin,unsigned int x,unsigned int y)
+void CalcPrint_Percent_xy(unsigned int  bin,unsigned int x,unsigned int y)
 {
      Formula_ConcConvers_Percent(bin);
   
@@ -1006,12 +993,12 @@ void CalcPrint_Percent_xy(unsigned int bin,unsigned int x,unsigned int y)
      
      CleanArea_Ram_and_Screen(x,x+LARGH_CON_UNITA_MISURA,y,y+10);
      BinToBCDisp(struct_conc_print.conc_to_print,struct_conc_print.decimali_to_print,x,y);
-     LCDPrintString(StringsSubmenuSimboliConc[UNIT_MIS_CONCENTR_PERCENTUALE],x+LARGH_CON_UNITA_MISURA,y);
-     LCD_CopyPartialScreen(x,x+LARGH_CON_UNITA_MISURA,y,y+10);
+     LCDPrintString(StringsSubmenuSimboliConc[UNIT_MIS_CONCENTR_PERCENTUALE],x+START_UNITA_MISURA,y);
+     LCD_CopyPartialScreen(x,x+LARGH_CON_UNITA_MISURA,y,y+12);
  
 }
 //****************************************************************************************************************************************************
-void CalcPrint_PuntTitol_xy(unsigned int bin,unsigned int x,unsigned int y)
+void CalcPrint_PuntTitol_xy(unsigned int  bin,unsigned int x,unsigned int y)
 {
       Formula_ConcConvers_PuntTitol(bin);
    
@@ -1019,11 +1006,11 @@ void CalcPrint_PuntTitol_xy(unsigned int bin,unsigned int x,unsigned int y)
      
       CleanArea_Ram_and_Screen(x,x+LARGH_CON_UNITA_MISURA,y,y+10);
       BinToBCDisp(struct_conc_print.conc_to_print,struct_conc_print.decimali_to_print,x,y);
-      LCDPrintString(StringsSubmenuSimboliConc[UNIT_MIS_CONCENTR_PUNT_TITOL],x+LARGH_CON_UNITA_MISURA,y);
-      LCD_CopyPartialScreen(x,x+LARGH_CON_UNITA_MISURA,y,y+10);
+      LCDPrintString(StringsSubmenuSimboliConc[UNIT_MIS_CONCENTR_PUNT_TITOL],x+START_UNITA_MISURA,y);
+      LCD_CopyPartialScreen(x,x+LARGH_CON_UNITA_MISURA,y,y+12);
 }
 //****************************************************************************************************************************************************
-void CalcPrint_GrammiLitro_xy(unsigned int bin,unsigned int x,unsigned int y)
+void CalcPrint_GrammiLitro_xy(unsigned int  bin,unsigned int x,unsigned int y)
 {
       Formula_ConcConvers_grammiLitro(bin);
   
@@ -1031,23 +1018,23 @@ void CalcPrint_GrammiLitro_xy(unsigned int bin,unsigned int x,unsigned int y)
        
       CleanArea_Ram_and_Screen(x,x+LARGH_CON_UNITA_MISURA,y,y+10);
       BinToBCDisp(struct_conc_print.conc_to_print,struct_conc_print.decimali_to_print,x,y);
-      LCDPrintString(StringsSubmenuSimboliConc[UNIT_MIS_CONCENTR_GRAMMILITRO],x+LARGH_CON_UNITA_MISURA,y);
-      LCD_CopyPartialScreen(x,x+LARGH_CON_UNITA_MISURA,y,y+10);
+      LCDPrintString(StringsSubmenuSimboliConc[UNIT_MIS_CONCENTR_GRAMMILITRO],x+START_UNITA_MISURA,y);
+      LCD_CopyPartialScreen(x,x+LARGH_CON_UNITA_MISURA,y,y+12);
 
 }
 //****************************************************************************************************************************************************
-void CalcPrint_uSiemens_xy(unsigned int bin,unsigned int x,unsigned int y)
+void CalcPrint_uSiemens_xy(unsigned int  bin,unsigned int x,unsigned int y)
 {
     Formula_ConcConvers_uSiemens(bin);  
     SelectFont(CALIBRI_10);
    
     CleanArea_Ram_and_Screen(x,x+LARGH_CON_UNITA_MISURA,y,y+10);
     BinToBCDisp(struct_conc_print.conc_to_print,struct_conc_print.decimali_to_print,x,y);
-    LCDPrintString(StringsSubmenuSimboliConc[UNIT_MIS_CONCENTR_uSIEMENS],x+LARGH_CON_UNITA_MISURA,y);
-    LCD_CopyPartialScreen(x,x+LARGH_CON_UNITA_MISURA,y,y+10);
+    LCDPrintString(StringsSubmenuSimboliConc[UNIT_MIS_CONCENTR_uSIEMENS],x+START_UNITA_MISURA,y);
+    LCD_CopyPartialScreen(x,x+LARGH_CON_UNITA_MISURA,y,y+12);
 }
 //****************************************************************************************************************************************************
-void CalcPrint_milliSiemens_xy(unsigned int bin,unsigned int x,unsigned int y)
+void CalcPrint_milliSiemens_xy(unsigned int  bin,unsigned int x,unsigned int y)
 {
     Formula_ConcConvers_milliSiemens(bin);
   
@@ -1055,8 +1042,8 @@ void CalcPrint_milliSiemens_xy(unsigned int bin,unsigned int x,unsigned int y)
    
     CleanArea_Ram_and_Screen(x,x+LARGH_CON_UNITA_MISURA,y,y+10);
     BinToBCDisp(struct_conc_print.conc_to_print,struct_conc_print.decimali_to_print,x,y);
-    LCDPrintString(StringsSubmenuSimboliConc[UNIT_MIS_CONCENTR_mSIEMENS],x+LARGH_CON_UNITA_MISURA,y);
-    LCD_CopyPartialScreen(x,x+LARGH_CON_UNITA_MISURA,y,y+10);
+    LCDPrintString(StringsSubmenuSimboliConc[UNIT_MIS_CONCENTR_mSIEMENS],x+START_UNITA_MISURA,y);
+    LCD_CopyPartialScreen(x,x+LARGH_CON_UNITA_MISURA,y,y+12);
 }
 
 
@@ -1113,7 +1100,7 @@ void LoadDisplay_Logo(void)
 //****************************************************************************************************************************************************
 void Convers_Res_to_Temp(float* float_res)
 {
-
+//funzione mia che fa interpolazione lineare a segmenti
   unsigned int tab_index=0;
   float temp,interval_res,delta,f;
   
@@ -1144,14 +1131,107 @@ void Convers_Res_to_Temp(float* float_res)
   
   *float_res=(float)(10*(tab_index-1))+temp*10;
 
-  
-  
-  
-  
- 
 }
 
+//****************************************************************************************************************************************************
+float CalcoloConcent_Now(float conduc_meas)
+{
+  float f_concent;
 
+  float pendenza_m;
+  
+  
+  
+  //il punto 0x ha conducibilità dell'acqua distillata: 5,5 us  
+  //per il valore in punto intermedio applico formula della curva passante per 2 punti:
+  //se devo trovare 
+  
+  if(PROGR_IN_USO.curva_lav_cal_type==CURVA_LAV_1PT)
+  {
+    
+    pendenza_m=((float)PROGR_IN_USO.curva_lav_Yconcent[PROGR_IN_USO.curva_lav_C_index])/((PROGR_IN_USO.curva_lav_XconducC)-CONDUC_H20_DISTILL);
+    switch(PROGR_IN_USO.unita_mis_concentr)
+    {
+      case UNIT_MIS_CONCENTR_PERCENTUALE:
+            if((conduc_meas-CONDUC_H20_DISTILL)<0)return 0;
+            f_concent=pendenza_m*(conduc_meas-CONDUC_H20_DISTILL);
+            if   (f_concent<1000)struct_conc_print.decimali_to_print=DUE_DECIMALI;
+            else                struct_conc_print.decimali_to_print=UN_DECIMALE;
+            f_concent/=100; // devo dare il vero valore da stampare,sprintf pensa solo a arrotondarlo a n decimali
+            if(f_concent>99.9)f_concent=99.9;
+            break ;
+            
+      case UNIT_MIS_CONCENTR_PUNT_TITOL:
+            if((conduc_meas-CONDUC_H20_DISTILL)<0)return 0;
+            f_concent=pendenza_m*(conduc_meas-CONDUC_H20_DISTILL);
+            if   (f_concent<1000)struct_conc_print.decimali_to_print=DUE_DECIMALI;
+            else                 struct_conc_print.decimali_to_print=UN_DECIMALE;
+            f_concent/=10;
+            if(f_concent>999)f_concent=999;
+            break ;
+            
+      case UNIT_MIS_CONCENTR_GRAMMILITRO:
+            if((conduc_meas-CONDUC_H20_DISTILL)<0)return 0;
+            f_concent=pendenza_m*(conduc_meas-CONDUC_H20_DISTILL);
+            if   (f_concent<1000)struct_conc_print.decimali_to_print=DUE_DECIMALI;
+            else                struct_conc_print.decimali_to_print=UN_DECIMALE;
+            f_concent/=10;
+            if(f_concent>999)f_concent=999;
+            break ;
+            
+      case UNIT_MIS_CONCENTR_uSIEMENS:
+            f_concent=conduc_meas*100000;
+            if   (f_concent<10) struct_conc_print.decimali_to_print=DUE_DECIMALI;
+            else                struct_conc_print.decimali_to_print=UN_DECIMALE;
+            if(f_concent>999)f_concent=999;
+            break ;
+            
+      case UNIT_MIS_CONCENTR_mSIEMENS:
+            f_concent=conduc_meas*1000;
+            if   (f_concent<10) struct_conc_print.decimali_to_print=DUE_DECIMALI;
+            else                struct_conc_print.decimali_to_print=UN_DECIMALE;
+            if(f_concent>999)f_concent=999;
+            break ;
+    }//fine switch(PROGR_IN_USO.unita_mis_concentr)
+    
+     
+  }
+  else//nel caso di curva a 3 punti
+  {
+    
+    
+  }
+  
+  return f_concent;
+  
+}
+
+//****************************************************************************************************************************************************
+float CompensConduc_TK(float* meas_conduc) //
+{
+  float f1,ftk;
+  
+  ftk=(float)PROGR_IN_USO.TK.tk2.old_TK/100;
+  
+  f1=measures.temp_resist;
+  Convers_Res_to_Temp(&f1);//ora f1 è temperatura in °C,la temp di riferimento è già in °C
+  
+  float delta_temp=PROGR_IN_USO.temp_acq_curva_lav-f1;//delta_temp è in °C
+  
+  if(PROGR_IN_USO.curva_lav_cal_type==CURVA_LAV_1PT)
+  {/*
+    f1=(ftk/100)*delta_temp;
+    f1=(1+(ftk/100)*delta_temp);*/
+    f1=*meas_conduc  *(1+(ftk/100)*delta_temp);
+  }
+  else  //curva_lav_3pt
+  {
+  }
+  
+  
+  return f1;
+  
+}
 
 
 

@@ -421,9 +421,9 @@ void SubmenuComunic(void)
 	while(loop_flag)
 	{
 		key_getstroke(&key,portMAX_DELAY);
-		//if(CHECK_KEY_READY)
+		
 		{
-			CLEAR_KEY_READY;
+			
 			if(CHECK_ARROW_KEYS_MOVE_UPDOWN)
 			{
 				if (key == KEY_DOWNRIGHT)
@@ -876,7 +876,7 @@ void DecrSoglia(unsigned short index,unsigned short incr)//viene chiamata riga p
 
 	unsigned int   multiplied;
 	unsigned short resto;
-        unsigned int temp_test;
+        unsigned int  temp_test;
 
 
 
@@ -983,7 +983,7 @@ void PrintUnitMis(unsigned short index,unsigned short x ,unsigned short y)//vien
 	}
 }
 //***************************************************************************************************************************************
-void DecrParamConc(unsigned short* par_pt,unsigned short incr)//il valore da stampare si troverà nella struttura struct_conc_to_print
+void DecrParamConc(unsigned int* par_pt,unsigned short incr)//il valore da stampare si troverà nella struttura struct_conc_to_print
 {
 
 
@@ -1035,7 +1035,7 @@ void DecrParamConc(unsigned short* par_pt,unsigned short incr)//il valore da sta
 	
 }
 //***************************************************************************************************************************************
-void IncrParamConc(unsigned short* par_pt,unsigned short incr)//il valore da stampare si troverà nella struttura struct_conc_to_print
+void IncrParamConc(unsigned int* par_pt,unsigned short incr)//il valore da stampare si troverà nella struttura struct_conc_to_print
 {
 
 

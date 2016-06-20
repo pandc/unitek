@@ -18,14 +18,17 @@
 extern print_conc_var  struct_conc_print;
 
 //****************************************************************************************************************************************************
-void Formula_ConcConvers_Percent(unsigned int bin)
+//dal valore float precalcolato Yconcentr al valore percentuale
+
+void Formula_ConcConvers_Percent(unsigned int  bin)
 {
     unsigned int decimillesimi;
-    unsigned int   multiplied;
-   
-    multiplied=bin*10;
-    decimillesimi=multiplied/64;
-    struct_conc_print.resto=multiplied%64;
+    //float mio_coeff_convers;
+    
+    
+    
+    decimillesimi=(unsigned int)(bin );
+    
 
     if(decimillesimi>9999)decimillesimi=9999;
 
@@ -46,22 +49,20 @@ unsigned int FormulaInversa_Conc_Percent(void)
 {
   unsigned int decimillesimi,multiplied,temp_test;
   
-  if(struct_conc_print.decimali_to_print==UN_DECIMALE)  	{	 decimillesimi=struct_conc_print.conc_to_print*10;  }
+  if(struct_conc_print.decimali_to_print==UN_DECIMALE)  	{decimillesimi=struct_conc_print.conc_to_print*10;  }
   if(struct_conc_print.decimali_to_print==DUE_DECIMALI)	{	 decimillesimi=struct_conc_print.conc_to_print   ;	 }
-  multiplied=decimillesimi*64;
-  multiplied+=struct_conc_print.resto;
-  temp_test=multiplied/10;
-  return temp_test;
+  multiplied=decimillesimi*1;
+ // multiplied+=struct_conc_print.resto;
+  temp_test=multiplied/1;//era 10
+  return  temp_test;
 }
 //****************************************************************************************************************************************************
-void Formula_ConcConvers_PuntTitol(unsigned int bin)
+void Formula_ConcConvers_PuntTitol(unsigned int  bin)
 {
     unsigned int decimillesimi;
-    unsigned int   multiplied;
-   
-    multiplied=bin*10;
-    decimillesimi=multiplied/64;
-    struct_conc_print.resto=multiplied%64;
+    
+    
+    decimillesimi=(unsigned int)(bin *1);
 
     if(decimillesimi>9999)decimillesimi=9999;
 
@@ -78,7 +79,7 @@ void Formula_ConcConvers_PuntTitol(unsigned int bin)
  }
 
 //****************************************************************************************************************************************************
-unsigned int FormulaInversa_Conc_PuntTitol(void)
+unsigned int  FormulaInversa_Conc_PuntTitol(void)
 {
   unsigned int decimillesimi,multiplied,temp_test;
   
@@ -91,14 +92,12 @@ unsigned int FormulaInversa_Conc_PuntTitol(void)
  
 }
 //****************************************************************************************************************************************************
-void Formula_ConcConvers_grammiLitro(unsigned int bin)
+void Formula_ConcConvers_grammiLitro(unsigned int  bin)
 {
     unsigned int decimillesimi;
-    unsigned int   multiplied;
+
    
-     multiplied=bin*10;
-     decimillesimi=multiplied/64;
-     struct_conc_print.resto=multiplied%64;
+     decimillesimi=(unsigned int)(bin *1);
 
      if(decimillesimi>9999)decimillesimi=9999;
 
@@ -114,7 +113,7 @@ void Formula_ConcConvers_grammiLitro(unsigned int bin)
      }
 }
 //****************************************************************************************************************************************************
-unsigned int FormulaInversa_Conc_grammiLitro(void)
+unsigned int  FormulaInversa_Conc_grammiLitro(void)
 {
   unsigned int decimillesimi,multiplied,temp_test;
   
@@ -127,14 +126,10 @@ unsigned int FormulaInversa_Conc_grammiLitro(void)
  
 }
 //****************************************************************************************************************************************************
-void Formula_ConcConvers_uSiemens(unsigned int bin)
+void Formula_ConcConvers_uSiemens(unsigned int  bin)
 {
     unsigned int decimillesimi;
-    unsigned int   multiplied;
-   
-    multiplied=bin*1;
-    decimillesimi=multiplied/64;
-    struct_conc_print.resto=multiplied%64;
+    decimillesimi=(unsigned int)(bin *1);
 
     if(decimillesimi>999)decimillesimi=999;
 
@@ -142,7 +137,7 @@ void Formula_ConcConvers_uSiemens(unsigned int bin)
     struct_conc_print.decimali_to_print=INTERO;
 }
 //****************************************************************************************************************************************************
-unsigned int FormulaInversa_Conc_uSiemens(void)
+unsigned int  FormulaInversa_Conc_uSiemens(void)
 {
   unsigned int decimillesimi,multiplied,temp_test;
   
@@ -150,26 +145,22 @@ unsigned int FormulaInversa_Conc_uSiemens(void)
   
   multiplied=decimillesimi*64;
   multiplied+=struct_conc_print.resto;
-  temp_test=multiplied/10;
+  temp_test=multiplied;
   
   return temp_test;
 }
 //****************************************************************************************************************************************************
-void Formula_ConcConvers_milliSiemens(unsigned int bin)
+void Formula_ConcConvers_milliSiemens(unsigned int  bin)
 {
     unsigned int decimillesimi;
-    unsigned int   multiplied;
-   
-    multiplied=bin*1;
-    decimillesimi=multiplied/64;
-    struct_conc_print.resto=multiplied%64;
+    decimillesimi=(unsigned int)(bin *1);
 
     if(decimillesimi>999)decimillesimi=999;
     struct_conc_print.conc_to_print=decimillesimi;
     struct_conc_print.decimali_to_print=INTERO;
 }
 //****************************************************************************************************************************************************
-unsigned int FormulaInversa_Conc_milliSiemens(void)
+unsigned int  FormulaInversa_Conc_milliSiemens(void)
 {
   unsigned int decimillesimi,multiplied,temp_test;
   
@@ -177,7 +168,31 @@ unsigned int FormulaInversa_Conc_milliSiemens(void)
   
   multiplied=decimillesimi*64;
   multiplied+=struct_conc_print.resto;
-  temp_test=multiplied/10;
+  temp_test=multiplied;
   
   return temp_test;
+}
+
+//****************************************************************************************************************************************************
+void Rappresentazione_Conc_Percent(unsigned int bin)
+{
+    unsigned int decimillesimi;
+    
+
+    decimillesimi=bin;
+    
+
+    if(decimillesimi>9999)decimillesimi=9999;
+
+    if(decimillesimi>999)
+    {
+            struct_conc_print.conc_to_print     = decimillesimi/10;
+            struct_conc_print.decimali_to_print =UN_DECIMALE;
+    }
+    else
+    {
+            struct_conc_print.conc_to_print=decimillesimi;
+            struct_conc_print.decimali_to_print =DUE_DECIMALI;
+    }
+  
 }
