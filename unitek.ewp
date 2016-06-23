@@ -2944,6 +2944,9 @@
         <name>$PROJ_DIR$\menu\Menu.c</name>
       </file>
       <file>
+        <name>$PROJ_DIR$\menu\MenuFunctions.c</name>
+      </file>
+      <file>
         <name>$PROJ_DIR$\menu\menustrings.c</name>
       </file>
       <file>
@@ -3054,6 +3057,9 @@
     </file>
     <file>
       <name>$PROJ_DIR$\freertos\queue.c</name>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\freertos\timers.c</name>
     </file>
   </group>
   <group>

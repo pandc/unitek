@@ -48,13 +48,7 @@ extern unsigned char unita_mis_concentr;
 
 extern unsigned int keyold_flags;
 
-extern unsigned int menu_triang_x,menu_triang_y;
-//extern unsigned char menu_triang_index;
-extern unsigned char menu_triang_limit_up;
-extern unsigned char menu_triang_limit_dn;
-extern unsigned char menu_triang_limit_dx;
-extern unsigned char menu_triang_limit_sx;
-extern unsigned char menu_triang_index;
+extern  TimerHandle_t xTimers[ NUM_TIMERS ];
 
 extern unsigned char array_line[128];//un array abbastanza grande da contenere la + lunga linea possibile
 extern unsigned char char_size;
@@ -63,7 +57,7 @@ extern unsigned char screen_image[1024];
 extern unsigned int global_flags;
 extern unsigned int key_flags;
 
-extern unsigned int triangolino_inversion_timer;
+
 extern unsigned char loop_flag;
 extern unsigned int blink_timer_on;
 
@@ -115,9 +109,9 @@ void  Sub2MenuSelTipoCurvaLavoro(void)
         {
                 key_getstroke(&key,portMAX_DELAY);
                 if (key == KEY_PROG)
-                //if(CHECK_TASTO_PROG_PRESSED)
+                
                 {
-                        CLEAR_TASTO_PROG_PRESSED;
+                        
                         MenuFunction_Index=SUBMENU_SELECTED_PROGR;
                         loop_flag=0;
 
@@ -126,7 +120,7 @@ void  Sub2MenuSelTipoCurvaLavoro(void)
                 if (key == KEY_OK)
                 //if(CHECK_TASTO_OK_PRESSED)
                 {
-                        CLEAR_TASTO_OK_PRESSED;
+                        
                         RamSettings.ptype_arr[selected_progr].curva_lav_cal_type=submenuCurLavType_index;
                         test=SaveRamSettings_in_External_DataFlash();
                         if(!test)
@@ -140,7 +134,7 @@ void  Sub2MenuSelTipoCurvaLavoro(void)
                         DisegnaMarker(102,menu_triang_y,y_old);
                         y_old=menu_triang_y;
                         if(submenuCurLavType_index==CALIBR_CENTR)MenuFunction_Index=SUB3MENU_CURVA_DI_LAVORO;
-                        else					MenuFunction_Index=SUB3MENU_SEL_LCH;
+                        else					 MenuFunction_Index=SUB3MENU_SEL_LCH;
 
                         loop_flag=0;
                 }
@@ -153,7 +147,7 @@ void  Sub2MenuSelTipoCurvaLavoro(void)
                         {
                                 MoveTriangolinoDown();
                                 if(submenuCurLavType_index<5)submenuCurLavType_index+=1;
-                                CLEAR_TASTO_DN_DX_PRESSED;
+                                
                         }
 
                         if (key == KEY_UPLEFT)
@@ -161,11 +155,11 @@ void  Sub2MenuSelTipoCurvaLavoro(void)
                         {
                                 MoveTriangolinoUp();
                                 if(submenuCurLavType_index)submenuCurLavType_index-=1;
-                                CLEAR_TASTO_UP_SX_PRESSED;
+                                
                         }
                 }
 
-                //if(CHECK_ARROW_KEYS_MOVE_SXDX)
+                //
                 {
 
 
@@ -232,7 +226,7 @@ void Sub2Sel_L_C_H(void)
                   MoveTriangolinoDown();
                   MoveTriangolinoDown();
                   if(menu_L_C_H<15)menu_L_C_H+=1;
-                  CLEAR_TASTO_DN_DX_PRESSED;
+                  
           }
 
           if(key==KEY_UPLEFT)
@@ -240,13 +234,13 @@ void Sub2Sel_L_C_H(void)
                   MoveTriangolinoUp();
                   MoveTriangolinoUp();
                   if(menu_L_C_H)menu_L_C_H-=1;
-                  CLEAR_TASTO_UP_SX_PRESSED;
+                  
           }
         }
-        else//cioè if(CHECK_ARROW_KEYS_MOVE_SXDX)
+        else//cioè 
         {
-                if(CHECK_TASTO_DN_DX_PRESSED)CLEAR_TASTO_DN_DX_PRESSED;
-                if(CHECK_TASTO_UP_SX_PRESSED)CLEAR_TASTO_UP_SX_PRESSED;
+                
+                
         }
 
     	if(CHECK_PIU_MENO_ENABLED)
@@ -321,7 +315,7 @@ void Sub2Sel_L_C_H(void)
             {
                     incr_step=1;
                     incr_counter=0;
-                    CLEAR_TASTO_PLUS_RELEASED;
+                    
             }
 
 
@@ -404,13 +398,13 @@ void Sub2Sel_L_C_H(void)
                 {
                         incr_step=1;
                         incr_counter=0;
-                        CLEAR_TASTO_MENO_RELEASED;
+
                 }
                 
                 if (key == KEY_PROG)
-                //if(CHECK_TASTO_PROG_PRESSED)
+                
                 {
-                        CLEAR_TASTO_PROG_PRESSED;
+                        
                         MenuFunction_Index=SUB2MENU_SEL_TIPO_CURV_LAV;
                         loop_flag=0;
 
@@ -459,7 +453,7 @@ void Sub2Sel_L_C_H(void)
                              PROGR_IN_USO.curva_lav_XconducH=measures.conduc;
                             } 
                             MoveTriangolinoSx();
-                            CLEAR_TASTO_OK_PRESSED;
+                            
                             MenuFunction_Index=SUB3MENU_CURVA_DI_LAVORO3pt;
                             
                             test=SaveRamSettings_in_External_DataFlash();
@@ -558,7 +552,7 @@ void Sub2MenuCurvadiLavoro(void)
                 if (key == KEY_OK)
                 //if(CHECK_TASTO_OK_PRESSED)
                 {
-                        CLEAR_TASTO_OK_PRESSED;
+                        
 
 
                         if(menu_triang_x==0)
@@ -572,7 +566,6 @@ void Sub2MenuCurvadiLavoro(void)
                         {
                                 MoveTriangolinoSx();
                                 MARK_ARROW_KEYS_MOVE_UPDOWN;
-                                CLEAR_ARROW_KEYS_MOVE_SXDX;
                                 CLEAR_PIU_MENO_ENABLED;
                                 PROGR_IN_USO.curva_lav_C_index=page*5+menu_triang_index;
                                 
@@ -606,9 +599,9 @@ void Sub2MenuCurvadiLavoro(void)
                 }
 
                 if (key == KEY_PROG)
-                //if(CHECK_TASTO_PROG_PRESSED)
+                
                 {
-                        CLEAR_TASTO_PROG_PRESSED;
+                        
                         MenuFunction_Index=SUB2MENU_SEL_TIPO_CURV_LAV;
                         loop_flag=0;
 
@@ -639,11 +632,11 @@ void Sub2MenuCurvadiLavoro(void)
                                 }
                         }
                         else if (key == (KEY_PLUS | KEY_RELEASED))
-                        //if(CHECK_TASTO_PLUS_RELEASED)
+                        
                         {
                                 incr_step=1;
                                 incr_counter=0;
-                                CLEAR_TASTO_PLUS_RELEASED;
+                                
                         }
 
                         if ((key == KEY_MINUS) || (last_key == KEY_MINUS))
@@ -678,7 +671,7 @@ void Sub2MenuCurvadiLavoro(void)
                         {
                                 incr_step=1;
                                 incr_counter=0;
-                                CLEAR_TASTO_MENO_RELEASED;
+
                         }
                 }
 
@@ -702,7 +695,7 @@ void Sub2MenuCurvadiLavoro(void)
                                 else              to_print=0;
 
 
-                                CLEAR_TASTO_DN_DX_PRESSED;
+                                
                         }
 
                         if (key == KEY_UPLEFT)
@@ -724,13 +717,12 @@ void Sub2MenuCurvadiLavoro(void)
                                 }
                                 else              to_print=0;
 
-                                CLEAR_TASTO_UP_SX_PRESSED;
+                                
                         }
                 }
-                else//cioè if(CHECK_ARROW_KEYS_MOVE_SXDX)
+                else
                 {
-                        //if(CHECK_TASTO_DN_DX_PRESSED)CLEAR_TASTO_DN_DX_PRESSED;
-                        //if(CHECK_TASTO_UP_SX_PRESSED)CLEAR_TASTO_UP_SX_PRESSED;
+                        
                 }
 		
 
@@ -853,7 +845,7 @@ void Sub2MenuCurvadiLavoro3Punti(void)
 			if (key == KEY_OK)
 			//if(CHECK_TASTO_OK_PRESSED)
 			{
-				CLEAR_TASTO_OK_PRESSED;
+				
 
 				switch(menu_triang_y)
 				{
@@ -870,7 +862,7 @@ void Sub2MenuCurvadiLavoro3Punti(void)
 				{
 					MoveTriangolinoSx();
 					MARK_ARROW_KEYS_MOVE_UPDOWN;
-					CLEAR_ARROW_KEYS_MOVE_SXDX;
+					
 					CLEAR_PIU_MENO_ENABLED;
 					PROGR_IN_USO.curva_lav_C_index=page*5+menu_triang_index;
 
@@ -890,9 +882,9 @@ void Sub2MenuCurvadiLavoro3Punti(void)
 			}
 
 			if (key == KEY_PROG)
-			//if(CHECK_TASTO_PROG_PRESSED)
+			
 			{
-				CLEAR_TASTO_PROG_PRESSED;
+				
 				MenuFunction_Index=SUB3MENU_SEL_LCH;
 				loop_flag=0;
 
@@ -907,11 +899,11 @@ void Sub2MenuCurvadiLavoro3Punti(void)
 					
 				}
 				else if (key == (KEY_PLUS | KEY_RELEASED))
-				//if(CHECK_TASTO_PLUS_RELEASED)
+				
 				{
 					incr_step=1;
 					incr_counter=0;
-					CLEAR_TASTO_PLUS_RELEASED;
+					
 				}
 
 				if ((key == KEY_MINUS) || (last_key == KEY_MINUS))
@@ -925,7 +917,7 @@ void Sub2MenuCurvadiLavoro3Punti(void)
 				{
 					incr_step=1;
 					incr_counter=0;
-					CLEAR_TASTO_MENO_RELEASED;
+
 				}
 
 			}
@@ -950,7 +942,7 @@ void Sub2MenuCurvadiLavoro3Punti(void)
 					else              to_print=0;
 
 
-					CLEAR_TASTO_DN_DX_PRESSED;
+					
 				}
 
 				if (key == KEY_UPLEFT)
@@ -972,13 +964,13 @@ void Sub2MenuCurvadiLavoro3Punti(void)
 					}
 					else              to_print=0;
 
-					CLEAR_TASTO_UP_SX_PRESSED;
+					
 				}
 			}
-			else//cioè if(CHECK_ARROW_KEYS_MOVE_SXDX)
+			else//cioè 
 			{
-				//if(CHECK_TASTO_DN_DX_PRESSED)CLEAR_TASTO_DN_DX_PRESSED;
-				//if(CHECK_TASTO_UP_SX_PRESSED)CLEAR_TASTO_UP_SX_PRESSED;
+				//if(CHECK_TASTO_DN_DX_PRESSED)
+				//if(CHECK_TASTO_UP_SX_PRESSED)
 			}
 		}//fine if(CHECK_KEY_READY)
 
@@ -1093,160 +1085,159 @@ void Sub2MenuImpostaSoglie(void)
 	{
 		if (key_getstroke(&key,kDec*2))
 			last_key = key;
-		else
-			key = 0;
-		//if(CHECK_KEY_READY)
-		{
+		else	key = 0;
+		
+		
 			
-			if (key == KEY_OK)
-			//if(CHECK_TASTO_OK_PRESSED)
-			{
-				CLEAR_TASTO_OK_PRESSED;
+                if (key == KEY_OK)
+                //if(CHECK_TASTO_OK_PRESSED)
+                {
+                        
 
 
-				if(menu_triang_x==0)
-				{
-					MoveTriangolinoDx();
-					//non marcare MOVE_SXDX!!
-					CLEAR_ARROW_KEYS_MOVE_UPDOWN;
-					MARK_PIU_MENO_ENABLED;
-				}
-				else
-				{
-					MoveTriangolinoSx();
-					MARK_ARROW_KEYS_MOVE_UPDOWN;
-					CLEAR_ARROW_KEYS_MOVE_SXDX;
-					CLEAR_PIU_MENO_ENABLED;
-                                        
-                                        
-                                        test=SaveRamSettings_in_External_DataFlash();
-                                        if(!test)
+                        if(menu_triang_x==0)
+                        {
+                                MoveTriangolinoDx();
+                                //non marcare MOVE_SXDX!!
+                                CLEAR_ARROW_KEYS_MOVE_UPDOWN;
+                                MARK_PIU_MENO_ENABLED;
+                        }
+                        else
+                        {
+                                MoveTriangolinoSx();
+                                MARK_ARROW_KEYS_MOVE_UPDOWN;
+                                
+                                CLEAR_PIU_MENO_ENABLED;
+                                
+                                
+                                test=SaveRamSettings_in_External_DataFlash();
+                                if(!test)
+                                {
+                                      LCD_Fill_ImageRAM(0x00);
+                                      SelectFont(CALIBRI_10);
+                                      LCDPrintString("File system error",4,24);
+                                      LCD_CopyPartialScreen(4,80,24,36);
+                                }
+
+                        }
+                }
+
+                if (key == KEY_PROG)
+                
+                {
+                        
+                        MenuFunction_Index=SUBMENU_SELECTED_PROGR;
+                        loop_flag=0;
+
+                }
+
+                if(CHECK_PIU_MENO_ENABLED)
+                {
+                        if ((key == KEY_PLUS) || (last_key == KEY_PLUS))
+                        //if(CHECK_TASTO_PLUS_PRESSED)
+                        {
+
+                                if(menu_triang_x==menu_triang_limit_dx)
+                                {
+                                        incr_counter++;
+                                        if(incr_counter>10) incr_step=10;
+                                        if(incr_counter>20)
                                         {
-                                              LCD_Fill_ImageRAM(0x00);
-                                              SelectFont(CALIBRI_10);
-                                              LCDPrintString("File system error",4,24);
-                                              LCD_CopyPartialScreen(4,80,24,36);
+                                                incr_step=100;
+                                                incr_counter=21;
                                         }
 
-				}
-			}
 
-			if (key == KEY_PROG)
-			//if(CHECK_TASTO_PROG_PRESSED)
-			{
-				CLEAR_TASTO_PROG_PRESSED;
-				MenuFunction_Index=SUBMENU_SELECTED_PROGR;
-				loop_flag=0;
+                                        string_index=menu_triang_index;
+                                        IncrSoglia(string_index,incr_step);
+                                        //LCDPrintString(StringsSubmenuImpostaSoglie[string_index],10,strings_y);
+                                        CleanArea_Ram_and_Screen(82,110,menu_triang_y,menu_triang_y+10);
+                                        PrintSoglia(string_index,82,menu_triang_y);
+                                        LCD_CopyPartialScreen(82,110,menu_triang_y,menu_triang_y+10);
+                                        //PrintUnitMis(string_index,112,strings_y);
+                                }
+                        }
+                        else if (key == (KEY_PLUS | KEY_RELEASED))
+                        
+                        {
+                                incr_step=1;
+                                incr_counter=0;
+                                
+                        }
 
-			}
+                        if ((key == KEY_MINUS) || (last_key == KEY_MINUS))
+                        //if(CHECK_TASTO_MENO_PRESSED)
+                        {
 
-			if(CHECK_PIU_MENO_ENABLED)
-			{
-				if ((key == KEY_PLUS) || (last_key == KEY_PLUS))
-				//if(CHECK_TASTO_PLUS_PRESSED)
-				{
-
-					if(menu_triang_x==menu_triang_limit_dx)
-					{
-						incr_counter++;
-						if(incr_counter>10) incr_step=10;
-						if(incr_counter>20)
-						{
-							incr_step=100;
-							incr_counter=21;
-						}
-
-
-						string_index=menu_triang_index;
-						IncrSoglia(string_index,incr_step);
-						//LCDPrintString(StringsSubmenuImpostaSoglie[string_index],10,strings_y);
-						CleanArea_Ram_and_Screen(82,110,menu_triang_y,menu_triang_y+10);
-						PrintSoglia(string_index,82,menu_triang_y);
-						LCD_CopyPartialScreen(82,110,menu_triang_y,menu_triang_y+10);
-						//PrintUnitMis(string_index,112,strings_y);
-					}
-				}
-				else if (key == (KEY_PLUS | KEY_RELEASED))
-				//if(CHECK_TASTO_PLUS_RELEASED)
-				{
-					incr_step=1;
-					incr_counter=0;
-					CLEAR_TASTO_PLUS_RELEASED;
-				}
-
-				if ((key == KEY_MINUS) || (last_key == KEY_MINUS))
-				//if(CHECK_TASTO_MENO_PRESSED)
-				{
-
-					if(menu_triang_x==menu_triang_limit_dx)
-					{
-						incr_counter++;
-						if(incr_counter>10)
-						{
-							incr_step=10;
-						}
-						if(incr_counter>20)
-						{
-							incr_step=100;
-							incr_counter=21;
-						}
+                                if(menu_triang_x==menu_triang_limit_dx)
+                                {
+                                        incr_counter++;
+                                        if(incr_counter>10)
+                                        {
+                                                incr_step=10;
+                                        }
+                                        if(incr_counter>20)
+                                        {
+                                                incr_step=100;
+                                                incr_counter=21;
+                                        }
 
 
-						string_index=menu_triang_index;
-						DecrSoglia(string_index,incr_step);
-						//LCDPrintString(StringsSubmenuImpostaSoglie[string_index],10,strings_y);
-						CleanArea_Ram_and_Screen(82,110,menu_triang_y,menu_triang_y+10);
-						PrintSoglia(string_index,82,menu_triang_y);
-						LCD_CopyPartialScreen(82,110,menu_triang_y,menu_triang_y+10);
-						//PrintUnitMis(string_index,112,strings_y);
-					}
-				}
-				else if (key == (KEY_MINUS | KEY_RELEASED))
-				//if(CHECK_TASTO_MENO_RELEASED)
-				{
-					incr_step=1;
-					incr_counter=0;
-					CLEAR_TASTO_MENO_RELEASED;
-				}
+                                        string_index=menu_triang_index;
+                                        DecrSoglia(string_index,incr_step);
+                                        //LCDPrintString(StringsSubmenuImpostaSoglie[string_index],10,strings_y);
+                                        CleanArea_Ram_and_Screen(82,110,menu_triang_y,menu_triang_y+10);
+                                        PrintSoglia(string_index,82,menu_triang_y);
+                                        LCD_CopyPartialScreen(82,110,menu_triang_y,menu_triang_y+10);
+                                        //PrintUnitMis(string_index,112,strings_y);
+                                }
+                        }
+                        else if (key == (KEY_MINUS | KEY_RELEASED))
+                        //if(CHECK_TASTO_MENO_RELEASED)
+                        {
+                                incr_step=1;
+                                incr_counter=0;
 
-			}
+                        }
 
-			if(CHECK_ARROW_KEYS_MOVE_UPDOWN)
-			{
-				if (key == KEY_DOWNRIGHT)
-				//if(CHECK_TASTO_DN_DX_PRESSED)
-				{
-					MoveTriangolinoDown();
-					if(menu_ImpostaSoglie_index<7)menu_ImpostaSoglie_index+=1;
-					if(menu_ImpostaSoglie_index>4)//lo scroll in basso serve solo nei casi che debba mostrare oltre la 5a stringa
-					{
-						if(scroll_old==menu_ImpostaSoglie_index)to_print=0;
-						else                           to_print=1;
+                }
 
-					}
-					CLEAR_TASTO_DN_DX_PRESSED;
-				}
+                if(CHECK_ARROW_KEYS_MOVE_UPDOWN)
+                {
+                        if (key == KEY_DOWNRIGHT)
+                        //if(CHECK_TASTO_DN_DX_PRESSED)
+                        {
+                                MoveTriangolinoDown();
+                                if(menu_ImpostaSoglie_index<7)menu_ImpostaSoglie_index+=1;
+                                if(menu_ImpostaSoglie_index>4)//lo scroll in basso serve solo nei casi che debba mostrare oltre la 5a stringa
+                                {
+                                        if(scroll_old==menu_ImpostaSoglie_index)to_print=0;
+                                        else                           to_print=1;
 
-				if (key == KEY_UPLEFT)
-				//if(CHECK_TASTO_UP_SX_PRESSED)
-				{
-					MoveTriangolinoUp();
-					if(menu_ImpostaSoglie_index)menu_ImpostaSoglie_index-=1;
-					if(menu_ImpostaSoglie_index<3)//lo scroll in alto può servire se sono prima della 4 stringa
-					{
-						if(scroll_old==menu_ImpostaSoglie_index)to_print=0;
-						else                           to_print=1;
-					}
-					CLEAR_TASTO_UP_SX_PRESSED;
-				}
-			}
-			else//cioè if(CHECK_ARROW_KEYS_MOVE_SXDX)
-			{
+                                }
+                                
+                        }
+
+                        if (key == KEY_UPLEFT)
+                        //if(CHECK_TASTO_UP_SX_PRESSED)
+                        {
+                                MoveTriangolinoUp();
+                                if(menu_ImpostaSoglie_index)menu_ImpostaSoglie_index-=1;
+                                if(menu_ImpostaSoglie_index<3)//lo scroll in alto può servire se sono prima della 4 stringa
+                                {
+                                        if(scroll_old==menu_ImpostaSoglie_index)to_print=0;
+                                        else                           to_print=1;
+                                }
+                                
+                        }
+                }
+                else//cioè 
+                {
 
 
 
-			}
-		}//fine if(CHECK_KEY_READY)
+                }
+		
 
 
 
@@ -1287,9 +1278,7 @@ void Sub2MenuImpostaSoglie(void)
 
 			LCD_Fill_ImageRAM(0x00);
 
-#ifdef DISEGNA_CORNICE
-	DisegnaCornice();
-#endif
+
 			DisegnaTriangolinoMenu(0,menu_triang_y);
 			SelectFont(CALIBRI_10);
 
@@ -1319,42 +1308,66 @@ void Sub2MenuImpostaSoglie(void)
 void Sub2MenuImpostaTimer(void)
 {
 	uint8_t key;
-	unsigned char loop_flag=1;
+	unsigned char loop_flag=1,to_print=1;
+        unsigned short string_index=0,strings_y=2;
+	
+	unsigned char first_string_to_print,last_string_to_print;
 
 	menu_triang_limit_up=2;
 	menu_triang_limit_dn=38;
 	menu_triang_y=2;
 
 	LCD_Fill_ImageRAM(0x00);
+        
+        unsigned char prova=0;
 
 #ifdef DISEGNA_CORNICE
 	DisegnaCornice();
 #endif
 
 
-	//DisegnaTriangolinoMenu(0,menu_triang_y);
 
 
 
 
 	SelectFont(CALIBRI_10);
-	LCDPrintString("TIMER..da fare..",8,26);
+	
+              if( xTimerStart( xTimers[ prova ], 0 ) != pdPASS )
+              {
+                  // The timer could not be set into the Active state.
+              }
 
 
-
-	LCD_CopyScreen();
+	
 
 	key = 0;
 	while(loop_flag)
 	{
 		if (key_getstroke(&key,portMAX_DELAY) && (key == KEY_PROG))
-		//if(CHECK_TASTO_PROG_PRESSED)
+		
 		{
-			CLEAR_TASTO_PROG_PRESSED;
+			
 			MenuFunction_Index=SUBMENU_SELEZIONA_PROG;
 			loop_flag=0;
 
 		}
+                
+                if(to_print)
+                {
+                  to_print=0;
+                  
+                  for(string_index=first_string_to_print;string_index<last_string_to_print;string_index++)
+                  {
+                          LCDPrintString(StringsSubmenuImpostaTimer[RamSettings.Linguaggio][string_index],10,strings_y);
+                          PrintSoglia(string_index,82,strings_y);
+                          PrintUnitMis(string_index,112,strings_y);
+
+
+                          strings_y+=H_RIGA_CALIBRI10;
+                  }
+                }
+                
+                
 	}
 
 
@@ -1404,12 +1417,7 @@ void Sub2MenuImpostaSimboli(void)
 	{
 		key_getstroke(&key,portMAX_DELAY);
 
-		/*if(CHECK_TASTO_OK_PRESSED)
-		{
-			CLEAR_TASTO_OK_PRESSED;
-			MARK_ARROW_KEYS_MOVE_SXDX;
 
-		}*/
 
 
 		if(CHECK_ARROW_KEYS_MOVE_UPDOWN)
@@ -1420,7 +1428,7 @@ void Sub2MenuImpostaSimboli(void)
 				MoveTriangolinoDown();
 				if(submenuImpostaSimboli_index<4)submenuImpostaSimboli_index+=1;
 				else				 submenuImpostaSimboli_index=5;
-				CLEAR_TASTO_DN_DX_PRESSED;
+				
 			}
 
 			if (key == KEY_UPLEFT)
@@ -1429,10 +1437,10 @@ void Sub2MenuImpostaSimboli(void)
 				MoveTriangolinoUp();
 				if(submenuImpostaSimboli_index)submenuImpostaSimboli_index-=1;
 				else 						   submenuImpostaSimboli_index =0;
-				CLEAR_TASTO_UP_SX_PRESSED;
+				
 			}
 		}
-		else//cioè if(CHECK_ARROW_KEYS_MOVE_SXDX)
+		else//cioè 
 		{
 
 
@@ -1455,13 +1463,13 @@ void Sub2MenuImpostaSimboli(void)
 			DisegnaMarker(80,menu_triang_y,y_old);//il 3° parametro è la y del triangolino da cancellare
 
 			y_old=menu_triang_y;
-			CLEAR_TASTO_OK_PRESSED;
+			
 		}
 
 		if (key == KEY_PROG)
-		//if(CHECK_TASTO_PROG_PRESSED)
+		
 		{
-			CLEAR_TASTO_PROG_PRESSED;
+			
 			MenuFunction_Index=SUBMENU_SELECTED_PROGR;
 			loop_flag=0;
 
@@ -1519,7 +1527,7 @@ void Sub2MenuTK(void)
 					MoveTriangolinoDown();
 					if(submenuTK_index<1)submenuTK_index+=1;
 					else		     submenuTK_index=1;
-					CLEAR_TASTO_DN_DX_PRESSED;
+					
 				}
 
 				if (key == KEY_UPLEFT)
@@ -1528,10 +1536,10 @@ void Sub2MenuTK(void)
 					MoveTriangolinoUp();
 					if(submenuTK_index)submenuTK_index-=1;
 					else 		   submenuTK_index =0;
-					CLEAR_TASTO_UP_SX_PRESSED;
+					
 				}
 			}
-			//else//cioè if(CHECK_ARROW_KEYS_MOVE_SXDX)
+			//else//cioè 
 			{
 
 
@@ -1541,7 +1549,7 @@ void Sub2MenuTK(void)
 			if (key == KEY_OK)
 			//if(CHECK_TASTO_OK_PRESSED)
 			{
-				CLEAR_TASTO_OK_PRESSED;
+				
                                 if(menu_triang_y==menu_triang_limit_dn)
                                 {
 
@@ -1556,7 +1564,7 @@ void Sub2MenuTK(void)
 					{
 						MoveTriangolinoSx();
 						MARK_ARROW_KEYS_MOVE_UPDOWN;
-						CLEAR_ARROW_KEYS_MOVE_SXDX;
+						
 						CLEAR_PIU_MENO_ENABLED;
 
 						PROGR_IN_USO.TK.tk2.old_TK=PROGR_IN_USO.TK.tk2.nuovo_TK;
@@ -1598,11 +1606,11 @@ void Sub2MenuTK(void)
 						}
 					}
 					else if (key == (KEY_PLUS | KEY_RELEASED))
-					//if(CHECK_TASTO_PLUS_RELEASED)
+					
 					{
 						incr_step=1;
 						incr_counter=0;
-						CLEAR_TASTO_PLUS_RELEASED;
+						
 					}
 
 
@@ -1637,15 +1645,15 @@ void Sub2MenuTK(void)
 					{
 						incr_step=1;
 						incr_counter=0;
-						CLEAR_TASTO_MENO_RELEASED;
+
 					}
 
 				}
 
 			if (key == KEY_PROG)
-			//if(CHECK_TASTO_PROG_PRESSED)
+			
 			{
-				CLEAR_TASTO_PROG_PRESSED;
+				
 				MenuFunction_Index=SUBMENU_SELEZIONA_PROG;
 				loop_flag=0;
 			}
@@ -1664,104 +1672,4 @@ void Sub2MenuTK(void)
 		}
 	}
 }
-//***************************************************************************************
-void DisegnaMarker(unsigned short x,unsigned short y,unsigned short y_old)
-{
-	mybmp_struct1.start_x=x;
-	mybmp_struct1.start_y=y;
-	CleanArea_Ram_and_Screen(x,x+10,y_old,y_old+10);
-	CleanArea_Ram_and_Screen(x,x+10,y,y+10);
-	LCD_DrawChar('*');
-	LCD_CopyPartialScreen(x,x+10,y,y+10);
-}
-//***************************************************************************************
-void DisegnaCarattereBlink(char char_to_blink,unsigned short x,unsigned short y,unsigned char *toggler)
-{
-	//if(!blink_timer_on)
-	{
-		//blink_timer_on=50;
-		if(*toggler)
-		{
-			*toggler=0;
-			CleanArea_Ram_and_Screen(x,x+10,y,y+10);
-		}
-		else
-		{
-			*toggler=1;
-			mybmp_struct1.start_x=x;
-			mybmp_struct1.start_y=y;
-			LCD_DrawChar(char_to_blink);
-			LCD_CopyPartialScreen(x,x+10,y,y+10);
-		}
-	}
-
-}
-//***************************************************************************************
-//NB 16 elementi
-void RicalcolaCurvaLavoro(void)
-{
-	unsigned char i;
-	unsigned short step;
-
-	step=(unsigned short)(PROGR_IN_USO.curva_lav_Yconcent[PROGR_IN_USO.curva_lav_C_index]/PROGR_IN_USO.curva_lav_C_index);//curva_lavoro[0][selected_curva_lavoro_index]/selected_curva_lavoro_index;
-	//per i valori inferiori al punto centrale
-	for(i=0;i<PROGR_IN_USO.curva_lav_C_index;i++)
-	{
-		PROGR_IN_USO.curva_lav_Yconcent[i]=i*step;
-	}
-
-	//per i valori superiori al punto centrale
-	for(i=PROGR_IN_USO.curva_lav_C_index+1;i<16;i++)
-	{
-		PROGR_IN_USO.curva_lav_Yconcent[i]=i*step;
-	}
-}
-
-//***************************************************************************************
-//la curva ha 16 elementi
-void RicalcolaCurvaLavoro3pt(void)
-{
-      unsigned char i;
-      unsigned short step0_L,stepL_C,stepC_H,stepH_15;
-      
-      
-      step0_L =(unsigned short)(PROGR_IN_USO.curva_lav_Yconcent[PROGR_IN_USO.curva_lav_L_index]/PROGR_IN_USO.curva_lav_L_index);
-      
-      stepL_C =(unsigned short)((PROGR_IN_USO.curva_lav_Yconcent[PROGR_IN_USO.curva_lav_C_index]-PROGR_IN_USO.curva_lav_Yconcent[PROGR_IN_USO.curva_lav_L_index])/
-        (PROGR_IN_USO.curva_lav_C_index-PROGR_IN_USO.curva_lav_L_index));
-      
-       stepC_H =(unsigned short)((PROGR_IN_USO.curva_lav_Yconcent[PROGR_IN_USO.curva_lav_H_index]-PROGR_IN_USO.curva_lav_Yconcent[PROGR_IN_USO.curva_lav_C_index])/
-        (PROGR_IN_USO.curva_lav_H_index-PROGR_IN_USO.curva_lav_C_index));
-      
-      stepH_15 =stepC_H;//(PROGR_IN_USO.curva_lav_Yconcent[15]-PROGR_IN_USO.curva_lav_Yconcent[PROGR_IN_USO.curva_lav_H_index])/
-        //(15-PROGR_IN_USO.curva_lav_H_index);
-      
-      
-      
-     
-      //per i valori inferiori al punto L e per L
-      for(i=0;i<(PROGR_IN_USO.curva_lav_L_index);i++)//PROGR_IN_USO.curva_lav_L_index+1  per comprendere anche L ma L è già impostato
-      {
-              PROGR_IN_USO.curva_lav_Yconcent[i]=i*step0_L;
-      }
-     
-
-      //per i valori tra L e C,C compreso,L c'è già
-      for(i=(PROGR_IN_USO.curva_lav_L_index+1);i<(PROGR_IN_USO.curva_lav_C_index);i++)//PROGR_IN_USO.curva_lav_L_index+1  L è già a posto
-      {
-              PROGR_IN_USO.curva_lav_Yconcent[i]=PROGR_IN_USO.curva_lav_Yconcent[i-1]+stepL_C;//se L=100 e step =12 il 1° valore della seconda spezzata sarà 112
-      }
-  
-      
-      for(i=(PROGR_IN_USO.curva_lav_C_index+1);i<(PROGR_IN_USO.curva_lav_H_index);i++)//PROGR_IN_USO.curva_lav_C_index+1  C è già  a posto
-      {
-              PROGR_IN_USO.curva_lav_Yconcent[i]=PROGR_IN_USO.curva_lav_Yconcent[i-1]+stepC_H;//se C=200 e step =8 il 1° valore della seconda spezzata sarà 208
-      }
-    
-      
-      for(i=(PROGR_IN_USO.curva_lav_H_index+1);i<(15+1);i++)//15+1  per comprendere anche il 15° elemento
-      {
-              PROGR_IN_USO.curva_lav_Yconcent[i]=PROGR_IN_USO.curva_lav_Yconcent[i-1]+stepH_15;//se C=200 e step =8 il 1° valore della seconda spezzata sarà 208
-      }
-  
-}
+//***************************************************************************************   

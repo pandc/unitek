@@ -419,6 +419,13 @@ void LCD_DrawChar(char my_char)
     mybmp_struct1.start_x +=mybmp_struct1.font_info_pt->p_character_descriptor[char_offset].width;
     mybmp_struct1.start_x+=1;
 }
-
+//***************************************************************************************
+void DisegnaCornice (void)
+{
+	RigaHoriz(0,127,0);
+	RigaHoriz(0,127,63);
+	RigaVertic(0,0,63);
+	RigaVertic(127,0,63);
+}
 
 

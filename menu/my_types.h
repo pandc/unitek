@@ -54,6 +54,35 @@ typedef union
 
 typedef struct
 {
+  unsigned int T1_Rit_Accensione_CH_C;
+  unsigned int T2_Dosaggio;
+  unsigned int T3_Rit_Dos;
+  unsigned int T4_AllMin_C;
+  unsigned int T5_AllMax_C;
+  unsigned int T6_Rit_Accensione_CH_C;
+  unsigned int T7_Riscald;
+  unsigned int T8_AllMin_T;
+  unsigned int T9_AllMax_T;
+  
+}T9_type;
+
+
+typedef union
+{
+  T9_type Timers_9;
+  
+  unsigned int Timers_values[9];
+  
+  
+  
+}Timer9_type;
+
+
+
+
+
+typedef struct
+{
 	unsigned char unita_mis_concentr;//1
         setp_e_soglie_type setp_e_soglie;//16 bytes
 	TK_type TK;						 //8
@@ -75,8 +104,9 @@ typedef struct
 	float temp_acq_curva_lav;
         
         unsigned int curva_lav_YconcentC_intero;
+        
+        Timer9_type   Timers;
 }program_type;
-
 
 
 
@@ -92,6 +122,9 @@ typedef struct
 	unsigned char ComunRS485;
 	unsigned char ComunUSB;
 	unsigned char Linguaggio;
+        
+        
+        
 }my_RamSettings_type;
 
 typedef struct
@@ -143,6 +176,8 @@ typedef struct
   unsigned int decimali_to_print;
   unsigned int resto;
 }print_conc_var;
+
+
 
 
 #endif /* MY_TYPES_H_ */

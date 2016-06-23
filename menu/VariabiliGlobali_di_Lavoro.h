@@ -11,7 +11,8 @@
 #include "my_types.h"
 
 extern unsigned int global_flags;
-extern unsigned int key_flags;
+extern unsigned int timer_flags;
+
 
 
 //extern unsigned char unita_mis_concentr;
@@ -39,7 +40,7 @@ extern unsigned char stato_intervento_temper,stato_intervento_conc;
 extern unsigned int TK_attuale;
 extern unsigned int TK_nuovo ;
 //menu seleziona simbolo
-extern unsigned int abilita_disabilita;
+//extern unsigned int abilita_disabilita;
 
 //menu comunicazioni
 extern unsigned char stato_RS485;

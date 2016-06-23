@@ -21,7 +21,7 @@ const char StringsSubmenuSimboliConc   [5][4]={ "%",
 												"mS"
 													};
 
-const char StringsSubmenuCurvaLavoro  [16][4]={ "osX",
+const char StringsSubmenuCurvaLavoro  [16][4]={                                                 "0sX",
 												"01X",
 												"02X",
 												"03X",
@@ -127,7 +127,7 @@ const char StringsSubmenuImpostaSimboli [4][5][20]={{                           
                                                                                                 };//ITALIANO	//ENGLISH	//FRANCAIS	//ESPANOL
 
 
-const char StringsSubmenuImpostaSoglie[4][8][20]={{ "Set.Conc.", 	//ITALIANO
+const char StringsSubmenuImpostaSoglie[4][8][20]={{ "Set.Conc.", 	                                        //ITALIANO
                                                                                                 "All.Conc.Min",
                                                                                                 "All.Conc.Max",
                                                                                                 "Isteresis.Conc",

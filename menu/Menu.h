@@ -9,13 +9,21 @@
 #define SOURCES_MENU_H_
 
 #include "my_types.h"
+#include "timers.h"   
 
 extern print_conc_var struct_conc_print;
 extern unsigned char simbolo_in_uso;
 extern void (*MenuFunctionPt[30])(void);
 extern void (*WorkMenu_CalcPrint_UnMisura_Conc[8])(unsigned int);
 extern void (*CalcPrint_UnMisura_Conc[8])(unsigned int ,unsigned int,unsigned int);
-extern void (*IncrPrint_UnMisura_Conc[8])(unsigned short*,unsigned int,unsigned int,unsigned int);
+
+extern unsigned int menu_triang_x,menu_triang_y;
+extern unsigned char menu_triang_limit_up;
+extern unsigned char menu_triang_limit_dn;
+extern unsigned char menu_triang_limit_dx;
+extern unsigned char menu_triang_limit_sx;
+extern unsigned char menu_triang_index;
+
 
 
 void Formula_ConcConvers_Percent(unsigned int  bin);
@@ -35,6 +43,8 @@ unsigned int  FormulaInversa_Conc_milliSiemens(void);
 
 
 void Rappresentazione_Conc_Percent(unsigned int bin);
+
+void MyCreateTimers(void);
 
 
 
@@ -70,6 +80,15 @@ void IncrPrintConc_milliSiemens_xy(unsigned short* bin,unsigned int x,unsigned i
 void Convers_Res_to_Temp(float* float_res);
 float CalcoloConcent_Now(float conduc_meas);
 float CompensConduc_TK(float*) ;
+
+void CalcPrintTemperatura(float * t_float);
+void PrintConc_WorkMenu(float* c_float);
+void ControlloSoglieAllarmi_Temp(float*);
+void ControlloSoglieAllarmi_Conc(float*);
+void ControlloRitardi(void);
+
+
+void vTimerCallback( TimerHandle_t pxTimer );
 
 #define SET_CONC_INDEX      0
 #define ALL_CONC_MIN_INDEX  1

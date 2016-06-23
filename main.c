@@ -96,6 +96,8 @@ portTickType xLastWakeTime;
 	MenuInit();
 
 	meas_start();
+        
+       
 
 	// Initialise the xLastWakeTime variable with the current time.
 	xLastWakeTime = xTaskGetTickCount();
@@ -128,6 +130,7 @@ int main(void)
 	//InitRtc();
 
 	xTaskCreate(vInitTask,"initTask",128,NULL,tskIDLE_PRIORITY,NULL);
+        
 
 	vTaskStartScheduler();
 }
