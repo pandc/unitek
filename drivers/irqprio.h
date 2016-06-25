@@ -15,10 +15,7 @@
 #define ETH_IRQ_PRIO			(HIGHEST_RTOS_PRIO+2)		// lowest priority
 
 #define DMA2_Channel1_IRQ_PRIO	(HIGHEST_RTOS_PRIO+3)
-#define DMA2_Channel2_IRQ_PRIO	(DMA1_Channel4_IRQ_PRIO+1)
 #define SPI3_IRQ_PRIO			(HIGHEST_RTOS_PRIO+3)
-
-#define SPIDF_IRQ_PRIO			(HIGHEST_RTOS_PRIO+3)
 
 #define KBD_IRQn_EXTI_IRQ_PRIO	(HIGHEST_RTOS_PRIO+2)
 

@@ -44,7 +44,7 @@ static const SPI_InitTypeDef SPI_InitStructure[2] = {
 		.SPI_CPOL = SPI_CPOL_High,
 		.SPI_CPHA = SPI_CPHA_2Edge,
 		.SPI_NSS = SPI_NSS_Soft,
-		.SPI_BaudRatePrescaler = SPI_BaudRatePrescaler_32,//era 32
+		.SPI_BaudRatePrescaler = SPI_BaudRatePrescaler_32,
 		.SPI_FirstBit = SPI_FirstBit_MSB,
 		.SPI_CRCPolynomial = 7
 	},
@@ -137,7 +137,6 @@ void MSPI_Init(void)
 
 	spisetup = 0xff;
 	MSPI_Lock(SPISETUP_Dataflash);
-	MSPI_Unlock();
 
 	/* SPIx_Rx_DMA_Channel configuration ---------------------------------*/
 	DMA_DeInit(SPIx_Rx_DMA_Channel);
@@ -180,6 +179,8 @@ void MSPI_Init(void)
 
 	/* SPIx enable */
 	SPI_Cmd(SPIx, ENABLE);
+
+	MSPI_Unlock();
 }
 
 void MSPI_Write_Dma(const uint8_t *txb,uint8_t *rxb,uint16_t size,uint8_t incopt)

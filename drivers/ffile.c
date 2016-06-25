@@ -30,7 +30,7 @@
 #define	FAT_ATTR_TOSEND	(1 << 1)
 #define	FAT_ATTR_SENT	(1 << 2)
 
-#define MIN_DELAY()		vTaskDelay(1)
+#define MIN_DELAY()		taskYIELD()
 
 #define MAP_SET_PAGE(p)		map[(p) >> 3] |= 1 << ((p) & 7)
 #define MAP_BUSY_PAGE(p)	((map[(p) >> 3] & (1 << ((p) & 7))) != 0)
@@ -69,14 +69,6 @@ static inline void DF_DISABLE(void)
 {
 	GPIO_SetBits(DF_SELn_PORT,DF_SELn_PIN);
 	MSPI_Unlock();
-}
-
-static uint8_t MSPI_Write(uint8_t data)
-{
-	SPI_I2S_SendData(SPI3, data);
-	while (SPI_I2S_GetFlagStatus(SPI3, SPI_I2S_FLAG_RXNE) == RESET);
-	data = SPI_I2S_ReceiveData(SPI3);
-	return data;
 }
 
 // Initialization
@@ -164,19 +156,20 @@ static void write_SPI_page_buffer(uint16_t page_addr,uint16_t buffer_addr)
 
 static uint16_t readPageParam(uint16_t page,void *dest)
 {
-uint16_t i;
-
 	DF_ENABLE();
 	MSPI_Write(0xd2);	// Read main memory page
 	write_SPI_page_buffer(page,fd.fat_pagedata);
+#if 0
 	MSPI_Write(0);	// don't care
 	MSPI_Write(0);	// don't care
 	MSPI_Write(0);	// don't care
 	MSPI_Write(0);	// don't care
 	for (i = 0; i < sizeof(FATPGPARAMST); i++)
 		((uint8_t *)dest)[i] = MSPI_Write(0);
-// 	MSPI_Write_Dma(NULL,NULL,4,SPIDMAINC_NoInc);
-// 	MSPI_Write_Dma(NULL,dest,sizeof(FATPGPARAMST),SPIDMAINC_RxInc);
+#else
+ 	MSPI_Write_Dma(NULL,NULL,4,SPIDMAINC_NoInc);
+ 	MSPI_Write_Dma(NULL,dest,sizeof(FATPGPARAMST),SPIDMAINC_RxInc);
+#endif
 	DF_DISABLE();
 	MIN_DELAY();
 	return TRUE;
@@ -184,19 +177,20 @@ uint16_t i;
 
 static uint16_t readPagePartial(uint16_t page,uint16_t offset,void *dest,uint16_t len)
 {
-uint16_t i;
-
 	DF_ENABLE();
 	MSPI_Write(0xd2);	// Read main memory page
 	write_SPI_page_buffer(page,offset);	
+#if 0
 	MSPI_Write(0);	// don't care
 	MSPI_Write(0);	// don't care
 	MSPI_Write(0);	// don't care
 	MSPI_Write(0);	// don't care
 	for (i = 0; i < len; i++)
 		((uint8_t *)dest)[i] = MSPI_Write(0);
-// 	MSPI_Write_Dma(NULL,NULL,4,SPIDMAINC_NoInc);
-// 	MSPI_Write_Dma(NULL,dest,len,SPIDMAINC_RxInc);
+#else
+	MSPI_Write_Dma(NULL,NULL,4,SPIDMAINC_NoInc);
+	MSPI_Write_Dma(NULL,dest,len,SPIDMAINC_RxInc);
+#endif
 	DF_DISABLE();
 	MIN_DELAY();
 	return TRUE;
@@ -238,52 +232,55 @@ uint16_t st;
 
 static void setBuffer(uint16_t bufnum,uint8_t val)
 {
-uint16_t i;
-
 	DF_ENABLE();
 	MSPI_Write(0x84 + (bufnum*3));
+#if 0
 	MSPI_Write(0);
 	MSPI_Write(0);
 	MSPI_Write(0);
 	for (i = 0; i < fd.fat_pagelength; i++)
 		MSPI_Write(val);
-// 	MSPI_Write_Dma(NULL,NULL,3,SPIDMAINC_NoInc);
-// 	MSPI_Write_Dma(&val,NULL,fd.fat_pagelength,SPIDMAINC_NoInc);
+#else
+	MSPI_Write_Dma(NULL,NULL,3,SPIDMAINC_NoInc);
+	MSPI_Write_Dma(&val,NULL,fd.fat_pagelength,SPIDMAINC_NoInc);
+#endif
 	DF_DISABLE();
 	MIN_DELAY();
 }
 
 static void writeBuffer(uint16_t bufnum,uint16_t offset,void *src,uint16_t len)
 {
-uint16_t i;
-
 	DF_ENABLE();
 	MSPI_Write(0x84 + (bufnum*3));
 	write_SPI_page_buffer(0,offset);
+#if 0
 	for (i = 0; i < len; i++)
 		MSPI_Write(((uint8_t *)src)[i]);
-// 	if (len == 1)
-// 		MSPI_Write(((uint8_t *)src)[0]);
-// 	else
-// 		MSPI_Write_Dma(src,NULL,len,SPIDMAINC_TxInc);
+#else
+	if (len == 1)
+		MSPI_Write(((uint8_t *)src)[0]);
+	else
+		MSPI_Write_Dma(src,NULL,len,SPIDMAINC_TxInc);
+#endif
 	DF_DISABLE();
 	MIN_DELAY();
 }
 
 static uint16_t readBuffer(uint16_t bufnum,uint16_t offset,void *dest,uint16_t len)
 {
-uint16_t i;
-
 	DF_ENABLE();
 	MSPI_Write(0xd4 + (bufnum*2));
 	write_SPI_page_buffer(0,offset);
 	MSPI_Write(0);
+#if 0
 	for (i = 0; i < len; i++)
 		((uint8_t *)dest)[i] = MSPI_Write(0);
-// 	if (len == 1)
-// 		((uint8_t *)dest)[0] = MSPI_Write(0);
-// 	else
-// 		MSPI_Write_Dma(NULL,dest,len,SPIDMAINC_RxInc);		
+#else
+	if (len == 1)
+		((uint8_t *)dest)[0] = MSPI_Write(0);
+	else
+		MSPI_Write_Dma(NULL,dest,len,SPIDMAINC_RxInc);
+#endif
 	DF_DISABLE();
 	MIN_DELAY();
 	return TRUE;
