@@ -83,7 +83,7 @@ typedef struct
 #define TEMP_MAX_LIMIT		   1300
 #define TEMP_MIN_LIMIT		    100
 
-void MenuTempHum(void);
+void SchermataDiLavoro(void);
 void MenuProg(void);
 void SubmenuINOUT(void);
 void SubmenuSelProgr(void);
@@ -171,7 +171,15 @@ void WriteMyFlashSector(void);
 #define CALIBR_CENTR 0
 #define CALIBR_3pt   1
 
-
+#define TIMER1_RIT_ACC_CONC     0
+#define TIMER2_TOUT_DOSAGGIO    1
+#define TIMER3_RIT_DOSAGGIO     2
+#define TIMER4_RIT_ALL_MIN_CONC 3
+#define TIMER5_RIT_ALL_MAX_CONC 4
+#define TIMER6_RIT_ACC_TEMP     5
+#define TIMER7_TOUT_TEMP        6
+#define TIMER8_RIT_ALL_MIN_TEMP 7
+#define TIMER9_RIT_ALL_MAX_TEMP 8
 
 #define OVER_CONC_MAX 						0x1
 #define MARK_OVER_CONC_MAX  	(global_flags |= OVER_CONC_MAX )
@@ -218,17 +226,9 @@ void WriteMyFlashSector(void);
 #define CLEAR_ALARM_CONC_MIN 		(global_flags &=~ALARM_CONC_MIN )
 #define CHECK_ALARM_CONC_MIN 		(global_flags &  ALARM_CONC_MIN )
 
-
-
-
-#define ALARMS_CONC_MASK                 ALARM_CONC_MAX | ALARM_CONC_MIN  
-#define CLEAR_ALARMS_MASK 		(global_flags &=~ALARMS_MASK )
-#define CHECK_ALARMS_MASK		(global_flags &  ALARMS_MASK )
-
-#define CONC_MASK  ALARMS_CONC_MASK  |  PREALARMS_CONC_MASK
-#define CHECK_CONC_MASK                 (global_flags &  CONC_MASK )
-
-
+#define ALARMS_CONC_MASK                (ALARM_CONC_MAX | ALARM_CONC_MIN ) 
+#define CLEAR_CONC_ALARMS_MASK 		(global_flags &=~ALARMS_CONC_MASK )
+#define CHECK_CONC_ALARMS_MASK		(global_flags &  ALARMS_CONC_MASK )
 
 
 #define ALARM_TEMP_MAX 							0x40
@@ -241,15 +241,15 @@ void WriteMyFlashSector(void);
 #define CLEAR_ALARM_TEMP_MIN 		(global_flags &=~ALARM_TEMP_MIN )
 #define CHECK_ALARM_TEMP_MIN 		(global_flags &  ALARM_TEMP_MIN )
 
-
-
+#define ALARMS_TEMP_MASK                (ALARM_TEMP_MAX | ALARM_TEMP_MIN ) 
+#define CLEAR_TEMP_ALARMS_MASK 		(global_flags &=~ALARMS_TEMP_MASK )
+#define CHECK_TEMP_ALARMS_MASK		(global_flags &  ALARMS_TEMP_MASK )
 
 
 #define PREALARM_FUSTO_VUOTO 						0x100
 #define MARK_PREALARM_FUSTO_VUOTO  	(global_flags |= PREALARM_FUSTO_VUOTO )
 #define CLEAR_PREALARM_FUSTO_VUOTO 	(global_flags &=~PREALARM_FUSTO_VUOTO )
 #define CHECK_PREALARM_FUSTO_VUOTO 	(global_flags &  PREALARM_FUSTO_VUOTO )
-
 
 #define ALARM_FUSTO_VUOTO 						0x200
 #define MARK_ALARM_FUSTO_VUOTO  	(global_flags |= ALARM_FUSTO_VUOTO )
@@ -259,59 +259,89 @@ void WriteMyFlashSector(void);
 
 
 
+#define PUMP_STATE_RIPOSO 						0x400
+#define MARK_PUMP_STATE_RIPOSO  	(global_flags |= PUMP_STATE_RIPOSO )
+#define CLEAR_PUMP_STATE_RIPOSO 	(global_flags &=~PUMP_STATE_RIPOSO )
+#define CHECK_PUMP_STATE_RIPOSO 	(global_flags &  PUMP_STATE_RIPOSO )
+
+
+#define PUMP_STATE_ATTIVO 						0x800
+#define MARK_PUMP_STATE_ATTIVO  	(global_flags |= PUMP_STATE_ATTIVO )
+#define CLEAR_PUMP_STATE_ATTIVO 	(global_flags &=~PUMP_STATE_ATTIVO )
+#define CHECK_PUMP_STATE_ATTIVO 	(global_flags &  PUMP_STATE_RIPOSO )
+
+#define PUMP_STATE_WAIT 						0x1000
+#define MARK_PUMP_STATE_WAIT  	(global_flags |= PUMP_STATE_WAIT )
+#define CLEAR_PUMP_STATE_WAIT 	(global_flags &=~PUMP_STATE_WAIT )
+#define CHECK_PUMP_STATE_WAIT 	(global_flags &  PUMP_STATE_WAIT )
+
+#define PUMP_STATE (PUMP_STATE_RIPOSO | PUMP_STATE_ATTIVO)
+
+#define CHECK_PUMP_STATE                (global_flags &  PUMP_STATE)          
 
 
 
 
-#define PREALARMS_MASK    PREALARM_CONC_MAX | PREALARM_CONC_MIN  | PREALARM_TEMP_MAX |\
-                                              PREALARM_TEMP_MIN |  PREALARM_FUSTO_VUOTO
-#define CLEAR_PREALARMS_MASK 		(global_flags &=~PREALARMS_MASK )
-#define CHECK_PREALARMS_MASK		(global_flags &  PREALARMS_MASK )
+#define HEATER_STATE_RIPOSO 						0x2000
+#define MARK_HEATER_STATE_RIPOSO  	(global_flags |= HEATER_STATE_RIPOSO )
+#define CLEAR_HEATER_STATE_RIPOSO 	(global_flags &=~HEATER_STATE_RIPOSO )
+#define CHECK_HEATER_STATE_RIPOSO 	(global_flags &  HEATER_STATE_RIPOSO )
+
+
+#define HEATER_STATE_ATTIVO 						0x4000
+#define MARK_HEATER_STATE_ATTIVO  	(global_flags |= HEATER_STATE_ATTIVO )
+#define CLEAR_HEATER_STATE_ATTIVO 	(global_flags &=~HEATER_STATE_ATTIVO )
+#define CHECK_HEATER_STATE_ATTIVO 	(global_flags &  HEATER_STATE_RIPOSO )
+
+
+
+#define HEATER_STATE (HEATER_STATE_RIPOSO | HEATER_STATE_ATTIVO)
+
+#define CHECK_HEATER_STATE                (global_flags &  HEATER_STATE)          
 
 
 //mettere flag indicante uscita da menu,considerata come riaccensione,riazzera timers
 
 
-#define BLINK_PUMP 								0x100
+#define BLINK_PUMP 								0x10000
 #define MARK_BLINK_PUMP  			(global_flags |= BLINK_PUMP )
 #define CLEAR_BLINK_PUMP 			(global_flags &=~BLINK_PUMP )
 #define CHECK_BLINK_PUMP 			(global_flags &  BLINK_PUMP )
 
-#define PRINT_PUMP 								0x200
+#define PRINT_PUMP 								0x20000
 #define MARK_PRINT_PUMP  			(global_flags |= PRINT_PUMP )
 #define CLEAR_PRINT_PUMP 			(global_flags &=~PRINT_PUMP )
 #define CHECK_PRINT_PUMP 			(global_flags &  PRINT_PUMP )
 
-#define PRINT_HEATER 								0x400
+#define PRINT_HEATER 								0x40000
 #define MARK_PRINT_HEATER  			(global_flags |= PRINT_HEATER )
 #define CLEAR_PRINT_HEATER 			(global_flags &=~PRINT_HEATER )
 #define CHECK_PRINT_HEATER 			(global_flags &  PRINT_HEATER )
 
-#define PRINT_CONC_LIMITS 								0x800
+#define PRINT_CONC_LIMITS 							0x80000
 #define MARK_PRINT_CONC_LIMITS  		(global_flags |= PRINT_CONC_LIMITS )
 #define CLEAR_PRINT_CONC_LIMITS 		(global_flags &=~PRINT_CONC_LIMITS )
 #define CHECK_PRINT_CONC_LIMITS 		(global_flags &  PRINT_CONC_LIMITS )
 
-#define PRINT_TEMP_LIMITS 								0x1000
+#define PRINT_TEMP_LIMITS 							0x100000
 #define MARK_PRINT_TEMP_LIMITS  		(global_flags |= PRINT_TEMP_LIMITS )
 #define CLEAR_PRINT_TEMP_LIMITS 		(global_flags &=~PRINT_TEMP_LIMITS )
 #define CHECK_PRINT_TEMP_LIMITS 		(global_flags &  PRINT_TEMP_LIMITS )
 
-#define PRINT_DISABILITA 								0x2000
+#define PRINT_DISABILITA 							0x200000
 #define MARK_PRINT_DISABILITA  			(global_flags |= PRINT_DISABILITA )
 #define CLEAR_PRINT_DISABILITA 			(global_flags &=~PRINT_DISABILITA )
 #define CHECK_PRINT_DISABILITA 			(global_flags &  PRINT_DISABILITA )
 
-#define CONTROL_CONC_TEMP_ENA 								0x4000
-#define MARK_CONTROL_CONC_TEMP_ENA  		(global_flags |= CONTROL_CONC_TEMP_ENA )
-#define CLEAR_CONTROL_CONC_TEMP_ENA 		(global_flags &=~CONTROL_CONC_TEMP_ENA )
-#define CHECK_CONTROL_CONC_TEMP_ENA 		(global_flags &  CONTROL_CONC_TEMP_ENA )
-/*
-#define CONTROL_TEMP_ENA 								0x8000
+#define CONTROL_CONC_ENA 							0x400000
+#define MARK_CONTROL_CONC_ENA  		        (global_flags |= CONTROL_CONC_ENA )
+#define CLEAR_CONTROL_CONC_ENA 		        (global_flags &=~CONTROL_CONC_ENA )
+#define CHECK_CONTROL_CONC_ENA 		        (global_flags &  CONTROL_CONC_ENA )
+
+#define CONTROL_TEMP_ENA 							0x800000
 #define MARK_CONTROL_TEMP_ENA  			(global_flags |= CONTROL_TEMP_ENA )
 #define CLEAR_CONTROL_TEMP_ENA 			(global_flags &=~CONTROL_TEMP_ENA )
 #define CHECK_CONTROL_TEMP_ENA 			(global_flags &  CONTROL_TEMP_ENA )
-*/
 
 
 
@@ -321,27 +351,20 @@ void WriteMyFlashSector(void);
 
 
 
-#define ARROW_KEYS_MOVE_UPDOWN 						0x1000000
+
+#define ARROW_KEYS_MOVE_UPDOWN 						0x10000000
 #define MARK_ARROW_KEYS_MOVE_UPDOWN  	(global_flags |= ARROW_KEYS_MOVE_UPDOWN )
 #define CLEAR_ARROW_KEYS_MOVE_UPDOWN 	(global_flags &=~ARROW_KEYS_MOVE_UPDOWN )
 #define CHECK_ARROW_KEYS_MOVE_UPDOWN 	(global_flags &  ARROW_KEYS_MOVE_UPDOWN )
 
 
-#define PIU_MENO_ENABLED 						0x2000000
+#define PIU_MENO_ENABLED 						0x20000000
 #define MARK_PIU_MENO_ENABLED  		(global_flags |= PIU_MENO_ENABLED )
 #define CLEAR_PIU_MENO_ENABLED 		(global_flags &=~PIU_MENO_ENABLED )
 #define CHECK_PIU_MENO_ENABLED 		(global_flags &  PIU_MENO_ENABLED )
 
 
-#define TIMER1_RIT_ACC_CONC     0
-#define TIMER2_TOUT_DOSAGGIO    1
-#define TIMER3_RIT_DOSAGGIO     2
-#define TIMER4_RIT_ALL_MIN_CONC 3
-#define TIMER5_RIT_ALL_MAX_CONC 4
-#define TIMER6_RIT_ACC_TEMP     5
-#define TIMER7_TOUT_TEMP        6
-#define TIMER8_RIT_ALL_MIN_TEMP 7
-#define TIMER9_RIT_ALL_MAX_TEMP 8
+
 
 
 #define TIMER1_EXPIRED 						        0x1
@@ -409,7 +432,7 @@ void WriteMyFlashSector(void);
 #define CONDUC_H20_DISTILL 0.0000055
 #define SCALED_TK_DIV      10000
 
-
+#define TIMERS_MAX_VAL     10000
 
 
 

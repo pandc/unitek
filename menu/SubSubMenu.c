@@ -54,7 +54,6 @@ extern unsigned char array_line[128];//un array abbastanza grande da contenere l
 extern unsigned char char_size;
 
 extern unsigned char screen_image[1024];
-extern unsigned int global_flags;
 extern unsigned int key_flags;
 
 
@@ -765,9 +764,7 @@ void Sub2MenuCurvadiLavoro(void)
 
 			LCD_Fill_ImageRAM(0x00);
 
-#ifdef DISEGNA_CORNICE
-			DisegnaCornice();
-#endif
+
 			DisegnaTriangolinoMenu(0,menu_triang_y);
 			SelectFont(CALIBRI_10);
 
@@ -1307,71 +1304,276 @@ void Sub2MenuImpostaSoglie(void)
 //***************************************************************************************
 void Sub2MenuImpostaTimer(void)
 {
-	uint8_t key;
-	unsigned char loop_flag=1,to_print=1;
-        unsigned short string_index=0,strings_y=2;
-	
-	unsigned char first_string_to_print,last_string_to_print;
+  uint8_t key,last_key;
+  unsigned char loop_flag=1,to_print=1,resto,test;
+  unsigned short page=0,page_old;
+  unsigned short string_index=0,strings_y=2;
+  unsigned short menu_ImpostaTimers_index=0;
+  unsigned char first_string_to_print,last_string_to_print;
+  unsigned int prova=80;
+  
 
-	menu_triang_limit_up=2;
-	menu_triang_limit_dn=38;
-	menu_triang_y=2;
+  menu_triang_limit_up=2;
+  menu_triang_limit_dn=50;
+  menu_triang_limit_dx=74;
+  menu_triang_y=2+(menu_ImpostaTimers_index*H_RIGA_CALIBRI10);
+  menu_triang_index=menu_ImpostaTimers_index;
+  incr_step=1;
 
-	LCD_Fill_ImageRAM(0x00);
-        
-        unsigned char prova=0;
+  LCD_Fill_ImageRAM(0x00);
+ 
+  SelectFont(CALIBRI_10);
+  
+  
+ 
+  key = last_key = 0;
+  while(loop_flag)
+  {
+      //if (key_getstroke(&key,portMAX_DELAY) && (key == KEY_PROG))
+        if (key_getstroke(&key,kDec*2))
+			last_key = key;
+		else	key = 0;
+                
+                if (key_getstroke(&key,kDec*2))
+			last_key = key;
+		else	key = 0;
+		
+      
+    if (key == KEY_PROG)
+    {
+            
+            MenuFunction_Index=SUBMENU_SELECTED_PROGR;
+            loop_flag=0;
 
-#ifdef DISEGNA_CORNICE
-	DisegnaCornice();
-#endif
+    }
+              
+              
+    
+      
+      
+      if (key == KEY_OK)
+      //if(CHECK_TASTO_OK_PRESSED)
+      {
+              
 
 
-
-
-
-
-	SelectFont(CALIBRI_10);
-	
-              if( xTimerStart( xTimers[ prova ], 0 ) != pdPASS )
+              if(menu_triang_x==0)
               {
-                  // The timer could not be set into the Active state.
+                      MoveTriangolinoDx();
+                      //non marcare MOVE_SXDX!!
+                      CLEAR_ARROW_KEYS_MOVE_UPDOWN;
+                      MARK_PIU_MENO_ENABLED;
+              }
+              else
+              {
+                      MoveTriangolinoSx();
+                      MARK_ARROW_KEYS_MOVE_UPDOWN;
+                      
+                      CLEAR_PIU_MENO_ENABLED;
+                      
+                      
+                      test=SaveRamSettings_in_External_DataFlash();
+                      if(!test)
+                      {
+                            LCD_Fill_ImageRAM(0x00);
+                            SelectFont(CALIBRI_10);
+                            LCDPrintString("File system error",4,24);
+                            LCD_CopyPartialScreen(4,80,24,36);
+                      }
+
+              }
+      }
+      
+      if(CHECK_ARROW_KEYS_MOVE_UPDOWN)
+      {
+              if (key == KEY_DOWNRIGHT)
+              //if(CHECK_TASTO_DN_DX_PRESSED)
+              {
+                      MoveTriangolinoDown();
+                      if(menu_ImpostaTimers_index<15)menu_ImpostaTimers_index+=1;
+                      page=(menu_ImpostaTimers_index)/5;
+
+                      if(page!=page_old)
+                      {
+                              to_print=1;
+                              if(page==3)menu_triang_limit_dn=2;
+                              else 	  menu_triang_limit_dn=50;
+                              menu_triang_index=0;
+                              menu_triang_y=menu_triang_limit_up;
+                      }
+                      else              to_print=0;
+
+
+                      
               }
 
+              if (key == KEY_UPLEFT)
+              //if(CHECK_TASTO_UP_SX_PRESSED)
+              {
+                      MoveTriangolinoUp();
+                      if(menu_ImpostaTimers_index)menu_ImpostaTimers_index-=1;
 
+                      page=(menu_ImpostaTimers_index)/5;
+
+                      if(page!=page_old)
+                      {
+                              to_print=1;
+                              if(page==3)menu_triang_limit_dn=2;
+                              else 	  menu_triang_limit_dn=50;
+                              menu_triang_index=4;
+                              menu_triang_y=menu_triang_limit_dn;
+
+                      }
+                      else              to_print=0;
+
+                      
+              }
+      }
+      else
+      {
+              
+      }
 	
+      if(CHECK_PIU_MENO_ENABLED)
+      {
+              if ((key == KEY_PLUS) || (last_key == KEY_PLUS))
+              //if(CHECK_TASTO_PLUS_PRESSED)
+              {
 
-	key = 0;
-	while(loop_flag)
-	{
-		if (key_getstroke(&key,portMAX_DELAY) && (key == KEY_PROG))
-		
-		{
-			
-			MenuFunction_Index=SUBMENU_SELEZIONA_PROG;
-			loop_flag=0;
+                      if(menu_triang_x==menu_triang_limit_dx)
+                      {
+                              incr_counter++;
+                              if(incr_counter>10) incr_step=10;
+                              if(incr_counter>20)
+                              {
+                                      incr_step=100;
+                                      incr_counter=21;
+                              }
 
-		}
+                              string_index=menu_triang_index+ page*5;
+                              //incremento
+                              prova=PROGR_IN_USO.Timers.Timers_values[string_index];
+                              if((prova+incr_step)<TIMERS_MAX_VAL)
+                              {
+                                CleanArea_Ram_and_Screen(92,120,menu_triang_y,menu_triang_y+10);
+                                prova+=incr_step;
+                                PROGR_IN_USO.Timers.Timers_values[string_index]=prova;
+                                BinToBCDisp(PROGR_IN_USO.Timers.Timers_values[string_index],INTERO,96,menu_triang_y);
+                                LCD_CopyPartialScreen(92,120,menu_triang_y,menu_triang_y+10);
+                              }
+                              
+                              
+                              
+                      }
+              }
+              else if (key == (KEY_PLUS | KEY_RELEASED))
+              
+              {
+                      incr_step=1;
+                      incr_counter=0;
+                      
+              }
+
+              if ((key == KEY_MINUS) || (last_key == KEY_MINUS))
+              //if(CHECK_TASTO_MENO_PRESSED)
+              {
+
+                      if(menu_triang_x==menu_triang_limit_dx)
+                      {
+                              incr_counter++;
+                              if(incr_counter>10)
+                              {
+                                      incr_step=10;
+                              }
+                              if(incr_counter>20)
+                              {
+                                      incr_step=100;
+                                      incr_counter=21;
+                              }
+
+
+                              string_index=menu_triang_index+ page*5;
+
+                              //sistemare...per step>1 può scendere sotto 0
+                              prova=PROGR_IN_USO.Timers.Timers_values[string_index];
+                              if((prova-incr_step)>0)
+                              {
+                                prova-=incr_step;
+                                CleanArea_Ram_and_Screen(92,120,menu_triang_y,menu_triang_y+10);
+                                PROGR_IN_USO.Timers.Timers_values[string_index]=prova;
+                                BinToBCDisp(PROGR_IN_USO.Timers.Timers_values[string_index],INTERO,96,menu_triang_y);
+                                LCD_CopyPartialScreen(92,120,menu_triang_y,menu_triang_y+10);
+                              }
+                              
+                      }
+              }
+              else if (key == (KEY_MINUS | KEY_RELEASED))
+              //if(CHECK_TASTO_MENO_RELEASED)
+              {
+                      incr_step=1;
+                      incr_counter=0;
+
+              }
+      }
+
+   
+      if(to_print)
+      {
+        to_print=0;
+        switch(page)
+      {
+        case 0:
+                first_string_to_print=0;
+                last_string_to_print =5;//sarebbe 4
+                menu_triang_limit_dn=50;
+                break;
+
+        case 1:
+                first_string_to_print=5;
+                last_string_to_print =8;//sarebbe 9
+                menu_triang_limit_dn=26;
+                break;
+
+        default:
+            break;
+        }
+        
+        if(page!=page_old)
+        {
+          LCD_Fill_ImageRAM(0x00);
+          strings_y=2;
+        }
+        
+        DisegnaTriangolinoMenu(0,menu_triang_y);
+        for(string_index=first_string_to_print;string_index<last_string_to_print;string_index++)
+        {
+            LCDPrintString(StringsSubmenuImpostaTimer[RamSettings.Linguaggio][string_index],10,strings_y);
+            BinToBCDisp(PROGR_IN_USO.Timers.Timers_values[string_index],INTERO,96,strings_y);
+            LCDPrintString("s",122,strings_y);
+            strings_y+=H_RIGA_CALIBRI10;
                 
-                if(to_print)
-                {
-                  to_print=0;
-                  
-                  for(string_index=first_string_to_print;string_index<last_string_to_print;string_index++)
-                  {
-                          LCDPrintString(StringsSubmenuImpostaTimer[RamSettings.Linguaggio][string_index],10,strings_y);
-                          PrintSoglia(string_index,82,strings_y);
-                          PrintUnitMis(string_index,112,strings_y);
-
-
-                          strings_y+=H_RIGA_CALIBRI10;
-                  }
-                }
+        }
+        
+        page_old=	PROGR_IN_USO.curva_lav_C_index / 5;
+        resto=		PROGR_IN_USO.curva_lav_C_index % 5;//es scelgo 7,è nella pag 1 riga 2(0,1,2)
+        if(page==page_old)
+        {
+                strings_y=(resto*H_RIGA_CALIBRI10)+2;
                 
-                
-	}
+        }
 
 
-
+        page_old=page;
+        
+        LCD_CopyScreen();
+        
+        
+        
+        
+      }
+          
+          
+  }
 
 }
 //***************************************************************************************
@@ -1654,7 +1856,7 @@ void Sub2MenuTK(void)
 			
 			{
 				
-				MenuFunction_Index=SUBMENU_SELEZIONA_PROG;
+				MenuFunction_Index=SUBMENU_SELECTED_PROGR;
 				loop_flag=0;
 			}
 

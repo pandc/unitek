@@ -14,8 +14,9 @@
 extern print_conc_var struct_conc_print;
 extern unsigned char simbolo_in_uso;
 extern void (*MenuFunctionPt[30])(void);
-extern void (*WorkMenu_CalcPrint_UnMisura_Conc[8])(unsigned int);
-extern void (*CalcPrint_UnMisura_Conc[8])(unsigned int ,unsigned int,unsigned int);
+extern void (*WorkMenu_CalcPrint_UnMisura_Conc  [5])(unsigned int);
+extern void (*CalcPrint_UnMisura_Conc           [5])(unsigned int ,unsigned int,unsigned int);
+extern void (*CalcPrint_Conc_Only               [5])(unsigned int ,unsigned int,unsigned int);
 
 extern unsigned int menu_triang_x,menu_triang_y;
 extern unsigned char menu_triang_limit_up;
@@ -70,6 +71,12 @@ void CalcPrint_GrammiLitro_xy(unsigned int  bin,unsigned int x,unsigned int y);
 void CalcPrint_uSiemens_xy(unsigned int  bin,unsigned int x,unsigned int y);
 void CalcPrint_milliSiemens_xy(unsigned int  bin,unsigned int x,unsigned int y);
 
+void CalcPrintOnly_Percent_xy(unsigned int  bin,unsigned int x,unsigned int y);
+void CalcPrintOnly_PuntTitol_xy(unsigned int  bin,unsigned int x,unsigned int y);
+void CalcPrintOnly_GrammiLitro_xy(unsigned int  bin,unsigned int x,unsigned int y);
+void CalcPrintOnly_uSiemens_xy(unsigned int  bin,unsigned int x,unsigned int y);
+void CalcPrintOnly_milliSiemens_xy(unsigned int  bin,unsigned int x,unsigned int y);
+
 
 void IncrPrintConc_Percent_xy(unsigned short* bin,unsigned int x,unsigned int y,unsigned int);
 void IncrPrintConc_PuntTitol_xy(unsigned short* bin,unsigned int x,unsigned int y,unsigned int);
@@ -86,6 +93,8 @@ void PrintConc_WorkMenu(float* c_float);
 void ControlloSoglieAllarmi_Temp(float*);
 void ControlloSoglieAllarmi_Conc(float*);
 void ControlloRitardi(void);
+void ConcPump_AtWork(float * t_float);
+void TempHeater_AtWork(float * t_float);
 
 
 void vTimerCallback( TimerHandle_t pxTimer );

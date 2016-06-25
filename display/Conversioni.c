@@ -32,7 +32,7 @@ void BinToBCDisp(unsigned int mybin,unsigned char decimali,unsigned char start_x
  mybmp_struct1.start_x=start_x;
 
  if(decimali==0)
- {
+ {      //a seconda della lunghezza della cifra da stampare mi sposta l'offset a dx,se cifra++ offset--
 	if(mybin<10)mybmp_struct1.start_x=start_x + 3*local_width_font+corrected_dot_local_width_font;
 	else
 	{
