@@ -49,7 +49,7 @@ extern unsigned char array_line[128];//un array abbastanza grande da contenere l
 extern unsigned char char_size;
 
 extern unsigned char screen_image[1024];
-extern unsigned int global_flags;
+
 extern unsigned int key_flags;
 
 

@@ -10,7 +10,7 @@
 
 #include "my_types.h"
 
-extern unsigned int global_flags;
+volatile extern unsigned int global_flags;
 extern unsigned int timer_flags;
 
 

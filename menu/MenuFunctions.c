@@ -254,6 +254,77 @@ void CalcPrint_milliSiemens_xy(unsigned int  bin,unsigned int x,unsigned int y)
     LCD_CopyPartialScreen(x,x+LARGH_CON_UNITA_MISURA,y,y+12);
 }
 //
+
+
+
+
+
+//****************************************************************************************************************************************************
+void CalcPrintOnly_Percent_xy(unsigned int  bin,unsigned int x,unsigned int y)
+{
+     Formula_ConcConvers_Percent(bin);
+  
+     SelectFont(CALIBRI_10);
+     
+     CleanArea_Ram_and_Screen(x,x+LARGH_CON_UNITA_MISURA,y,y+10);
+     BinToBCDisp(struct_conc_print.conc_to_print,struct_conc_print.decimali_to_print,x,y);
+     //LCDPrintString(StringsSubmenuSimboliConc[UNIT_MIS_CONCENTR_PERCENTUALE],x+START_UNITA_MISURA,y);
+     LCD_CopyPartialScreen(x,x+30,y,y+12);
+ 
+}
+//****************************************************************************************************************************************************
+void CalcPrintOnly_PuntTitol_xy(unsigned int  bin,unsigned int x,unsigned int y)
+{
+      Formula_ConcConvers_PuntTitol(bin);
+   
+      SelectFont(CALIBRI_10);
+     
+      CleanArea_Ram_and_Screen(x,x+LARGH_CON_UNITA_MISURA,y,y+10);
+      BinToBCDisp(struct_conc_print.conc_to_print,struct_conc_print.decimali_to_print,x,y);
+      //LCDPrintString(StringsSubmenuSimboliConc[UNIT_MIS_CONCENTR_PUNT_TITOL],x+START_UNITA_MISURA,y);
+      LCD_CopyPartialScreen(x,x+24,y,y+12);
+}
+//****************************************************************************************************************************************************
+void CalcPrintOnly_GrammiLitro_xy(unsigned int  bin,unsigned int x,unsigned int y)
+{
+      Formula_ConcConvers_grammiLitro(bin);
+  
+      SelectFont(CALIBRI_10);
+       
+      CleanArea_Ram_and_Screen(x,x+LARGH_CON_UNITA_MISURA,y,y+10);
+      BinToBCDisp(struct_conc_print.conc_to_print,struct_conc_print.decimali_to_print,x,y);
+      //LCDPrintString(StringsSubmenuSimboliConc[UNIT_MIS_CONCENTR_GRAMMILITRO],x+START_UNITA_MISURA,y);
+      LCD_CopyPartialScreen(x,x+34,y,y+12);
+
+}
+//****************************************************************************************************************************************************
+void CalcPrintOnly_uSiemens_xy(unsigned int  bin,unsigned int x,unsigned int y)
+{
+    Formula_ConcConvers_uSiemens(bin);  
+    SelectFont(CALIBRI_10);
+   
+    CleanArea_Ram_and_Screen(x,x+LARGH_CON_UNITA_MISURA,y,y+10);
+    BinToBCDisp(struct_conc_print.conc_to_print,struct_conc_print.decimali_to_print,x,y);
+    //LCDPrintString(StringsSubmenuSimboliConc[UNIT_MIS_CONCENTR_uSIEMENS],x+START_UNITA_MISURA,y);
+    LCD_CopyPartialScreen(x,x+30,y,y+12);
+}
+//****************************************************************************************************************************************************
+void CalcPrintOnly_milliSiemens_xy(unsigned int  bin,unsigned int x,unsigned int y)
+{
+    Formula_ConcConvers_milliSiemens(bin);
+  
+    SelectFont(CALIBRI_10);
+   
+    CleanArea_Ram_and_Screen(x,x+LARGH_CON_UNITA_MISURA,y,y+10);
+    BinToBCDisp(struct_conc_print.conc_to_print,struct_conc_print.decimali_to_print,x,y);
+    //LCDPrintString(StringsSubmenuSimboliConc[UNIT_MIS_CONCENTR_mSIEMENS],x+START_UNITA_MISURA,y);
+    LCD_CopyPartialScreen(x,x+30,y,y+12);
+}
+
+
+
+
+//
 //***************************************************************************************************************************************
 void DecrParamConc(unsigned int* par_pt,unsigned short incr)//il valore da stampare si troverà nella struttura struct_conc_to_print
 {
