@@ -28,13 +28,15 @@ extern struct measures_st measures;
 extern const float calib_resist[6];
 extern const float calib_condutt[4];
 
-int meas_init(void);
-int meas_printInit(void);
-int domeas(float *val,float *pphase);
+void meas_init(void);
+int meas_loadParams(void);
+int meas_printParams(void);
+int domeas(int chan,float *val,float *pphase);
 int meas(float *resist,float *condut,float *conduc);
 int meas_temp(float *val);
 int set_meas_chan(int chan);
 float meas_getkcell(void);
-void meas_start(void);
+void meas_go(void);
+void meas_pause(void);
 
 #endif

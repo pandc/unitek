@@ -95,9 +95,7 @@ portTickType xLastWakeTime;
 
 	MenuInit();
 
-	meas_start();
-        
-       
+	meas_init();
 
 	// Initialise the xLastWakeTime variable with the current time.
 	xLastWakeTime = xTaskGetTickCount();

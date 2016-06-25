@@ -501,11 +501,6 @@ uint32_t freq = 0;
 			break;
 		}
 		COM_Puts("\r\n");
-		if (!set_meas_chan((item < CALIB_Items)? item: CALIB_High))
-		{
-			COM_Puts("Error setting ADG715\r\n");
-			return CALLBACKRET_Error;
-		}
 		if (item == CALIB_GCable)
 		{
 			COM_Puts(">>> Connect reference resistance of 100KOhm and press enter (ESC to abort)\r\n");
@@ -521,7 +516,7 @@ uint32_t freq = 0;
 			}
 			if (c != '\r')
 				return CALLBACKRET_Error;
-			if (!domeas(res,&sp))
+			if (!domeas(CALIB_High,res,&sp))
 			{
 				COM_Puts("Measure error\r\n");
 				return CALLBACKRET_Error;
@@ -551,7 +546,7 @@ uint32_t freq = 0;
 				}
 				if (c != '\r')
 					return CALLBACKRET_Error;
-				if (!domeas(res+i,(i == 1)? NULL:&sp))
+				if (!domeas(CALIB_Ptc,res+i,(i == 1)? NULL:&sp))
 				{
 					COM_Puts("Measure error\r\n");
 					return CALLBACKRET_Error;
@@ -594,7 +589,7 @@ uint32_t freq = 0;
 			}
 			if (c != '\r')
 				return CALLBACKRET_Error;
-			if (!domeas(res+i,(i == 1)? &sp: NULL))
+			if (!domeas(item,res+i,(i == 1)? &sp: NULL))
 			{
 				COM_Puts("Measure error\r\n");
 				return CALLBACKRET_Error;
@@ -1145,12 +1140,22 @@ float resist,condut,conduc;
 
 	if (strcmpNoCase(arg,"=INIT"))
 	{
-		if (meas_init())
+		if (meas_loadParams())
 		{
-			meas_printInit();
+			meas_printParams();
 			return CALLBACKRET_Ok;
 		}
 		return CALLBACKRET_Error;
+	}
+	else if (strcmpNoCase(arg,"=PAUSE"))
+	{
+		meas_pause();
+		return CALLBACKRET_Ok;
+	}
+	else if (strcmpNoCase(arg,"=GO"))
+	{
+		meas_go();
+		return CALLBACKRET_Ok;
 	}
 	else if (strcmpNoCase(arg,"=PTC"))
 	{

@@ -5,6 +5,7 @@
 
 #include "freertos.h"
 #include "task.h"
+#include "semphr.h"
 
 #include "com.h"
 #include "debug.h"
@@ -58,6 +59,7 @@ static const uint8_t adg715_cmd[CALIB_Items] = {
 	0x01
 };
 
+static xSemaphoreHandle	semaMeas;
 static float real_values,imm_values,final_resist,kcell_factor,gcable;
 static uint32_t ad5934_freq;
 static int meas_samples = DEFAULT_MEAS_SAMPLES,curr_chan = -1;
@@ -75,7 +77,7 @@ float f;
 	return (uint32_t)f;
 }
 
-int set_meas_chan(int chan)
+static int set_meas_chan(int chan)
 {
 uint8_t data;
 
@@ -86,11 +88,12 @@ uint8_t data;
 	data = adg715_cmd[chan];
 	if (!I2C_Write(ADG715_SLAVE,&data,1))
 		return FALSE;
+	curr_chan = chan;
 	vTaskDelay(kDec);
 	return TRUE;
 }
 
-int meas_printInit(void)
+int meas_printParams(void)
 {
 int i;
 
@@ -116,7 +119,7 @@ float meas_getkcell(void)
 		return 1.0;
 }
 
-int meas_init(void)
+int meas_loadParams(void)
 {
 int i;
 float f;
@@ -169,13 +172,26 @@ float f;
 	return TRUE;
 }
 
-int domeas(float *val,float *pphase)
+int domeas(int chan,float *val,float *pphase)
 {
 int i,j,res = FALSE;
 uint8_t buf[10],vbuf[10];
 uint8_t cregh,cregl;
 uint32_t stf = 0;
 
+	if (!semaMeas)
+	{
+		Dprintf(DBGLVL_Meas,"domeas: must call meas_init");
+		return FALSE;
+	}
+
+	xSemaphoreTake(semaMeas,portMAX_DELAY);
+
+	if (!set_meas_chan(chan))
+	{
+		Dprintf(DBGLVL_Meas,"domeas: error setting ADG715");
+		goto exi;
+	}
 	cregh = ADGAIN_x1 + ADOV_2Vpp;		// pga gain = 1, out voltage range 2.0vpp
 	cregl = ADCLK_Ext;					// External clock
 	AD_WriteByte(ADREG_CntrlH,cregh | ADCMD_StandBy);	// stand by mode
@@ -184,22 +200,22 @@ uint32_t stf = 0;
 	vTaskDelay(kCen);
 	AD_WriteByte(ADREG_CntrlL,cregl);		// Reset off
 
-	Dprintf(DBGLVL_Meas,"waiting for stand-by mode");
+	Dprintf(DBGLVL_Meas,"domeas: waiting for stand-by mode");
 	for (i = 0; i < 10; i++)
 	{
 		*buf = 0;
 		AD_Read(ADREG_CntrlH,buf,1);
 		if (*buf == (cregh | ADCMD_StandBy))
 			break;
-		Dprintf(DBGLVL_Meas,"bad control-reg %02X",*buf);
+		Dprintf(DBGLVL_Meas,"domeas: bad control-reg %02X",*buf);
 		vTaskDelay(kDec);
 	}
 	if (i >= 10)
 	{
-		Dprintf(DBGLVL_Meas,"unable to talk with analog device");
+		Dprintf(DBGLVL_Meas,"domeas: unable to talk with analog device");
 		goto exi;
 	}
-	Dprintf(DBGLVL_Meas,"device in standby mode");
+	Dprintf(DBGLVL_Meas,"domeas: device in standby mode");
 
 	*vbuf = 0;
 
@@ -211,7 +227,7 @@ uint32_t stf = 0;
 	AD_Read(ADREG_StartFreq,vbuf+1,3);
 	if (memcmp(buf+1,vbuf+1,3))
 	{
-		Dprintf(DBGLVL_Meas,"error verifying start freq (%lu)",get_dword(vbuf,GS_BigEndian));
+		Dprintf(DBGLVL_Meas,"domeas: error verifying start freq (%lu)",get_dword(vbuf,GS_BigEndian));
 		goto exi;
 	}
 
@@ -220,7 +236,7 @@ uint32_t stf = 0;
 	AD_Read(ADREG_FreqInc,vbuf+1,3);
 	if (memcmp(buf+1,vbuf+1,3))
 	{
-		Dprintf(DBGLVL_Meas,"error verifying freq incr (%lu)",get_dword(vbuf,GS_BigEndian));
+		Dprintf(DBGLVL_Meas,"domeas: error verifying freq incr (%lu)",get_dword(vbuf,GS_BigEndian));
 		goto exi;
 	}
 
@@ -229,7 +245,7 @@ uint32_t stf = 0;
 	AD_Read(ADREG_IncNum,vbuf,2);
 	if (memcmp(buf,vbuf,2) != 0)
 	{
-		Dprintf(DBGLVL_Meas,"error verifying number of incr (%u)",get_word(vbuf,GS_BigEndian));
+		Dprintf(DBGLVL_Meas,"domeas: error verifying number of incr (%u)",get_word(vbuf,GS_BigEndian));
 		goto exi;
 	}
 
@@ -238,7 +254,7 @@ uint32_t stf = 0;
 	AD_Read(ADREG_SettlingCycles,vbuf,2);
 	if (memcmp(buf,vbuf,2) != 0)
 	{
-		Dprintf(DBGLVL_Meas,"error verifying number of settling time (%u)",get_word(vbuf,GS_BigEndian));
+		Dprintf(DBGLVL_Meas,"domeas: error verifying number of settling time (%u)",get_word(vbuf,GS_BigEndian));
 		goto exi;
 	}
 
@@ -265,7 +281,7 @@ uint32_t stf = 0;
 			if (*buf & ADST_ValidRIVal)
 				break;
 			AD_Read(ADREG_CntrlH,buf+1,1);
-			Dprintf(DBGLVL_Meas,"bad status %02X (%02X)",*buf,buf[1]);
+			Dprintf(DBGLVL_Meas,"domeas: bad status %02X (%02X)",*buf,buf[1]);
 			vTaskDelay(kDec);
 		}
 		AD_Read(ADREG_RealData,buf,4);		// read real & immaginary values
@@ -274,7 +290,7 @@ uint32_t stf = 0;
 		{
 			rsamples[j] = vr;
 			isamples[j] = vi;
-			Dprintf(DBGLVL_Meas,"%3d. %6d %6d",j+1,vr,vi);
+			Dprintf(DBGLVL_Meas,"domeas: %3d. %6d %6d",j+1,vr,vi);
 			real_values += (float)vr;
 			imm_values += (float)vi;
 		}
@@ -290,14 +306,13 @@ uint32_t stf = 0;
 			*pphase = *pphase + 2 * PI ;
 		else if (real_values < 0) 
 			*pphase = *pphase + PI; 
-		Dprintf(DBGLVL_Meas,"System phase: %.10e",*pphase);
+		Dprintf(DBGLVL_Meas,"domeas: System phase: %.10e",*pphase);
 	}
-       
 
 	res = TRUE;
 
 	final_resist = sqrt(imm_values*imm_values+real_values*real_values);
-	Dprintf(DBGLVL_Meas,"Resistance value: %.3f",final_resist);
+	Dprintf(DBGLVL_Meas,"domeas: Resistance value: %.3f",final_resist);
 exi:
 	if (res)
 	{
@@ -307,6 +322,7 @@ exi:
 	}
 	else
 		Dprintf(DBGLVL_Meas,"domeas: measure error");
+	xSemaphoreGive(semaMeas);
 	return res;
 }
 
@@ -319,8 +335,7 @@ float val,tphase;
 		return FALSE;
 	for (i = CALIB_Low; i >= CALIB_High; i--)
 	{
-		set_meas_chan(i);
-		if (!domeas(&val,&tphase))
+		if (!domeas(i,&val,&tphase))
 			return FALSE;
 		Dprintf(DBGLVL_Meas,"meas: ncl=%.10e nch=%.10e nx=%.10e sp=%.10e tp=%.10e",mcp[i].ncl,mcp[i].nch,val,mcp[i].sp,tphase);
 		if (val > mcp[i].ncl)
@@ -344,7 +359,6 @@ float val,tphase;
 	*condut=(((val - mcp[i].nos) * mcp[i].gf) * cos(tphase));
 	*condut=*condut - gcable;
 	*resist=(1.0 / *condut)-RES_ADD;
-//	*resist = (1.0 / (((val - mcp[i].nos) * mcp[i].gf) * cos(tphase) - gcable)) - RES_ADD;
 	*condut = 1.0 / *resist;
 	*conduc = *condut / kcell_factor;
 	return TRUE;
@@ -356,23 +370,20 @@ float tphase,val;
 
 	if (!mcpok)
 		return FALSE;
-	set_meas_chan(CALIB_Ptc);
-	if (!domeas(&val,&tphase))
+	if (!domeas(CALIB_Ptc,&val,&tphase))
 		return FALSE;
 	Dprintf(DBGLVL_Meas,"meas_temp: nch=%.10e ncl=%.10e gf=%.10e nos=%.10e sp=%.10e",mcp[CALIB_Ptc].nch,mcp[CALIB_Ptc].ncl,mcp[CALIB_Ptc].gf,mcp[CALIB_Ptc].nos);
 	tphase -= mcp[CALIB_Ptc].sp;
-	//*resist = (1.0 / (((val - mcp[CALIB_Ptc].nos) * mcp[CALIB_Ptc].gf) * cos(tphase) - gcable)) - RES_ADD;
-        *resist=((val-mcp[CALIB_Ptc].nos)*mcp[CALIB_Ptc].gf)*cos(tphase);
+	*resist=((val-mcp[CALIB_Ptc].nos)*mcp[CALIB_Ptc].gf)*cos(tphase);
 	return TRUE;
 }
 
 #define MEAS_PERIOD		kSec*3
 struct measures_st measures;
-
-
+static int pause;
 static void meas_task(void *par)
 {
-	if (!meas_init())
+	if (!meas_loadParams())
 	{
 		Dprintf(DBGLVL_Meas,"meas_task: invalid calibration parameters");
 		vTaskSuspend(NULL);
@@ -380,6 +391,15 @@ static void meas_task(void *par)
 	for (;;)
 	{
 		vTaskDelay(MEAS_PERIOD);
+		if (pause)
+		{
+			if (pause == 1)
+			{
+				pause = 2;
+				Dprintf(DBGLVL_Meas,"meas_task: pause");
+			}
+			continue;
+		}
 		if (meas_temp(&measures.temp_resist))
 		{
 			Dprintf(DBGLVL_Meas,"meas_task: temper resist=%.10eOhm",measures.temp_resist);
@@ -404,7 +424,28 @@ static void meas_task(void *par)
 	}
 }
 
-void meas_start(void)
+void meas_pause(void)
 {
+	if (pause)
+		return;
+	pause = 1;
+	for (;;)
+	{
+		vTaskDelay(kSec);
+		if (pause == 2)
+			break;
+	}
+}
+
+void meas_go(void)
+{
+	pause = 0;
+}
+
+void meas_init(void)
+{
+ 	if (semaMeas)
+		return;
+	semaMeas = xSemaphoreCreateMutex();
 	xTaskCreate(meas_task, "measures", 256, NULL, tskIDLE_PRIORITY, NULL);
 }
