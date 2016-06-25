@@ -62,11 +62,12 @@ extern unsigned char width_font;
 //dovrebbero essere costanti in flash,ma non riesco a inizializzarle
 //***************************************************************************************
 void (*MenuFunctionPt[30])(void);
-void (*WorkMenu_CalcPrint_UnMisura_Conc[8])(unsigned int);
-void (*CalcPrint_UnMisura_Conc[8])(unsigned int ,unsigned int,unsigned int);
+void (*WorkMenu_CalcPrint_UnMisura_Conc [5])(unsigned int);
+void (*CalcPrint_UnMisura_Conc          [5])(unsigned int ,unsigned int,unsigned int);
+void (*CalcPrint_Conc_Only              [5])(unsigned int ,unsigned int,unsigned int);
 
-void (*Formula_ConcConvers    [8])(unsigned int );
-unsigned int(* FormulaInversa_Conc [8])(void);
+void (*Formula_ConcConvers              [5])(unsigned int );
+unsigned int(* FormulaInversa_Conc      [5])(void);
 //***************************************************************************************
 static void menu_task(void *par)
 {
@@ -76,6 +77,7 @@ static void menu_task(void *par)
         ffready(portMAX_DELAY);
         LoadRamSettingsFrom_External_DataFlash();
 
+        MyCreateTimers();
 
 	MenuFunction_Index=MENU_TEMPHUM;
 
@@ -91,7 +93,7 @@ static void menu_task(void *par)
 void MenuInit(void)
 {  
         //associo i puntatori a funzione menu a specifiche funzioni
-	MenuFunctionPt[MENU_TEMPHUM]		=&MenuTempHum;	    //0
+	MenuFunctionPt[MENU_TEMPHUM]		=&SchermataDiLavoro;	    //0
 	MenuFunctionPt[MENU_PROGR]		=&MenuProg;			//1
 	MenuFunctionPt[SUBMENU_INOUT]		=&SubmenuINOUT;		//2
 	MenuFunctionPt[SUBMENU_SELEZIONA_PROG]	=&SubmenuSelProgr;	//3
@@ -126,6 +128,12 @@ void MenuInit(void)
        CalcPrint_UnMisura_Conc[UNIT_MIS_CONCENTR_uSIEMENS    ]=CalcPrint_uSiemens_xy;
        CalcPrint_UnMisura_Conc[UNIT_MIS_CONCENTR_mSIEMENS    ]=CalcPrint_milliSiemens_xy;
        
+      CalcPrint_Conc_Only[UNIT_MIS_CONCENTR_PERCENTUALE ]=CalcPrintOnly_Percent_xy;
+      CalcPrint_Conc_Only[UNIT_MIS_CONCENTR_PUNT_TITOL  ]=CalcPrintOnly_PuntTitol_xy;
+      CalcPrint_Conc_Only[UNIT_MIS_CONCENTR_GRAMMILITRO ]=CalcPrintOnly_GrammiLitro_xy;
+      CalcPrint_Conc_Only[UNIT_MIS_CONCENTR_uSIEMENS    ]=CalcPrintOnly_uSiemens_xy;
+      CalcPrint_Conc_Only[UNIT_MIS_CONCENTR_mSIEMENS    ]=CalcPrintOnly_milliSiemens_xy;
+       
     
        Formula_ConcConvers      [UNIT_MIS_CONCENTR_PERCENTUALE ]=Formula_ConcConvers_Percent;
        Formula_ConcConvers      [UNIT_MIS_CONCENTR_PUNT_TITOL  ]=Formula_ConcConvers_PuntTitol;
@@ -155,16 +163,27 @@ void MenuInit(void)
         
         
 	xTaskCreate(menu_task, "menu", 256, NULL, tskIDLE_PRIORITY, NULL);
+        
+        MARK_HEATER_STATE_RIPOSO;
+        MARK_PUMP_STATE_RIPOSO;
+        CLEAR_TEMP_ALARMS_MASK;
+        CLEAR_CONC_ALARMS_MASK;  
+        MARK_OVER_TEMP_NORMAL;
+        
+        
+        
 }
 
 //***************************************************************************************
-void MenuTempHum(void)
+void SchermataDiLavoro(void)
 {
 	uint8_t key;
-        float local_conc_float,local_temp_float;
+        float c_float,t_float;
        // float generic_float;
         
-        MyCreateTimers();
+        unsigned int prova_x,prova_y,prova_x2,generic_ui;
+        unsigned int un_misura;
+        static unsigned char abilita_disabilita_old=0xFF;
 	stato_intervento_conc=  STATO_POMPA_RIPOSO;//STATO_INIZIALE;
 	stato_intervento_temper=STATO_RISC_RIPOSO;//STATO_INIZIALE;
 
@@ -190,7 +209,12 @@ void MenuTempHum(void)
         LCDPrintString(StringsSubmenuSimboliConc[PROGR_IN_USO.unita_mis_concentr],24,2);
         LCD_CopyPartialScreen(24,48,2,14);
         
-      
+        MARK_PUMP_STATE_RIPOSO;
+        MARK_PRINT_CONC_LIMITS;
+        MARK_HEATER_STATE_RIPOSO;
+        MARK_PRINT_TEMP_LIMITS;
+        
+        un_misura=PROGR_IN_USO.unita_mis_concentr;
         
         
         
@@ -219,189 +243,76 @@ void MenuTempHum(void)
                 {
                   measures.temp_ok=0;
                   SelectFont(CALIBRI_20);
-                  CalcPrintTemperatura(&local_temp_float);
+                  CalcPrintTemperatura(&t_float);
                    /*  +-+-+-+-+-+-+-+-+-+-+-+-+-+ +-+-+
                        |C|O|M|P|E|N|S|A|Z|I|O|N|E| |T|K|
                        +-+-+-+-+-+-+-+-+-+-+-+-+-+ +-+-+  */    
-                 local_conc_float=CompensConduc_TK(&measures.conduc);
+                 c_float=CompensConduc_TK(&measures.conduc);
                  /* +-+-+-+-+-+-+-+ +-+ +-+-+-+-+-+-+ +-+-+-+-+-+-+-+-+-+-+-+-+-+-+
                     |C|A|L|C|O|L|O| |E| |S|T|A|M|P|A| |C|O|N|C|E|N|T|R|A|Z|I|O|N|E|
                     +-+-+-+-+-+-+-+ +-+ +-+-+-+-+-+-+ +-+-+-+-+-+-+-+-+-+-+-+-+-+-+ */
                  
-                 local_conc_float=CalcoloConcent_Now(local_conc_float);
+                 c_float=CalcoloConcent_Now(c_float);
                 
-                 PrintConc_WorkMenu(&local_conc_float); 
-                 
-                 
-                 MARK_CONTROL_CONC_TEMP_ENA;
+                 PrintConc_WorkMenu(&c_float); 
 
-                
+                 
+                 MARK_CONTROL_TEMP_ENA;
+                 MARK_CONTROL_CONC_ENA;
+
                 }
                         /* +-+-+-+-+ +-+-+-+-+-+-+ +-+-+-+-+-+-+
                            |F|I|N|E| |S|T|A|M|P|A| |V|A|L|O|R|I|
                            +-+-+-+-+ +-+-+-+-+-+-+ +-+-+-+-+-+-+   */
-                 
-		if(RamSettings.abilita_disabilita==1)
-		{
-			SelectFont(CALIBRI_20);
-			//abilita_disabilita=DISABILITA;
-			if(RamSettings.abilita_disabilita==DISABILITA)
-			{
-				 CleanArea_Ram_and_Screen(2,28,42,54);//cancella area pompa
-                                 CleanArea_Ram_and_Screen(6,124,34,56);
-				 LCDPrintString("USCITE_OFF",6,38);
-				 LCD_CopyPartialScreen(6,124,34,58);
-			}
-			else
-			{
-				 CleanArea_Ram_and_Screen(6,124,34,56);
-				 //LCDPrintString("USCITE_OFF",6,34);
-				 LCD_CopyPartialScreen(6,124,34,56);
-			}
+                
+          
+                  SelectFont(CALIBRI_20);
+                  //abilita_disabilita=DISABILITA;
+                  if(RamSettings.abilita_disabilita==DISABILITA)
+                  {
+                       if(abilita_disabilita_old!=RamSettings.abilita_disabilita) 
+                       { 
+                           CleanArea_Ram_and_Screen(2,28,42,54);//cancella area pompa
+                           CleanArea_Ram_and_Screen(6,124,34,56);
+                           LCDPrintString("USCITE_OFF",6,38);
+                           LCD_CopyPartialScreen(6,124,34,58);
+                       }   
+                  }
+                  else
+                  {
+                       if(abilita_disabilita_old!=RamSettings.abilita_disabilita) 
+                       {      
+                            CleanArea_Ram_and_Screen(6,124,34,56);
+                           
+                           LCD_CopyPartialScreen(6,124,34,56);
+                       }
+                  }
 
-			//abilita_disabilita_old=RamSettings.abilita_disabilita;
-
-		}
+                  abilita_disabilita_old=RamSettings.abilita_disabilita;
+		
                 
                 
-                
-                if( CHECK_CONTROL_CONC_TEMP_ENA)
-                {  
-                  ControlloSoglieAllarmi_Temp(&local_temp_float);
-                  ControlloSoglieAllarmi_Conc(&local_conc_float); 
-                }
-                
-                                
-                
+                if( CHECK_CONTROL_CONC_ENA) ControlloSoglieAllarmi_Conc(&c_float);
+                if( CHECK_CONTROL_TEMP_ENA) ControlloSoglieAllarmi_Temp(&t_float); 
+               
                 ControlloRitardi();
+ 
                 
-                
-                
-                
-                
-                
-                
-
+              
                 
                 if(RamSettings.abilita_disabilita==ABILITA)
                 {  
                       //**************** INTERVENTO!!!********************************************
                       //confronto con setpoint,isteresi ecc
-                    /* ___ ____ _  _ ___ ____ ____ _    _    ____    ____ ___ ____ ___ ____    ____ ____ _  _ ____ ____ _  _ ___ ____ ____ ___  _ ____ _  _ ____ 
-                      |    |  | |\ |  |  |__/ |  | |    |    |  |    [__   |  |__|  |  |  |    |    |  | |\ | |    |___ |\ |  |  |__/ |__|   /  | |  | |\ | |___ 
-                      |___ |__| | \|  |  |  \ |__| |___ |___ |__|    ___]  |  |  |  |  |__|    |___ |__| | \| |___ |___ | \|  |  |  \ |  |  /__ | |__| | \| |___   */
-                     
-                      
-                    //
-                   // if(local_conc_float>
-                  
-                  
-                  
-                  
-                  
-                  
-                  
-                  
-                  
-                     if(CHECK_CONTROL_CONC_TEMP_ENA)
-                     {  
-                        CLEAR_CONTROL_CONC_TEMP_ENA;
-                        //lo stato in cui vado dipende dalla concentrazione e dallo stato precedente
-                       
-                        switch(stato_intervento_conc)
-                        {
-                                
+                    ConcPump_AtWork   (&c_float);
+                    TempHeater_AtWork (&t_float);
+               }
 
-                                case STATO_POMPA_RIPOSO:
-                                        if(local_conc_float < (float)(PROGR_IN_USO.setp_e_soglie.ses_struct.SetConc - PROGR_IN_USO.setp_e_soglie.ses_struct.IsteresiConc))
-                                        {
-                                          stato_intervento_conc=STATO_POMPA_ON_CONC_SCARSA;
-                                          MARK_PRINT_PUMP;
-                                          CLEAR_PRINT_CONC_LIMITS;
-                                          //>>>>>>>>>>>>>Enable_Pump();
-                                        }
-                                        break;
-
-
-                                case STATO_POMPA_ON_CONC_SCARSA:
-                                       //per prima cosa controllo di non essere in allarme 
-                                      if(local_conc_float  < (PROGR_IN_USO.setp_e_soglie.ses_struct.AllConcMin-+ PROGR_IN_USO.setp_e_soglie.ses_struct.IsteresiConc))
-                                                  
-                                  
-                                        {
-                                          
-
-                                        }
-                                        else  
-                                        {
-                                                if(local_conc_float > (float)(PROGR_IN_USO.setp_e_soglie.ses_struct.SetConc + PROGR_IN_USO.setp_e_soglie.ses_struct.IsteresiConc))
-                                                {
-                                                    stato_intervento_conc=STATO_POMPA_RIPOSO;   
-                                                    MARK_PRINT_PUMP;
-                                                    CLEAR_PRINT_CONC_LIMITS;
-                                                    //>>>>>>>>>>>>>Disable_Pump();    
-                                                }
-                                                else
-                                                {
-                                                        if(RamSettings.abilita_disabilita==ABILITA)CleanArea_Ram_and_Screen(30,58,42,54);
-                                                }
-
-                                        }
-                                        break;
-
-                                default:
-                                        break;
-                        }
-                     } 
-                    /*____ ____ _  _ ___ ____ ____ _    _    ____    ____ ___ ____ ___ ____    ___ ____ _  _ ___  ____ ____ ____ ___ _  _ ____ ____ 
-                      |    |  | |\ |  |  |__/ |  | |    |    |  |    [__   |  |__|  |  |  |     |  |___ |\/| |__] |___ |__/ |__|  |  |  | |__/ |__| 
-                      |___ |__| | \|  |  |  \ |__| |___ |___ |__|    ___]  |  |  |  |  |__|     |  |___ |  | |    |___ |  \ |  |  |  |__| |  \ |  | */
-                      
-                   if(CHECK_CONTROL_CONC_TEMP_ENA  )
-                   {  
-                        
-                        CLEAR_CONTROL_CONC_TEMP_ENA;
-                        switch(stato_intervento_temper)
-                        {
-                                case STATO_RISC_RIPOSO:
-                                        break;
-
-
-                                case STATO_RISC_ON_TEMP_SCARSA:
-                                        if((local_temp_float ) > PROGR_IN_USO.setp_e_soglie.ses_struct.SetTemp +
-                                                                 PROGR_IN_USO.setp_e_soglie.ses_struct.IsteresiTemp)
-                                        
-                                        {
-                                                
-                                        }
-                                        else
-                                        {
-                                                if((local_temp_float) < PROGR_IN_USO.setp_e_soglie.ses_struct.AllTempMin)
-                                                {
-                                                        
-                                                }
-                                                else
-                                                {
-                                                        CleanArea_Ram_and_Screen(66,80,42,64);
-                                                }
-
-                                        }
-                                        break;
-
-                                default:
-                                        break;
-                        }
-                   }   
-                
-                }//fine if(RamSettings.abilita_disabilita==ABILITA)
-                {
-                  //eventuale cancellazione disegni e setpoint
-                }
                 
                 if(CHECK_PRINT_PUMP)
                 {
                   CLEAR_PRINT_PUMP;
-                  CleanArea_Ram_and_Screen(2,28,42,54);
+                  CleanArea_Ram_and_Screen(2,68,42,64);
                   mybmp_struct2.bmp_pointer=pompa_OK_bmp;
                   mybmp_struct2.righe	 =pompa_OKHeightPixels;
                   mybmp_struct2.colonne	 =pompa_OKWidthPages;
@@ -416,7 +327,25 @@ void MenuTempHum(void)
                 {
                   CLEAR_PRINT_CONC_LIMITS;
                   //pulisco disegno pompa
-                  CleanArea_Ram_and_Screen(2,28,42,54);
+                  
+                  
+                  SelectFont(CALIBRI_10);
+                  CleanArea_Ram_and_Screen(2,28,42,64);
+                  
+                  prova_x =2;
+                  prova_x2=28;
+                  prova_y =42;
+
+                  LCDPrintString("MAX",prova_x,prova_y);
+                  generic_ui=PROGR_IN_USO.setp_e_soglie.ses_struct.AllConcMax;
+                  CalcPrint_Conc_Only[un_misura](generic_ui,prova_x2,prova_y);
+                  LCDPrintString("MIN",prova_x,prova_y+12);
+                  generic_ui=PROGR_IN_USO.setp_e_soglie.ses_struct.AllConcMin;
+                  CalcPrint_Conc_Only[un_misura](generic_ui,prova_x2,prova_y+12);
+                  
+                  
+                  prova_x2=50;
+                  LCD_CopyPartialScreen(2,prova_x2,42,64);
                 }
                 
                 
@@ -426,19 +355,35 @@ void MenuTempHum(void)
                 if(CHECK_PRINT_HEATER)
                 {
                   CLEAR_PRINT_HEATER;
-                  CleanArea_Ram_and_Screen(68,128,42,64);
+                  CleanArea_Ram_and_Screen(70,124,42,64);
                   mybmp_struct2.bmp_pointer=riscaldatore_bmp;
                   mybmp_struct2.righe	 =riscaldatoreHeightPixels;
                   mybmp_struct2.colonne	 =riscaldatoreWidthPages;
                   mybmp_struct2.start_x=104;
                   mybmp_struct2.start_y=42;
                   GetBitmap();
-                  LCD_CopyPartialScreen(68,128,42,64);
+                  LCD_CopyPartialScreen(90,128,44,64);
                 }
                 
                 if(CHECK_PRINT_TEMP_LIMITS ) //print limiti temperatura
                 {
                   CLEAR_PRINT_TEMP_LIMITS;
+                  SelectFont(CALIBRI_10);
+                  CleanArea_Ram_and_Screen(70,128,42,64);
+                  
+
+                  LCDPrintString("MAX",70,42);
+                  generic_ui=PROGR_IN_USO.setp_e_soglie.ses_struct.AllTempMax;
+                  generic_ui/=10;
+                  BinToBCDisp(generic_ui,UN_DECIMALE,92,42);
+                  LCDPrintString("MIN",70,54);
+                  generic_ui=PROGR_IN_USO.setp_e_soglie.ses_struct.AllTempMin ;
+                  generic_ui/=10;
+                  BinToBCDisp(generic_ui,UN_DECIMALE,92,54);
+                  
+                  LCD_CopyPartialScreen(70,124,42,64);
+                  
+                  
                 }
                    
                 if(CHECK_PRINT_DISABILITA)
@@ -723,7 +668,9 @@ void ControlloSoglieAllarmi_Temp(float*t_float)
         {
           MARK_OVER_TEMP_MAX;
           CLEAR_OVER_TEMP_MIN;
+          CLEAR_ALARM_TEMP_MIN;
           CLEAR_TIMER9_EXPIRED;
+
           if( xTimerStart( xTimers[ TIMER9_RIT_ALL_MAX_TEMP ], 0 ) != pdPASS ){}
         }
         else//controllo allarme basso solo se non ho quello alto
@@ -735,6 +682,7 @@ void ControlloSoglieAllarmi_Temp(float*t_float)
           {
             MARK_OVER_TEMP_MIN;
             CLEAR_OVER_TEMP_MAX;
+            CLEAR_ALARM_TEMP_MAX;
             if( xTimerStart( xTimers[ TIMER8_RIT_ALL_MIN_TEMP ], 0 ) != pdPASS ){}
           }
         }
@@ -749,6 +697,7 @@ void ControlloSoglieAllarmi_Temp(float*t_float)
           {
             MARK_OVER_TEMP_MIN;
             CLEAR_OVER_TEMP_MAX;
+            CLEAR_ALARM_TEMP_MAX;
             if( xTimerStart( xTimers[ TIMER8_RIT_ALL_MIN_TEMP ], 0 ) != pdPASS ){}
           }
           else
@@ -759,6 +708,7 @@ void ControlloSoglieAllarmi_Temp(float*t_float)
             if(*t_float<generic_float)
             {
               MARK_OVER_TEMP_NORMAL;
+              CLEAR_ALARM_TEMP_MAX;
             }
          }
        break;
@@ -772,6 +722,7 @@ void ControlloSoglieAllarmi_Temp(float*t_float)
           {
             MARK_OVER_TEMP_MAX;
             CLEAR_OVER_TEMP_MIN;
+            CLEAR_ALARM_TEMP_MIN;
             CLEAR_TIMER9_EXPIRED;
             if( xTimerStart( xTimers[ TIMER9_RIT_ALL_MAX_TEMP ], 0 ) != pdPASS ){}
           }
@@ -783,6 +734,7 @@ void ControlloSoglieAllarmi_Temp(float*t_float)
             if(*t_float>generic_float)
             {
               MARK_OVER_TEMP_NORMAL;
+              CLEAR_ALARM_TEMP_MIN;
             }
        }
       break;
@@ -792,10 +744,138 @@ void ControlloSoglieAllarmi_Temp(float*t_float)
   
 }
 //***************************************************************************************
+void ConcPump_AtWork(float * c_float)
+{
+  float generic_float;
+  
+  if(CHECK_CONTROL_CONC_ENA)
+   {  
+      CLEAR_CONTROL_CONC_ENA;
+      //lo stato in cui vado dipende dalla concentrazione e dallo stato precedente
+     //mettere if allarme non fare niente
+      if(!CHECK_CONC_ALARMS_MASK)//non la pulisco qua,la controllo solamente
+      {  
+          switch(CHECK_PUMP_STATE)
+          {
+             case PUMP_STATE_RIPOSO://verifico se vado sotto setp-isteresi
+              generic_float=(float)(PROGR_IN_USO.setp_e_soglie.ses_struct.SetConc - PROGR_IN_USO.setp_e_soglie.ses_struct.IsteresiConc);
+              generic_float/=100;
+              if(*c_float < generic_float)
+              {
+                 CLEAR_PUMP_STATE_RIPOSO;
+                 MARK_PUMP_STATE_WAIT;
+                
+                
+                 if( xTimerStart( xTimers[ TIMER3_RIT_DOSAGGIO ], 0 ) != pdPASS ){}
+                
+              }
+              break;
+
+
+            case PUMP_STATE_ATTIVO:
+             
+              generic_float=(float)(PROGR_IN_USO.setp_e_soglie.ses_struct.SetConc + PROGR_IN_USO.setp_e_soglie.ses_struct.IsteresiConc);
+              generic_float/=100;
+              if(*c_float >generic_float) //se è abbastanza caldo
+              {
+                  MARK_PUMP_STATE_RIPOSO; 
+                  CLEAR_PUMP_STATE_ATTIVO;
+                  
+                  MARK_PRINT_CONC_LIMITS;
+                  CLEAR_PRINT_PUMP;
+                  //>>>>>>>>>>>>>Disable_Pump();    
+              }
+              else
+              {
+                      if(RamSettings.abilita_disabilita==ABILITA)CleanArea_Ram_and_Screen(30,58,42,54);
+              }
+
+              break;
+            
+          case PUMP_STATE_WAIT :
+              
+              
+                    break;
+             
+          
+          
+            default:
+                    break;
+          
+          
+             }  
+          
+          }
+      }
+    
+}
+//***************************************************************************************
+void TempHeater_AtWork(float * t_float)
+{
+  float generic_float;
+  if(CHECK_CONTROL_TEMP_ENA)
+   {  
+      CLEAR_CONTROL_TEMP_ENA;
+
+      //lo stato in cui vado dipende dalla concentrazione e dallo stato precedente
+     //mettere if allarme non fare niente
+      if(!(CHECK_TEMP_ALARMS_MASK))//non la pulisco qua,la controllo solamente
+      {  
+          switch(CHECK_HEATER_STATE)
+          {
+             case HEATER_STATE_RIPOSO://verifico se vado sotto setp-isteresi
+               {
+               generic_float= (float)(PROGR_IN_USO.setp_e_soglie.ses_struct.SetTemp - PROGR_IN_USO.setp_e_soglie.ses_struct.IsteresiTemp);
+               generic_float/=100;
+               if(*t_float < generic_float)
+              {
+                 CLEAR_HEATER_STATE_RIPOSO;
+                 MARK_HEATER_STATE_ATTIVO;
+                 MARK_PRINT_HEATER;
+                 CLEAR_PRINT_TEMP_LIMITS;
+                 if( xTimerStart( xTimers[ TIMER7_TOUT_TEMP ], 0 ) != pdPASS ){}               
+              }
+               }
+              break;
+
+
+            case HEATER_STATE_ATTIVO:
+              {
+              generic_float=(float)(PROGR_IN_USO.setp_e_soglie.ses_struct.SetTemp + PROGR_IN_USO.setp_e_soglie.ses_struct.IsteresiTemp);
+              generic_float/=100;
+              if(*t_float > generic_float)
+              {
+                  MARK_HEATER_STATE_RIPOSO; 
+                  CLEAR_HEATER_STATE_ATTIVO;
+                  CLEAR_PRINT_HEATER;
+                  MARK_PRINT_TEMP_LIMITS;
+                  //>>>>>>>>>>>>>Disable_Pump();    
+              }
+              else
+              {
+                      //if(RamSettings.abilita_disabilita==ABILITA)CleanArea_Ram_and_Screen(30,58,42,54);
+              }
+              }
+              break;
+            
+          
+          
+            default:
+              MARK_HEATER_STATE_RIPOSO;       
+              break;
+          
+          
+             }  
+          
+          }
+      }
+}
+//***************************************************************************************
 void CalcPrintTemperatura(float * t_float)
 {
   char string_to_print[16];
   unsigned int len;
+  //float generic_float;
   
   
   *t_float=measures.temp_resist;
@@ -852,16 +932,106 @@ void ControlloRitardi(void)
   
   
   //controllo allarmi min e max temperatura
-  if(CHECK_OVER_TEMP_MAX)
-  {
+  
     if(CHECK_TIMER9_EXPIRED)
     {
-      MARK_ALARM_TEMP_MAX;
+     if(CHECK_OVER_TEMP_MAX)
+      {
+        MARK_ALARM_TEMP_MAX;//se quando il timer di preallarme è scaduto la condizione è confermata allora marca allarme
+        //SPEGNI HEATER
+        //DISABILITA FUNZ LAV TEMPERATURA
+      }
       CLEAR_TIMER9_EXPIRED;
+      
     }
-  }
+    
+    if(CHECK_TIMER8_EXPIRED)
+    {
+      if(CHECK_OVER_TEMP_MIN)
+      {
+        MARK_ALARM_TEMP_MIN;//se quando il timer di preallarme è scaduto la condizione è confermata allora marca allarme
+        //SPEGNI HEATER
+        //DISABILITA FUNZ LAV TEMPERATURA
+      }
+      CLEAR_TIMER8_EXPIRED;
+    }
   
   
+  
+    //controllo allarmi min e max concentrazione
+
+    if(CHECK_TIMER5_EXPIRED)
+    {
+      CLEAR_TIMER5_EXPIRED;
+      if(CHECK_OVER_CONC_MAX)
+      {
+        MARK_ALARM_CONC_MAX;//se quando il timer di preallarme è scaduto la condizione è confermata allora marca allarme
+        //SPEGNI POMPA
+        //DISABILITA FUNZ LAV CONCENTRAZIONE
+      }
+    }
+    
+    if(CHECK_TIMER4_EXPIRED)
+    {
+      CLEAR_TIMER4_EXPIRED;
+      if(CHECK_OVER_CONC_MIN)
+      {
+        MARK_ALARM_CONC_MIN;//se quando il timer di preallarme è scaduto la condizione è confermata allora marca allarme
+        //SPEGNI POMPA
+        //DISABILITA FUNZ LAV CONCENTRAZIONE
+      }
+    }
+    
+    
+    
+    if(CHECK_TIMER3_EXPIRED)
+    {
+      CLEAR_TIMER3_EXPIRED;
+      if(CHECK_PUMP_STATE_WAIT)
+      {
+        MARK_PUMP_STATE_ATTIVO;
+        CLEAR_PUMP_STATE_WAIT;
+                //>>>>>>>>>>>>>Enable_Pump();
+        if( xTimerStart( xTimers[ TIMER2_TOUT_DOSAGGIO ], 0 ) != pdPASS ){}
+        MARK_PRINT_PUMP;
+        CLEAR_PRINT_CONC_LIMITS;
+      }
+    }
+ 
+  
+    
+    if(CHECK_TIMER2_EXPIRED)//se non ho raggiunto conc in tempo limite blocco ,mettere bit
+    {
+      CLEAR_TIMER2_EXPIRED;
+      if(CHECK_PUMP_STATE_ATTIVO)
+      {
+        MARK_PUMP_STATE_WAIT;//tasnto non entro nemmeno nella funzione di lavoro pompa
+        //dovrei restare in wait perchè nessun timer mi fa uscire
+        //>>>>>>>>>>>>>Disable_Pump();
+        CleanArea_Ram_and_Screen(70,124,42,64);//cancella pompa e limiti
+            
+        //MARK_PRINT_TIMOUT;
+        CLEAR_PRINT_CONC_LIMITS;
+      }
+    }
+    
+    
+    
+    
+    
+    if(CHECK_TIMER7_EXPIRED)
+    {
+      CLEAR_TIMER7_EXPIRED;
+      if(CHECK_HEATER_STATE_ATTIVO)
+      {
+        MARK_HEATER_STATE_RIPOSO;//tanto non entro nemmeno nella funzione di lavoro pompa
+        
+        //>>>>>>>>>>>>>Disable_Pump();
+        
+        //MARK_PRINT_TIMOUT;
+        CLEAR_PRINT_TEMP_LIMITS;
+      }
+    }
 }
 //***************************************************************************************
 void CheckRiaccensione(void)
