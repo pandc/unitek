@@ -170,6 +170,11 @@ void MenuInit(void)
         CLEAR_CONC_ALARMS_MASK;  
         MARK_OVER_TEMP_NORMAL;
         
+        MARK_ACCENSIONE_CONC;
+        MARK_ACCENSIONE_TEMP;
+        if( xTimerStart( xTimers[ TIMER1_RIT_ACC_CONC ], 0 ) != pdPASS ){}
+        if( xTimerStart( xTimers[ TIMER6_RIT_ACC_TEMP ], 0 ) != pdPASS ){}  
+        
         
         
 }
@@ -211,8 +216,10 @@ void SchermataDiLavoro(void)
         
         MARK_PUMP_STATE_RIPOSO;
         MARK_PRINT_CONC_LIMITS;
+        MARK_PRINT_PUMP;
         MARK_HEATER_STATE_RIPOSO;
         MARK_PRINT_TEMP_LIMITS;
+        MARK_PRINT_HEATER;
         
         un_misura=PROGR_IN_USO.unita_mis_concentr;
         
@@ -241,29 +248,75 @@ void SchermataDiLavoro(void)
                  +-+-+-+-+-+-+-+ +-+-+-+-+-+-+-+-+-+-+-+ +-+ +-+-+-+-+-+-+-+-+-+-+-+-+-+-+    */
                 if(measures.temp_ok)
                 {
-                  measures.temp_ok=0;
-                  SelectFont(CALIBRI_20);
-                  CalcPrintTemperatura(&t_float);
-                   /*  +-+-+-+-+-+-+-+-+-+-+-+-+-+ +-+-+
-                       |C|O|M|P|E|N|S|A|Z|I|O|N|E| |T|K|
-                       +-+-+-+-+-+-+-+-+-+-+-+-+-+ +-+-+  */    
-                 c_float=CompensConduc_TK(&measures.conduc);
-                 /* +-+-+-+-+-+-+-+ +-+ +-+-+-+-+-+-+ +-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-                    |C|A|L|C|O|L|O| |E| |S|T|A|M|P|A| |C|O|N|C|E|N|T|R|A|Z|I|O|N|E|
-                    +-+-+-+-+-+-+-+ +-+ +-+-+-+-+-+-+ +-+-+-+-+-+-+-+-+-+-+-+-+-+-+ */
                  
-                 c_float=CalcoloConcent_Now(c_float);
+                    SelectFont(CALIBRI_20);
+                    CalcPrintTemperatura(&t_float);
+                    measures.temp_ok=0;
+                    
+                    MARK_CONTROL_TEMP_ENA;
+                    
+                  
+                }
                 
-                 PrintConc_WorkMenu(&c_float); 
+                 if(measures.meas_ok)
+                 {  
+                     /*  +-+-+-+-+-+-+-+-+-+-+-+-+-+ +-+-+
+                         |C|O|M|P|E|N|S|A|Z|I|O|N|E| |T|K|
+                         +-+-+-+-+-+-+-+-+-+-+-+-+-+ +-+-+  */    
+                   c_float=CompensConduc_TK(&measures.conduc);
+                   /* +-+-+-+-+-+-+-+ +-+ +-+-+-+-+-+-+ +-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+                      |C|A|L|C|O|L|O| |E| |S|T|A|M|P|A| |C|O|N|C|E|N|T|R|A|Z|I|O|N|E|
+                      +-+-+-+-+-+-+-+ +-+ +-+-+-+-+-+-+ +-+-+-+-+-+-+-+-+-+-+-+-+-+-+ */
+                   measures.meas_ok=0;
+                   c_float=CalcoloConcent_Now(c_float);
+                  
+                   PrintConc_WorkMenu(&c_float); 
 
-                 
-                 MARK_CONTROL_TEMP_ENA;
-                 MARK_CONTROL_CONC_ENA;
+                   
+                   
+                   MARK_CONTROL_CONC_ENA;
 
                 }
                         /* +-+-+-+-+ +-+-+-+-+-+-+ +-+-+-+-+-+-+
                            |F|I|N|E| |S|T|A|M|P|A| |V|A|L|O|R|I|
                            +-+-+-+-+ +-+-+-+-+-+-+ +-+-+-+-+-+-+   */
+                
+                
+                if(CHECK_ACCENSIONE_CONC)
+                {
+                   MARK_PRINT_CONC_WAIT;
+                   CLEAR_CONTROL_CONC_ENA;
+                }
+                
+                
+                if(CHECK_ACCENSIONE_TEMP)
+                {
+                   MARK_PRINT_TEMP_WAIT;
+                   CLEAR_CONTROL_CONC_ENA;
+                } 
+               
+                if(CHECK_PRINT_CONC_WAIT)
+                {
+                   SelectFont(CALIBRI_10);  
+                   CleanArea_Ram_and_Screen(2,62,42,54);
+                   LCDPrintString("  WAIT",10,38);
+                   LCD_CopyPartialScreen   (2,62,42,54); 
+                   CLEAR_PRINT_CONC_WAIT;
+
+                }
+                
+                
+                if(CHECK_PRINT_TEMP_WAIT)
+                {
+                   SelectFont(CALIBRI_10);  
+                   CleanArea_Ram_and_Screen(66,126,42,54);
+                   LCDPrintString("  WAIT",74,38);
+                   LCD_CopyPartialScreen   (74,126,42,54); 
+                   CLEAR_PRINT_TEMP_WAIT; 
+               } 
+               
+               
+                
                 
           
                   SelectFont(CALIBRI_20);
@@ -304,87 +357,91 @@ void SchermataDiLavoro(void)
                 {  
                       //**************** INTERVENTO!!!********************************************
                       //confronto con setpoint,isteresi ecc
-                    ConcPump_AtWork   (&c_float);
-                    TempHeater_AtWork (&t_float);
+                     if( CHECK_CONTROL_CONC_ENA)ConcPump_AtWork   (&c_float);
+                     if( CHECK_CONTROL_TEMP_ENA) TempHeater_AtWork (&t_float);
                }
 
-                
-                if(CHECK_PRINT_PUMP)
-                {
-                  CLEAR_PRINT_PUMP;
-                  CleanArea_Ram_and_Screen(2,68,42,64);
-                  mybmp_struct2.bmp_pointer=pompa_OK_bmp;
-                  mybmp_struct2.righe	 =pompa_OKHeightPixels;
-                  mybmp_struct2.colonne	 =pompa_OKWidthPages;
-                  mybmp_struct2.start_x=2;
-                  mybmp_struct2.start_y=42;
-                  GetBitmap();
-                  LCD_CopyPartialScreen(2,26,42,64);
-                }
-                
-                
-                if(CHECK_PRINT_CONC_LIMITS)  //print limiti concentrazione
-                {
-                  CLEAR_PRINT_CONC_LIMITS;
-                  //pulisco disegno pompa
+                if(CHECK_CONTROL_CONC_ENA)
+                {  
+                  if(CHECK_PRINT_PUMP)
+                  {
+                    CLEAR_PRINT_PUMP;
+                    CleanArea_Ram_and_Screen(2,62,42,64);
+                    mybmp_struct2.bmp_pointer=pompa_OK_bmp;
+                    mybmp_struct2.righe	 =pompa_OKHeightPixels;
+                    mybmp_struct2.colonne	 =pompa_OKWidthPages;
+                    mybmp_struct2.start_x=2;
+                    mybmp_struct2.start_y=42;
+                    GetBitmap();
+                    LCD_CopyPartialScreen(2,26,42,64);
+                  }
                   
                   
-                  SelectFont(CALIBRI_10);
-                  CleanArea_Ram_and_Screen(2,28,42,64);
-                  
-                  prova_x =2;
-                  prova_x2=28;
-                  prova_y =42;
+                  if(CHECK_PRINT_CONC_LIMITS)  //print limiti concentrazione
+                  {
+                    CLEAR_PRINT_CONC_LIMITS;
+                    //pulisco disegno pompa
+                    
+                    
+                    SelectFont(CALIBRI_10);
+                    CleanArea_Ram_and_Screen(2,28,42,64);
+                    
+                    prova_x =2;
+                    prova_x2=28;
+                    prova_y =42;
 
-                  LCDPrintString("MAX",prova_x,prova_y);
-                  generic_ui=PROGR_IN_USO.setp_e_soglie.ses_struct.AllConcMax;
-                  CalcPrint_Conc_Only[un_misura](generic_ui,prova_x2,prova_y);
-                  LCDPrintString("MIN",prova_x,prova_y+12);
-                  generic_ui=PROGR_IN_USO.setp_e_soglie.ses_struct.AllConcMin;
-                  CalcPrint_Conc_Only[un_misura](generic_ui,prova_x2,prova_y+12);
+                    LCDPrintString("Max",prova_x,prova_y);
+                    generic_ui=PROGR_IN_USO.setp_e_soglie.ses_struct.AllConcMax;
+                    CalcPrint_Conc_Only[un_misura](generic_ui,prova_x2,prova_y);
+                    LCDPrintString("Min",prova_x,prova_y+12);
+                    generic_ui=PROGR_IN_USO.setp_e_soglie.ses_struct.AllConcMin;
+                    CalcPrint_Conc_Only[un_misura](generic_ui,prova_x2,prova_y+12);
+                    
+                    
+                    prova_x2=50;
+                    LCD_CopyPartialScreen(2,prova_x2,42,64);
+                  }
+                } 
+                
+                
+                 if(CHECK_CONTROL_CONC_ENA)
+                 { 
+                  //mettere anche qui un bit
+                  if(CHECK_PRINT_HEATER)
+                  {
+                    CLEAR_PRINT_HEATER;
+                    CleanArea_Ram_and_Screen(70,124,42,64);
+                    mybmp_struct2.bmp_pointer=riscaldatore_bmp;
+                    mybmp_struct2.righe	 =riscaldatoreHeightPixels;
+                    mybmp_struct2.colonne	 =riscaldatoreWidthPages;
+                    mybmp_struct2.start_x=104;
+                    mybmp_struct2.start_y=42;
+                    GetBitmap();
+                    LCD_CopyPartialScreen(90,128,44,64);
+                  }
                   
-                  
-                  prova_x2=50;
-                  LCD_CopyPartialScreen(2,prova_x2,42,64);
-                }
-                
-                
-                
-                
-                
-                if(CHECK_PRINT_HEATER)
-                {
-                  CLEAR_PRINT_HEATER;
-                  CleanArea_Ram_and_Screen(70,124,42,64);
-                  mybmp_struct2.bmp_pointer=riscaldatore_bmp;
-                  mybmp_struct2.righe	 =riscaldatoreHeightPixels;
-                  mybmp_struct2.colonne	 =riscaldatoreWidthPages;
-                  mybmp_struct2.start_x=104;
-                  mybmp_struct2.start_y=42;
-                  GetBitmap();
-                  LCD_CopyPartialScreen(90,128,44,64);
-                }
-                
-                if(CHECK_PRINT_TEMP_LIMITS ) //print limiti temperatura
-                {
-                  CLEAR_PRINT_TEMP_LIMITS;
-                  SelectFont(CALIBRI_10);
-                  CleanArea_Ram_and_Screen(70,128,42,64);
-                  
+                  if(CHECK_PRINT_TEMP_LIMITS ) //print limiti temperatura
+                  {
+                    CLEAR_PRINT_TEMP_LIMITS;
+                    SelectFont(CALIBRI_10);
+                    CleanArea_Ram_and_Screen(70,128,42,64);
+                    
 
-                  LCDPrintString("MAX",70,42);
-                  generic_ui=PROGR_IN_USO.setp_e_soglie.ses_struct.AllTempMax;
-                  generic_ui/=10;
-                  BinToBCDisp(generic_ui,UN_DECIMALE,92,42);
-                  LCDPrintString("MIN",70,54);
-                  generic_ui=PROGR_IN_USO.setp_e_soglie.ses_struct.AllTempMin ;
-                  generic_ui/=10;
-                  BinToBCDisp(generic_ui,UN_DECIMALE,92,54);
+                    LCDPrintString("Max",70,42);
+                    generic_ui=PROGR_IN_USO.setp_e_soglie.ses_struct.AllTempMax;
+                    generic_ui/=10;
+                    BinToBCDisp(generic_ui,UN_DECIMALE,96,42);
+                    LCDPrintString("Min",70,54);
+                    generic_ui=PROGR_IN_USO.setp_e_soglie.ses_struct.AllTempMin ;
+                    generic_ui/=10;
+                    BinToBCDisp(generic_ui,UN_DECIMALE,96,54);
+                    
+                    LCD_CopyPartialScreen(70,128,42,64);
+                    
+                    
+                  }
                   
-                  LCD_CopyPartialScreen(70,124,42,64);
-                  
-                  
-                }
+                 }  
                    
                 if(CHECK_PRINT_DISABILITA)
                 {
@@ -787,7 +844,7 @@ void ConcPump_AtWork(float * c_float)
               }
               else
               {
-                      if(RamSettings.abilita_disabilita==ABILITA)CleanArea_Ram_and_Screen(30,58,42,54);
+                     // if(RamSettings.abilita_disabilita==ABILITA)CleanArea_Ram_and_Screen(30,58,42,54);
               }
 
               break;
@@ -891,7 +948,7 @@ void CalcPrintTemperatura(float * t_float)
  len=strlen(string_to_print);
  LCDPrintString(string_to_print,125-(width_font*len)-5,14);
  LCD_CopyPartialScreen(60,120,14,36);
- CleanArea_Ram_and_Screen(00,62,14,36);
+ 
   
 }
 //***************************************************************************************
@@ -917,7 +974,7 @@ void PrintConc_WorkMenu(float* c_float)
       default:
       break;
     }
-   
+   CleanArea_Ram_and_Screen(00,62,14,36);
    len=strlen(string_to_print);
    LCDPrintString(string_to_print,62-(width_font*len)-5,14);
    LCD_CopyPartialScreen(00,62,14,36);
@@ -1008,10 +1065,14 @@ void ControlloRitardi(void)
         MARK_PUMP_STATE_WAIT;//tasnto non entro nemmeno nella funzione di lavoro pompa
         //dovrei restare in wait perchè nessun timer mi fa uscire
         //>>>>>>>>>>>>>Disable_Pump();
-        CleanArea_Ram_and_Screen(70,124,42,64);//cancella pompa e limiti
+        SelectFont(CALIBRI_10);
+        CleanArea_Ram_and_Screen(2,64,42,64);//cancella pompa e limiti
+        LCDPrintString("T OUT",18,42);
+        LCD_CopyPartialScreen(2,64,42,58);
             
         //MARK_PRINT_TIMOUT;
         CLEAR_PRINT_CONC_LIMITS;
+        CLEAR_PRINT_PUMP;
       }
     }
     
@@ -1026,10 +1087,14 @@ void ControlloRitardi(void)
       {
         MARK_HEATER_STATE_RIPOSO;//tanto non entro nemmeno nella funzione di lavoro pompa
         
-        //>>>>>>>>>>>>>Disable_Pump();
-        
+        //>>>>>>>>>>>>>Disable_Heather();
+        SelectFont(CALIBRI_10);
+        CleanArea_Ram_and_Screen(66,128,42,64);//cancella pompa e limiti
+        LCDPrintString("T OUT",82,42);
+        LCD_CopyPartialScreen(66,128,42,58);
         //MARK_PRINT_TIMOUT;
         CLEAR_PRINT_TEMP_LIMITS;
+        CLEAR_PRINT_HEATER;
       }
     }
 }

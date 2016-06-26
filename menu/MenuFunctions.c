@@ -266,10 +266,10 @@ void CalcPrintOnly_Percent_xy(unsigned int  bin,unsigned int x,unsigned int y)
   
      SelectFont(CALIBRI_10);
      
-     CleanArea_Ram_and_Screen(x,x+LARGH_CON_UNITA_MISURA,y,y+10);
+     CleanArea_Ram_and_Screen(x,x+28,y,y+10);
      BinToBCDisp(struct_conc_print.conc_to_print,struct_conc_print.decimali_to_print,x,y);
      //LCDPrintString(StringsSubmenuSimboliConc[UNIT_MIS_CONCENTR_PERCENTUALE],x+START_UNITA_MISURA,y);
-     LCD_CopyPartialScreen(x,x+30,y,y+12);
+     LCD_CopyPartialScreen(x,x+28,y,y+12);
  
 }
 //****************************************************************************************************************************************************
@@ -279,7 +279,7 @@ void CalcPrintOnly_PuntTitol_xy(unsigned int  bin,unsigned int x,unsigned int y)
    
       SelectFont(CALIBRI_10);
      
-      CleanArea_Ram_and_Screen(x,x+LARGH_CON_UNITA_MISURA,y,y+10);
+      CleanArea_Ram_and_Screen(x,x+28,y,y+10);
       BinToBCDisp(struct_conc_print.conc_to_print,struct_conc_print.decimali_to_print,x,y);
       //LCDPrintString(StringsSubmenuSimboliConc[UNIT_MIS_CONCENTR_PUNT_TITOL],x+START_UNITA_MISURA,y);
       LCD_CopyPartialScreen(x,x+24,y,y+12);
@@ -291,10 +291,10 @@ void CalcPrintOnly_GrammiLitro_xy(unsigned int  bin,unsigned int x,unsigned int 
   
       SelectFont(CALIBRI_10);
        
-      CleanArea_Ram_and_Screen(x,x+LARGH_CON_UNITA_MISURA,y,y+10);
+      CleanArea_Ram_and_Screen(x,x+28,y,y+10);
       BinToBCDisp(struct_conc_print.conc_to_print,struct_conc_print.decimali_to_print,x,y);
       //LCDPrintString(StringsSubmenuSimboliConc[UNIT_MIS_CONCENTR_GRAMMILITRO],x+START_UNITA_MISURA,y);
-      LCD_CopyPartialScreen(x,x+34,y,y+12);
+      LCD_CopyPartialScreen(x,x+28,y,y+12);
 
 }
 //****************************************************************************************************************************************************
@@ -303,10 +303,10 @@ void CalcPrintOnly_uSiemens_xy(unsigned int  bin,unsigned int x,unsigned int y)
     Formula_ConcConvers_uSiemens(bin);  
     SelectFont(CALIBRI_10);
    
-    CleanArea_Ram_and_Screen(x,x+LARGH_CON_UNITA_MISURA,y,y+10);
+    CleanArea_Ram_and_Screen(x,x+28,y,y+10);
     BinToBCDisp(struct_conc_print.conc_to_print,struct_conc_print.decimali_to_print,x,y);
     //LCDPrintString(StringsSubmenuSimboliConc[UNIT_MIS_CONCENTR_uSIEMENS],x+START_UNITA_MISURA,y);
-    LCD_CopyPartialScreen(x,x+30,y,y+12);
+    LCD_CopyPartialScreen(x,x+28,y,y+12);
 }
 //****************************************************************************************************************************************************
 void CalcPrintOnly_milliSiemens_xy(unsigned int  bin,unsigned int x,unsigned int y)
@@ -315,10 +315,10 @@ void CalcPrintOnly_milliSiemens_xy(unsigned int  bin,unsigned int x,unsigned int
   
     SelectFont(CALIBRI_10);
    
-    CleanArea_Ram_and_Screen(x,x+LARGH_CON_UNITA_MISURA,y,y+10);
+    CleanArea_Ram_and_Screen(x,x+28,y,y+10);
     BinToBCDisp(struct_conc_print.conc_to_print,struct_conc_print.decimali_to_print,x,y);
     //LCDPrintString(StringsSubmenuSimboliConc[UNIT_MIS_CONCENTR_mSIEMENS],x+START_UNITA_MISURA,y);
-    LCD_CopyPartialScreen(x,x+30,y,y+12);
+    LCD_CopyPartialScreen(x,x+28,y,y+12);
 }
 
 
@@ -508,15 +508,15 @@ void IncrSoglia(unsigned short index,unsigned short incr)//viene chiamata riga p
 	}
 	else//temperature
 	{
-		multiplied=PROGR_IN_USO.setp_e_soglie.setp_e_soglie_arr[index]*3;
-		multiplied/=128;
-		resto=multiplied % 128;
+		multiplied=PROGR_IN_USO.setp_e_soglie.setp_e_soglie_arr[index];
+		multiplied/=10;
+		resto=multiplied % 10;
 
 		if(multiplied<TEMP_MAX_LIMIT)multiplied++;
 
-		multiplied*=128;
+		multiplied*=10;
 		multiplied+=resto;
-		PROGR_IN_USO.setp_e_soglie.setp_e_soglie_arr[index]=multiplied /3;
+		PROGR_IN_USO.setp_e_soglie.setp_e_soglie_arr[index]=multiplied ;
 
 	}
 }
@@ -608,15 +608,15 @@ void DecrSoglia(unsigned short index,unsigned short incr)//viene chiamata riga p
 	}
 	else
 	{
-		multiplied=PROGR_IN_USO.setp_e_soglie.setp_e_soglie_arr[index]*3;
-		multiplied/=128;
-		resto=multiplied % 128;
+		multiplied=PROGR_IN_USO.setp_e_soglie.setp_e_soglie_arr[index];
+		multiplied/=10;
+		resto=multiplied % 10;
 
 		if(multiplied>TEMP_MIN_LIMIT)multiplied--;
 
-		multiplied*=128;
+		multiplied*=10;
 		multiplied+=resto;
-		PROGR_IN_USO.setp_e_soglie.setp_e_soglie_arr[index]=multiplied /3;
+		PROGR_IN_USO.setp_e_soglie.setp_e_soglie_arr[index]=multiplied ;
 	}
 }
 //***************************************************************************************
@@ -671,8 +671,8 @@ void PrintSoglia(unsigned short index,unsigned short x ,unsigned short y)//viene
 	}
 	else//solo temperature
 	{
-		multiplied=PROGR_IN_USO.setp_e_soglie.setp_e_soglie_arr[index]*3; ;
-		multiplied/=128;
+		multiplied=PROGR_IN_USO.setp_e_soglie.setp_e_soglie_arr[index]; ;
+		multiplied/=10;
 
 		CleanArea_Ram_and_Screen(x,x+30,y,y+10);
 		BinToBCDisp(multiplied,UN_DECIMALE,x,y);

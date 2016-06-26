@@ -181,6 +181,13 @@ void WriteMyFlashSector(void);
 #define TIMER8_RIT_ALL_MIN_TEMP 7
 #define TIMER9_RIT_ALL_MAX_TEMP 8
 
+
+
+
+                   /*+-+-+-+-+-+-+-+-+-+-+-+-+
+                     |g|l|o|b|a|l|_|f|l|a|g|s|
+                     +-+-+-+-+-+-+-+-+-+-+-+-+*/
+
 #define OVER_CONC_MAX 						0x1
 #define MARK_OVER_CONC_MAX  	(global_flags |= OVER_CONC_MAX )
 #define CLEAR_OVER_CONC_MAX 	(global_flags &=~OVER_CONC_MAX )
@@ -213,7 +220,7 @@ void WriteMyFlashSector(void);
 #define CHECK_OVER_TEMP_STATE   (global_flags & OVER_TEMP_STATE)
 
 #define MARK_OVER_TEMP_NORMAL   (global_flags &=~(OVER_TEMP_STATE ))
-#define OVER_TEMP_NORMAL                                                0
+#define OVER_TEMP_NORMAL                                           0
 
 
 #define ALARM_CONC_MAX 							0x10
@@ -268,7 +275,7 @@ void WriteMyFlashSector(void);
 #define PUMP_STATE_ATTIVO 						0x800
 #define MARK_PUMP_STATE_ATTIVO  	(global_flags |= PUMP_STATE_ATTIVO )
 #define CLEAR_PUMP_STATE_ATTIVO 	(global_flags &=~PUMP_STATE_ATTIVO )
-#define CHECK_PUMP_STATE_ATTIVO 	(global_flags &  PUMP_STATE_RIPOSO )
+#define CHECK_PUMP_STATE_ATTIVO 	(global_flags &  PUMP_STATE_ATTIVO )
 
 #define PUMP_STATE_WAIT 						0x1000
 #define MARK_PUMP_STATE_WAIT  	(global_flags |= PUMP_STATE_WAIT )
@@ -291,54 +298,23 @@ void WriteMyFlashSector(void);
 #define HEATER_STATE_ATTIVO 						0x4000
 #define MARK_HEATER_STATE_ATTIVO  	(global_flags |= HEATER_STATE_ATTIVO )
 #define CLEAR_HEATER_STATE_ATTIVO 	(global_flags &=~HEATER_STATE_ATTIVO )
-#define CHECK_HEATER_STATE_ATTIVO 	(global_flags &  HEATER_STATE_RIPOSO )
+#define CHECK_HEATER_STATE_ATTIVO 	(global_flags &  HEATER_STATE_ATTIVO )
 
 
 
 #define HEATER_STATE (HEATER_STATE_RIPOSO | HEATER_STATE_ATTIVO)
-
 #define CHECK_HEATER_STATE                (global_flags &  HEATER_STATE)          
 
 
 //mettere flag indicante uscita da menu,considerata come riaccensione,riazzera timers
 
 
-#define BLINK_PUMP 								0x10000
-#define MARK_BLINK_PUMP  			(global_flags |= BLINK_PUMP )
-#define CLEAR_BLINK_PUMP 			(global_flags &=~BLINK_PUMP )
-#define CHECK_BLINK_PUMP 			(global_flags &  BLINK_PUMP )
-
-#define PRINT_PUMP 								0x20000
-#define MARK_PRINT_PUMP  			(global_flags |= PRINT_PUMP )
-#define CLEAR_PRINT_PUMP 			(global_flags &=~PRINT_PUMP )
-#define CHECK_PRINT_PUMP 			(global_flags &  PRINT_PUMP )
-
-#define PRINT_HEATER 								0x40000
-#define MARK_PRINT_HEATER  			(global_flags |= PRINT_HEATER )
-#define CLEAR_PRINT_HEATER 			(global_flags &=~PRINT_HEATER )
-#define CHECK_PRINT_HEATER 			(global_flags &  PRINT_HEATER )
-
-#define PRINT_CONC_LIMITS 							0x80000
-#define MARK_PRINT_CONC_LIMITS  		(global_flags |= PRINT_CONC_LIMITS )
-#define CLEAR_PRINT_CONC_LIMITS 		(global_flags &=~PRINT_CONC_LIMITS )
-#define CHECK_PRINT_CONC_LIMITS 		(global_flags &  PRINT_CONC_LIMITS )
-
-#define PRINT_TEMP_LIMITS 							0x100000
-#define MARK_PRINT_TEMP_LIMITS  		(global_flags |= PRINT_TEMP_LIMITS )
-#define CLEAR_PRINT_TEMP_LIMITS 		(global_flags &=~PRINT_TEMP_LIMITS )
-#define CHECK_PRINT_TEMP_LIMITS 		(global_flags &  PRINT_TEMP_LIMITS )
-
-#define PRINT_DISABILITA 							0x200000
-#define MARK_PRINT_DISABILITA  			(global_flags |= PRINT_DISABILITA )
-#define CLEAR_PRINT_DISABILITA 			(global_flags &=~PRINT_DISABILITA )
-#define CHECK_PRINT_DISABILITA 			(global_flags &  PRINT_DISABILITA )
-
-#define CONTROL_CONC_ENA 							0x400000
+#define CONTROL_CONC_ENA 						0x8000
 #define MARK_CONTROL_CONC_ENA  		        (global_flags |= CONTROL_CONC_ENA )
 #define CLEAR_CONTROL_CONC_ENA 		        (global_flags &=~CONTROL_CONC_ENA )
 #define CHECK_CONTROL_CONC_ENA 		        (global_flags &  CONTROL_CONC_ENA )
 
-#define CONTROL_TEMP_ENA 							0x800000
+#define CONTROL_TEMP_ENA 						0x10000
 #define MARK_CONTROL_TEMP_ENA  			(global_flags |= CONTROL_TEMP_ENA )
 #define CLEAR_CONTROL_TEMP_ENA 			(global_flags &=~CONTROL_TEMP_ENA )
 #define CHECK_CONTROL_TEMP_ENA 			(global_flags &  CONTROL_TEMP_ENA )
@@ -346,24 +322,79 @@ void WriteMyFlashSector(void);
 
 
 
-
-
-
-
-
-
-#define ARROW_KEYS_MOVE_UPDOWN 						0x10000000
+#define ARROW_KEYS_MOVE_UPDOWN 						0x20000
 #define MARK_ARROW_KEYS_MOVE_UPDOWN  	(global_flags |= ARROW_KEYS_MOVE_UPDOWN )
 #define CLEAR_ARROW_KEYS_MOVE_UPDOWN 	(global_flags &=~ARROW_KEYS_MOVE_UPDOWN )
 #define CHECK_ARROW_KEYS_MOVE_UPDOWN 	(global_flags &  ARROW_KEYS_MOVE_UPDOWN )
 
 
-#define PIU_MENO_ENABLED 						0x20000000
+#define PIU_MENO_ENABLED 						0x40000
 #define MARK_PIU_MENO_ENABLED  		(global_flags |= PIU_MENO_ENABLED )
 #define CLEAR_PIU_MENO_ENABLED 		(global_flags &=~PIU_MENO_ENABLED )
 #define CHECK_PIU_MENO_ENABLED 		(global_flags &  PIU_MENO_ENABLED )
 
+#define ACCENSIONE_CONC 						0x80000
+#define MARK_ACCENSIONE_CONC  	(global_flags |= ACCENSIONE_CONC )
+#define CLEAR_ACCENSIONE_CONC 	(global_flags &=~ACCENSIONE_CONC )
+#define CHECK_ACCENSIONE_CONC 	(global_flags &  ACCENSIONE_CONC )
 
+#define ACCENSIONE_TEMP 						0x100000
+#define MARK_ACCENSIONE_TEMP  	(global_flags |= ACCENSIONE_TEMP )
+#define CLEAR_ACCENSIONE_TEMP 	(global_flags &=~ACCENSIONE_TEMP )
+#define CHECK_ACCENSIONE_TEMP 	(global_flags &  ACCENSIONE_TEMP )
+
+
+                   /*  +-+-+-+-+-+-+-+-+-+-+-+
+                       |p|r|i|n|t|_|f|l|a|g|s|
+                       +-+-+-+-+-+-+-+-+-+-+-+ */
+
+#define BLINK_PUMP 								0x1
+#define MARK_BLINK_PUMP  			(print_flags |= BLINK_PUMP )
+#define CLEAR_BLINK_PUMP 			(print_flags &=~BLINK_PUMP )
+#define CHECK_BLINK_PUMP 			(print_flags &  BLINK_PUMP )
+
+#define PRINT_PUMP 								0x2
+#define MARK_PRINT_PUMP  			(print_flags |= PRINT_PUMP )
+#define CLEAR_PRINT_PUMP 			(print_flags &=~PRINT_PUMP )
+#define CHECK_PRINT_PUMP 			(print_flags &  PRINT_PUMP )
+
+#define PRINT_HEATER 								0x4
+#define MARK_PRINT_HEATER  			(print_flags |= PRINT_HEATER )
+#define CLEAR_PRINT_HEATER 			(print_flags &=~PRINT_HEATER )
+#define CHECK_PRINT_HEATER 			(print_flags &  PRINT_HEATER )
+
+#define PRINT_CONC_LIMITS 							0x8
+#define MARK_PRINT_CONC_LIMITS  		(print_flags |= PRINT_CONC_LIMITS )
+#define CLEAR_PRINT_CONC_LIMITS 		(print_flags &=~PRINT_CONC_LIMITS )
+#define CHECK_PRINT_CONC_LIMITS 		(print_flags &  PRINT_CONC_LIMITS )
+
+#define PRINT_TEMP_LIMITS 							0x10
+#define MARK_PRINT_TEMP_LIMITS  		(print_flags |= PRINT_TEMP_LIMITS )
+#define CLEAR_PRINT_TEMP_LIMITS 		(print_flags &=~PRINT_TEMP_LIMITS )
+#define CHECK_PRINT_TEMP_LIMITS 		(print_flags &  PRINT_TEMP_LIMITS )
+
+#define PRINT_DISABILITA 							0x20
+#define MARK_PRINT_DISABILITA  			(print_flags |= PRINT_DISABILITA )
+#define CLEAR_PRINT_DISABILITA 			(print_flags &=~PRINT_DISABILITA )
+#define CHECK_PRINT_DISABILITA 			(print_flags &  PRINT_DISABILITA )
+
+#define PRINT_CONC_WAIT 							0x40
+#define MARK_PRINT_CONC_WAIT  		(print_flags |= PRINT_CONC_WAIT )
+#define CLEAR_PRINT_CONC_WAIT 		(print_flags &=~PRINT_CONC_WAIT )
+#define CHECK_PRINT_CONC_WAIT 		(print_flags &  PRINT_CONC_WAIT )
+
+#define PRINT_TEMP_WAIT 							0x80
+#define MARK_PRINT_TEMP_WAIT  		(print_flags |= PRINT_TEMP_WAIT )
+#define CLEAR_PRINT_TEMP_WAIT 		(print_flags &=~PRINT_TEMP_WAIT )
+#define CHECK_PRINT_TEMP_WAIT 		(print_flags &  PRINT_TEMP_WAIT )
+
+
+
+
+
+                   /*  +-+-+-+-+-+-+-+-+-+-+-+
+                       |t|i|m|e|r|_|f|l|a|g|s|
+                       +-+-+-+-+-+-+-+-+-+-+-+  */
 
 
 

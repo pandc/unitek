@@ -11,6 +11,7 @@
 #include "my_types.h"
 
 volatile extern unsigned int global_flags;
+volatile extern unsigned int print_flags;
 extern unsigned int timer_flags;
 
 

@@ -9,6 +9,7 @@
 #include "VariabiliGlobali_di_Lavoro.h"
 
 volatile unsigned int global_flags=0;
+volatile unsigned int print_flags=0;
 unsigned int timer_flags=0;
 
 
