@@ -268,7 +268,7 @@ void WriteMyFlashSector(void);
 #define PUMP_STATE_ATTIVO 						0x800
 #define MARK_PUMP_STATE_ATTIVO  	(global_flags |= PUMP_STATE_ATTIVO )
 #define CLEAR_PUMP_STATE_ATTIVO 	(global_flags &=~PUMP_STATE_ATTIVO )
-#define CHECK_PUMP_STATE_ATTIVO 	(global_flags &  PUMP_STATE_RIPOSO )
+#define CHECK_PUMP_STATE_ATTIVO 	(global_flags &  PUMP_STATE_ATTIVO )
 
 #define PUMP_STATE_WAIT 						0x1000
 #define MARK_PUMP_STATE_WAIT  	(global_flags |= PUMP_STATE_WAIT )
