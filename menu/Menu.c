@@ -170,6 +170,11 @@ void MenuInit(void)
         CLEAR_CONC_ALARMS_MASK;  
         MARK_OVER_TEMP_NORMAL;
         
+        MARK_ACCENSIONE_CONC;
+        MARK_ACCENSIONE_TEMP;
+        if( xTimerStart( xTimers[ TIMER1_RIT_ACC_CONC ], 0 ) != pdPASS ){}
+        if( xTimerStart( xTimers[ TIMER6_RIT_ACC_TEMP ], 0 ) != pdPASS ){}  
+        
         
         
 }
@@ -276,6 +281,43 @@ void SchermataDiLavoro(void)
                            |F|I|N|E| |S|T|A|M|P|A| |V|A|L|O|R|I|
                            +-+-+-+-+ +-+-+-+-+-+-+ +-+-+-+-+-+-+   */
                 
+                
+                if(CHECK_ACCENSIONE_CONC)
+                {
+                   MARK_PRINT_CONC_WAIT;
+                   CLEAR_CONTROL_CONC_ENA;
+                }
+                
+                
+                if(CHECK_ACCENSIONE_TEMP)
+                {
+                   MARK_PRINT_TEMP_WAIT;
+                   CLEAR_CONTROL_CONC_ENA;
+                } 
+               
+                if(CHECK_PRINT_CONC_WAIT)
+                {
+                   SelectFont(CALIBRI_10);  
+                   CleanArea_Ram_and_Screen(2,62,42,54);
+                   LCDPrintString("  WAIT",10,38);
+                   LCD_CopyPartialScreen   (2,62,42,54); 
+                   CLEAR_PRINT_CONC_WAIT;
+
+                }
+                
+                
+                if(CHECK_PRINT_TEMP_WAIT)
+                {
+                   SelectFont(CALIBRI_10);  
+                   CleanArea_Ram_and_Screen(66,126,42,54);
+                   LCDPrintString("  WAIT",74,38);
+                   LCD_CopyPartialScreen   (74,126,42,54); 
+                   CLEAR_PRINT_TEMP_WAIT; 
+               } 
+               
+               
+                
+                
           
                   SelectFont(CALIBRI_20);
                   //abilita_disabilita=DISABILITA;
@@ -319,83 +361,87 @@ void SchermataDiLavoro(void)
                      if( CHECK_CONTROL_TEMP_ENA) TempHeater_AtWork (&t_float);
                }
 
-                
-                if(CHECK_PRINT_PUMP)
-                {
-                  CLEAR_PRINT_PUMP;
-                  CleanArea_Ram_and_Screen(2,62,42,64);
-                  mybmp_struct2.bmp_pointer=pompa_OK_bmp;
-                  mybmp_struct2.righe	 =pompa_OKHeightPixels;
-                  mybmp_struct2.colonne	 =pompa_OKWidthPages;
-                  mybmp_struct2.start_x=2;
-                  mybmp_struct2.start_y=42;
-                  GetBitmap();
-                  LCD_CopyPartialScreen(2,26,42,64);
-                }
-                
-                
-                if(CHECK_PRINT_CONC_LIMITS)  //print limiti concentrazione
-                {
-                  CLEAR_PRINT_CONC_LIMITS;
-                  //pulisco disegno pompa
+                if(CHECK_CONTROL_CONC_ENA)
+                {  
+                  if(CHECK_PRINT_PUMP)
+                  {
+                    CLEAR_PRINT_PUMP;
+                    CleanArea_Ram_and_Screen(2,62,42,64);
+                    mybmp_struct2.bmp_pointer=pompa_OK_bmp;
+                    mybmp_struct2.righe	 =pompa_OKHeightPixels;
+                    mybmp_struct2.colonne	 =pompa_OKWidthPages;
+                    mybmp_struct2.start_x=2;
+                    mybmp_struct2.start_y=42;
+                    GetBitmap();
+                    LCD_CopyPartialScreen(2,26,42,64);
+                  }
                   
                   
-                  SelectFont(CALIBRI_10);
-                  CleanArea_Ram_and_Screen(2,28,42,64);
-                  
-                  prova_x =2;
-                  prova_x2=28;
-                  prova_y =42;
+                  if(CHECK_PRINT_CONC_LIMITS)  //print limiti concentrazione
+                  {
+                    CLEAR_PRINT_CONC_LIMITS;
+                    //pulisco disegno pompa
+                    
+                    
+                    SelectFont(CALIBRI_10);
+                    CleanArea_Ram_and_Screen(2,28,42,64);
+                    
+                    prova_x =2;
+                    prova_x2=28;
+                    prova_y =42;
 
-                  LCDPrintString("Max",prova_x,prova_y);
-                  generic_ui=PROGR_IN_USO.setp_e_soglie.ses_struct.AllConcMax;
-                  CalcPrint_Conc_Only[un_misura](generic_ui,prova_x2,prova_y);
-                  LCDPrintString("Min",prova_x,prova_y+12);
-                  generic_ui=PROGR_IN_USO.setp_e_soglie.ses_struct.AllConcMin;
-                  CalcPrint_Conc_Only[un_misura](generic_ui,prova_x2,prova_y+12);
+                    LCDPrintString("Max",prova_x,prova_y);
+                    generic_ui=PROGR_IN_USO.setp_e_soglie.ses_struct.AllConcMax;
+                    CalcPrint_Conc_Only[un_misura](generic_ui,prova_x2,prova_y);
+                    LCDPrintString("Min",prova_x,prova_y+12);
+                    generic_ui=PROGR_IN_USO.setp_e_soglie.ses_struct.AllConcMin;
+                    CalcPrint_Conc_Only[un_misura](generic_ui,prova_x2,prova_y+12);
+                    
+                    
+                    prova_x2=50;
+                    LCD_CopyPartialScreen(2,prova_x2,42,64);
+                  }
+                } 
+                
+                
+                 if(CHECK_CONTROL_CONC_ENA)
+                 { 
+                  //mettere anche qui un bit
+                  if(CHECK_PRINT_HEATER)
+                  {
+                    CLEAR_PRINT_HEATER;
+                    CleanArea_Ram_and_Screen(70,124,42,64);
+                    mybmp_struct2.bmp_pointer=riscaldatore_bmp;
+                    mybmp_struct2.righe	 =riscaldatoreHeightPixels;
+                    mybmp_struct2.colonne	 =riscaldatoreWidthPages;
+                    mybmp_struct2.start_x=104;
+                    mybmp_struct2.start_y=42;
+                    GetBitmap();
+                    LCD_CopyPartialScreen(90,128,44,64);
+                  }
                   
-                  
-                  prova_x2=50;
-                  LCD_CopyPartialScreen(2,prova_x2,42,64);
-                }
-                
-                
-                
-                
-                //mettere anche qui un bit
-                if(CHECK_PRINT_HEATER)
-                {
-                  CLEAR_PRINT_HEATER;
-                  CleanArea_Ram_and_Screen(70,124,42,64);
-                  mybmp_struct2.bmp_pointer=riscaldatore_bmp;
-                  mybmp_struct2.righe	 =riscaldatoreHeightPixels;
-                  mybmp_struct2.colonne	 =riscaldatoreWidthPages;
-                  mybmp_struct2.start_x=104;
-                  mybmp_struct2.start_y=42;
-                  GetBitmap();
-                  LCD_CopyPartialScreen(90,128,44,64);
-                }
-                
-                if(CHECK_PRINT_TEMP_LIMITS ) //print limiti temperatura
-                {
-                  CLEAR_PRINT_TEMP_LIMITS;
-                  SelectFont(CALIBRI_10);
-                  CleanArea_Ram_and_Screen(70,128,42,64);
-                  
+                  if(CHECK_PRINT_TEMP_LIMITS ) //print limiti temperatura
+                  {
+                    CLEAR_PRINT_TEMP_LIMITS;
+                    SelectFont(CALIBRI_10);
+                    CleanArea_Ram_and_Screen(70,128,42,64);
+                    
 
-                  LCDPrintString("Max",70,42);
-                  generic_ui=PROGR_IN_USO.setp_e_soglie.ses_struct.AllTempMax;
-                  generic_ui/=10;
-                  BinToBCDisp(generic_ui,UN_DECIMALE,96,42);
-                  LCDPrintString("Min",70,54);
-                  generic_ui=PROGR_IN_USO.setp_e_soglie.ses_struct.AllTempMin ;
-                  generic_ui/=10;
-                  BinToBCDisp(generic_ui,UN_DECIMALE,96,54);
+                    LCDPrintString("Max",70,42);
+                    generic_ui=PROGR_IN_USO.setp_e_soglie.ses_struct.AllTempMax;
+                    generic_ui/=10;
+                    BinToBCDisp(generic_ui,UN_DECIMALE,96,42);
+                    LCDPrintString("Min",70,54);
+                    generic_ui=PROGR_IN_USO.setp_e_soglie.ses_struct.AllTempMin ;
+                    generic_ui/=10;
+                    BinToBCDisp(generic_ui,UN_DECIMALE,96,54);
+                    
+                    LCD_CopyPartialScreen(70,128,42,64);
+                    
+                    
+                  }
                   
-                  LCD_CopyPartialScreen(70,128,42,64);
-                  
-                  
-                }
+                 }  
                    
                 if(CHECK_PRINT_DISABILITA)
                 {
