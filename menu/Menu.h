@@ -24,6 +24,7 @@ extern unsigned char menu_triang_limit_dn;
 extern unsigned char menu_triang_limit_dx;
 extern unsigned char menu_triang_limit_sx;
 extern unsigned char menu_triang_index;
+extern unsigned char MenuFunction_Index;
 
 
 
@@ -46,6 +47,7 @@ unsigned int  FormulaInversa_Conc_milliSiemens(void);
 void Rappresentazione_Conc_Percent(unsigned int bin);
 
 void MyCreateTimers(void);
+void StopAllTimers(void);
 
 
 
