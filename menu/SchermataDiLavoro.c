@@ -104,56 +104,67 @@ void SchermataDiLavoro(void)
         {  
           if( xTimerStart( xTimers[ TIMER6_RIT_ACC_TEMP ], 0 ) != pdPASS ){}  
         }
-           //abilita_disabilita=DISABILITA;
-          if(RamSettings.abilita_disabilita==ABILITA)
-          {
-               if(CHECK_STATE_ABILITATO) 
-               { 
-                  //non fare niente
-               } 
-               else//se ero disabilitato cancello 
-               {
-                 CleanArea_Ram_and_Screen(2,128,34,60); 
-                }
-           }
-          else  //Se trovo disabilitato ed ero abilitato finora
-          {
-            if(CHECK_STATE_ABILITATO) //allora scrivo
+        //E' solo qui che marco lo stato della schermata di lavoro che rimane come stato_old e verrà confrontato
+        //con le nuove condizioni della variabile RamSettings.abilita_disabilita,ce viene impostata solo nell'apposito menu
+        if(RamSettings.abilita_disabilita==ABILITA)
+        {
+             if(CHECK_STATE_ABILITATO) 
              { 
-               SelectFont(CALIBRI_20);  
-               CleanArea_Ram_and_Screen(2,28,42,54);//cancella area pompa
-               CleanArea_Ram_and_Screen(6,124,34,56);
-               LCDPrintString("OUTs OFF",6,38);
-               LCD_CopyPartialScreen(6,124,34,58);
+                //non fare niente
              } 
              else//se ero disabilitato cancello 
              {
-               //già a posto,non fare niente
-             }
+               CleanArea_Ram_and_Screen(2,128,34,60); //cancello scritte Outs off
+               MARK_STATE_ABILITATO;
+              }
+         }
+        else //cioè if(RamSettings.abilita_disabilita==DISABILITA) //Se trovo disabilitato ed ero abilitato finora
+        {
+          if(CHECK_STATE_ABILITATO) //allora scrivo
+           { 
+             SelectFont(CALIBRI_20);  
+             CleanArea_Ram_and_Screen(2,28,42,54);//cancella area pompa
+             CleanArea_Ram_and_Screen(6,124,34,56);
+             LCDPrintString("OUTs OFF",6,38);
+             LCD_CopyPartialScreen(6,124,34,58);
+             CLEAR_STATE_ABILITATO;
+           } 
+           else//se ero giàdisabilitato 
+           {
+             //già a posto,non fare niente
+           }
+        }
+        
+        
+        
+         //valuto ancora la stessa variabile...lo faccio solo per chiarezza di lettura 
+         if(RamSettings.abilita_disabilita==ABILITA)
+         { 
+          if(CHECK_TIMEOUT_CONC)
+          {
+            SelectFont(CALIBRI_10);
+            CleanArea_Ram_and_Screen(2,64,42,64);//cancella pompa e limiti
+            LCDPrintString("TimeOut",4,42);
+            LCD_CopyPartialScreen(2,64,42,58); 
+              
           }
-        
-        
-        
-        
-        
-        if(CHECK_TIMEOUT_CONC)
-        {
-          SelectFont(CALIBRI_10);
-          CleanArea_Ram_and_Screen(2,64,42,64);//cancella pompa e limiti
-          LCDPrintString("TimeOut",4,42);
-          LCD_CopyPartialScreen(2,64,42,58); 
-            
+          
+          if(CHECK_TIMEOUT_TEMP)
+          {
+            SelectFont(CALIBRI_10);
+            CleanArea_Ram_and_Screen(66,128,42,64);//cancella pompa e limiti
+            LCDPrintString("TimeOut",68,42);
+            LCD_CopyPartialScreen(66,128,42,58);
+              
+          }
         }
-        
-        if(CHECK_TIMEOUT_TEMP)
+        else  //se ==DISABILITA
         {
-          SelectFont(CALIBRI_10);
-          CleanArea_Ram_and_Screen(66,128,42,64);//cancella pompa e limiti
-          LCDPrintString("TimeOut",68,42);
-          LCD_CopyPartialScreen(66,128,42,58);
-            
+            CLEAR_PRINT_CONC_LIMITS;
+            CLEAR_PRINT_PUMP;
+            CLEAR_PRINT_TEMP_LIMITS;
+            CLEAR_PRINT_HEATER;
         }
-        
         //
          
         
@@ -227,8 +238,14 @@ void SchermataDiLavoro(void)
                   CLEAR_CONTROL_TEMP_ENA;
                 } 
                 
+
                 
-                
+                if(RamSettings.abilita_disabilita==DISABILITA)
+                {
+                  CLEAR_CONTROL_CONC_ENA;
+                  CLEAR_CONTROL_TEMP_ENA;
+              
+                }
                 
                 
                 
@@ -418,24 +435,25 @@ void ConcPump_AtWork(float * c_float)
               
               generic_float=(float)(PROGR_IN_USO.setp_e_soglie.ses_struct.SetConc );
               generic_float/=100;
-             
-                 
-                  xTimerStop( xTimers[TIMER3_RIT_DOSAGGIO], 0 );
-                
-                  CLEAR_PUMP_STATES;
-                  MARK_PUMP_STATE_RIPOSO; 
-                  
-                  
-                  MARK_PRINT_CONC_LIMITS;
-                  CLEAR_PRINT_PUMP;
-                  CleanArea_Ram_and_Screen(2,28,42,64);//cancello subito disegno pompa
-                  CLEAR_OUT_PUMP_ENABLE;
-                  I2C_RandWrite(0x20,0x01,1,&immagine_stato_uscite,1);
-                  
-                  //>>>>>>>>>>>>>Disable_Pump();    
-               
               
-                    break;
+              if(*c_float >generic_float) //se è anche solo superiore a setpoint era falso intervento
+              {   
+                xTimerStop( xTimers[TIMER3_RIT_DOSAGGIO], 0 );
+              
+                CLEAR_PUMP_STATES;
+                MARK_PUMP_STATE_RIPOSO; 
+                
+                
+                MARK_PRINT_CONC_LIMITS;
+                CLEAR_PRINT_PUMP;
+               // CleanArea_Ram_and_Screen(2,28,42,64);//cancello subito disegno pompa
+                CLEAR_OUT_PUMP_ENABLE;
+                I2C_RandWrite(0x20,0x01,1,&immagine_stato_uscite,1);
+              }
+              //>>>>>>>>>>>>>Disable_Pump();    
+           
+          
+                break;
              
           
           
