@@ -13,6 +13,10 @@ volatile unsigned int print_flags=0;
 unsigned int timer_flags=0;
 
 
+unsigned char immagine_stato_uscite=0;
+unsigned char I2C_conf_buf[4]={0,0,0,0};
+
+
 
 
 
@@ -65,7 +69,7 @@ const my_RamSettings_type ucFlash_Settings={
         .ptype_arr[0].Timers.Timers_9.T3_Rit_Dos=30,
         .ptype_arr[0].Timers.Timers_9.T4_AllMin_C=35,
         .ptype_arr[0].Timers.Timers_9.T5_AllMax_C=40,
-        .ptype_arr[0].Timers.Timers_9.T6_Rit_Accensione_CH_C=45,
+        .ptype_arr[0].Timers.Timers_9.T6_Rit_Accensione_CH_T=45,
         .ptype_arr[0].Timers.Timers_9.T7_Riscald=50,
         .ptype_arr[0].Timers.Timers_9.T8_AllMin_T=55,
         .ptype_arr[0].Timers.Timers_9.T9_AllMax_T=60,
@@ -90,7 +94,7 @@ const my_RamSettings_type ucFlash_Settings={
         .ptype_arr[1].Timers.Timers_9.T3_Rit_Dos=30,
         .ptype_arr[1].Timers.Timers_9.T4_AllMin_C=35,
         .ptype_arr[1].Timers.Timers_9.T5_AllMax_C=40,
-        .ptype_arr[1].Timers.Timers_9.T6_Rit_Accensione_CH_C=45,
+        .ptype_arr[1].Timers.Timers_9.T6_Rit_Accensione_CH_T=45,
         .ptype_arr[1].Timers.Timers_9.T7_Riscald=50,
         .ptype_arr[1].Timers.Timers_9.T8_AllMin_T=55,
         .ptype_arr[1].Timers.Timers_9.T9_AllMax_T=60,
@@ -115,7 +119,7 @@ const my_RamSettings_type ucFlash_Settings={
         .ptype_arr[2].Timers.Timers_9.T3_Rit_Dos=30,
         .ptype_arr[2].Timers.Timers_9.T4_AllMin_C=35,
         .ptype_arr[2].Timers.Timers_9.T5_AllMax_C=40,
-        .ptype_arr[2].Timers.Timers_9.T6_Rit_Accensione_CH_C=45,
+        .ptype_arr[2].Timers.Timers_9.T6_Rit_Accensione_CH_T=45,
         .ptype_arr[2].Timers.Timers_9.T7_Riscald=50,
         .ptype_arr[2].Timers.Timers_9.T8_AllMin_T=55,
         .ptype_arr[2].Timers.Timers_9.T9_AllMax_T=60,
@@ -141,7 +145,7 @@ const my_RamSettings_type ucFlash_Settings={
         .ptype_arr[3].Timers.Timers_9.T3_Rit_Dos=30,
         .ptype_arr[3].Timers.Timers_9.T4_AllMin_C=35,
         .ptype_arr[3].Timers.Timers_9.T5_AllMax_C=40,
-        .ptype_arr[3].Timers.Timers_9.T6_Rit_Accensione_CH_C=45,
+        .ptype_arr[3].Timers.Timers_9.T6_Rit_Accensione_CH_T=45,
         .ptype_arr[3].Timers.Timers_9.T7_Riscald=50,
         .ptype_arr[3].Timers.Timers_9.T8_AllMin_T=55,
         .ptype_arr[3].Timers.Timers_9.T9_AllMax_T=60,
@@ -167,7 +171,7 @@ const my_RamSettings_type ucFlash_Settings={
         .ptype_arr[4].Timers.Timers_9.T3_Rit_Dos=30,
         .ptype_arr[4].Timers.Timers_9.T4_AllMin_C=35,
         .ptype_arr[4].Timers.Timers_9.T5_AllMax_C=40,
-        .ptype_arr[4].Timers.Timers_9.T6_Rit_Accensione_CH_C=45,
+        .ptype_arr[4].Timers.Timers_9.T6_Rit_Accensione_CH_T=45,
         .ptype_arr[4].Timers.Timers_9.T7_Riscald=50,
         .ptype_arr[4].Timers.Timers_9.T8_AllMin_T=55,
         .ptype_arr[4].Timers.Timers_9.T9_AllMax_T=60,
