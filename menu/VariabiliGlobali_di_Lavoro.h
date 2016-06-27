@@ -14,6 +14,9 @@ volatile extern unsigned int global_flags;
 volatile extern unsigned int print_flags;
 extern unsigned int timer_flags;
 
+extern unsigned char immagine_stato_uscite;
+extern unsigned char I2C_conf_buf[4];
+
 
 
 //extern unsigned char unita_mis_concentr;
