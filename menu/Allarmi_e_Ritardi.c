@@ -46,6 +46,8 @@ void ControlloSoglieAllarmi_Conc(float*c_float)
         {
           MARK_OVER_CONC_MAX;
           CLEAR_OVER_CONC_MIN;
+          CLEAR_ALARM_CONC_MIN;//s eè max non può e non deve essere min
+          CLEAR_TIMER5_EXPIRED;//Timer Max temp..se era già partito sarebbe da fermare
           // non fermo altri timer,tanto marcano solo un flag xTimerStop
           if( xTimerStart( xTimers[ TIMER5_RIT_ALL_MAX_CONC ], 0 ) != pdPASS )
           {}// The timer could not be set into the Active state.  
@@ -58,7 +60,8 @@ void ControlloSoglieAllarmi_Conc(float*c_float)
           if(*c_float < generic_float)
           {
             MARK_OVER_CONC_MIN;
-            CLEAR_OVER_CONC_MAX;
+            CLEAR_OVER_CONC_MAX;//se è min non può e non deve essere max
+            CLEAR_ALARM_CONC_MAX;
           }
           if( xTimerStart( xTimers[ TIMER4_RIT_ALL_MIN_CONC ], 0 ) != pdPASS )
           {}// The timer could not be set into the Active state. 
@@ -96,8 +99,9 @@ void ControlloSoglieAllarmi_Conc(float*c_float)
           generic_float/=100;
           if(*c_float > generic_float)
           {
-            MARK_OVER_CONC_MAX;
-            CLEAR_OVER_CONC_MIN;
+            MARK_OVER_CONC_MIN;
+            CLEAR_OVER_CONC_MAX;//se è min non può e non deve essere max
+            CLEAR_ALARM_CONC_MAX;
             if( xTimerStart( xTimers[ TIMER4_RIT_ALL_MIN_CONC ], 0 ) != pdPASS )
             {}// The timer could not be set into the Active state. 
           }
@@ -109,6 +113,7 @@ void ControlloSoglieAllarmi_Conc(float*c_float)
             if(*c_float>generic_float)
             {
               MARK_OVER_CONC_NORMAL;
+              CLEAR_ALARM_CONC_MIN;
               
               if( xTimerStart( xTimers[ TIMER4_RIT_ALL_MIN_CONC ], 0 ) != pdPASS )
               {}// The timer could not be set into the Active state. 
@@ -149,7 +154,7 @@ void ControlloSoglieAllarmi_Temp(float*t_float)
         {
           MARK_OVER_TEMP_MAX;
           CLEAR_OVER_TEMP_MIN;
-          CLEAR_ALARM_TEMP_MIN;
+          CLEAR_ALARM_TEMP_MIN;//se è max non può e non deve essere min
           CLEAR_TIMER9_EXPIRED;//Timer Max temp..se era già partito sarebbe da fermare
 
           if( xTimerStart( xTimers[ TIMER9_RIT_ALL_MAX_TEMP ], 0 ) != pdPASS ){}
@@ -162,7 +167,7 @@ void ControlloSoglieAllarmi_Temp(float*t_float)
           if(*t_float < generic_float)
           {
             MARK_OVER_TEMP_MIN;
-            CLEAR_OVER_TEMP_MAX;
+            CLEAR_OVER_TEMP_MAX;//se è min non può e non deve essere max
             CLEAR_ALARM_TEMP_MAX;
             if( xTimerStart( xTimers[ TIMER8_RIT_ALL_MIN_TEMP ], 0 ) != pdPASS ){}
           }
@@ -177,7 +182,7 @@ void ControlloSoglieAllarmi_Temp(float*t_float)
           if(*t_float < generic_float)
           {
             MARK_OVER_TEMP_MIN;
-            CLEAR_OVER_TEMP_MAX;
+            CLEAR_OVER_TEMP_MAX;//se è min non può e non deve essere max
             CLEAR_ALARM_TEMP_MAX;
             if( xTimerStart( xTimers[ TIMER8_RIT_ALL_MIN_TEMP ], 0 ) != pdPASS ){}
           }
