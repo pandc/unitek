@@ -2940,6 +2940,9 @@
     <group>
       <name>Menu</name>
       <file>
+        <name>$PROJ_DIR$\menu\Allarmi_e_Ritardi.c</name>
+      </file>
+      <file>
         <name>$PROJ_DIR$\menu\Formule.c</name>
       </file>
       <file>
@@ -2950,6 +2953,9 @@
       </file>
       <file>
         <name>$PROJ_DIR$\menu\menustrings.c</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\menu\SchermataDiLavoro.c</name>
       </file>
       <file>
         <name>$PROJ_DIR$\menu\Submenu.c</name>
