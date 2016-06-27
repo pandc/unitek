@@ -104,7 +104,8 @@ static void menu_task(void *par)
     MARK_PRINT_CONC_WAIT;
     MARK_PRINT_TEMP_WAIT;
     
-    if(RamSettings.abilita_disabilita==ABILITA)MARK_STATE_ABILITATO;
+    if(RamSettings.abilita_disabilita==ABILITA) MARK_STATE_ABILITATO;
+    else                                        CLEAR_STATE_ABILITATO;
 
     MyCreateTimers();
 
