@@ -233,32 +233,44 @@ void WriteMyFlashSector(void);
 #define CLEAR_ALARM_CONC_MIN 		(global_flags &=~ALARM_CONC_MIN )
 #define CHECK_ALARM_CONC_MIN 		(global_flags &  ALARM_CONC_MIN )
 
+#define TIMEOUT_CONC 							0x40
+#define MARK_TIMEOUT_CONC  		(global_flags |= TIMEOUT_CONC )
+#define CLEAR_TIMEOUT_CONC 		(global_flags &=~TIMEOUT_CONC )
+#define CHECK_TIMEOUT_CONC 		(global_flags &  TIMEOUT_CONC )
+
+
 #define ALARMS_CONC_MASK                (ALARM_CONC_MAX | ALARM_CONC_MIN ) 
 #define CLEAR_CONC_ALARMS_MASK 		(global_flags &=~ALARMS_CONC_MASK )
 #define CHECK_CONC_ALARMS_MASK		(global_flags &  ALARMS_CONC_MASK )
 
 
-#define ALARM_TEMP_MAX 							0x40
+
+
+#define ALARM_TEMP_MAX 							0x80
 #define MARK_ALARM_TEMP_MAX  		(global_flags |= ALARM_TEMP_MAX )
 #define CLEAR_ALARM_TEMP_MAX 		(global_flags &=~ALARM_TEMP_MAX )
 #define CHECK_ALARM_TEMP_MAX 		(global_flags &  ALARM_TEMP_MAX )
 
-#define ALARM_TEMP_MIN 							0x80
+#define ALARM_TEMP_MIN 							0x100
 #define MARK_ALARM_TEMP_MIN  		(global_flags |= ALARM_TEMP_MIN )
 #define CLEAR_ALARM_TEMP_MIN 		(global_flags &=~ALARM_TEMP_MIN )
 #define CHECK_ALARM_TEMP_MIN 		(global_flags &  ALARM_TEMP_MIN )
+
+#define TIMEOUT_TEMP 							0x200
+#define MARK_TIMEOUT_TEMP  		(global_flags |= TIMEOUT_TEMP )
+#define CLEAR_TIMEOUT_TEMP 		(global_flags &=~TIMEOUT_TEMP )
+#define CHECK_TIMEOUT_TEMP 		(global_flags &  TIMEOUT_TEMP )
 
 #define ALARMS_TEMP_MASK                (ALARM_TEMP_MAX | ALARM_TEMP_MIN ) 
 #define CLEAR_TEMP_ALARMS_MASK 		(global_flags &=~ALARMS_TEMP_MASK )
 #define CHECK_TEMP_ALARMS_MASK		(global_flags &  ALARMS_TEMP_MASK )
 
 
-#define PREALARM_FUSTO_VUOTO 						0x100
-#define MARK_PREALARM_FUSTO_VUOTO  	(global_flags |= PREALARM_FUSTO_VUOTO )
-#define CLEAR_PREALARM_FUSTO_VUOTO 	(global_flags &=~PREALARM_FUSTO_VUOTO )
-#define CHECK_PREALARM_FUSTO_VUOTO 	(global_flags &  PREALARM_FUSTO_VUOTO )
 
-#define ALARM_FUSTO_VUOTO 						0x200
+
+
+
+#define ALARM_FUSTO_VUOTO 						0x400
 #define MARK_ALARM_FUSTO_VUOTO  	(global_flags |= ALARM_FUSTO_VUOTO )
 #define CLEAR_ALARM_FUSTO_VUOTO 	(global_flags &=~ALARM_FUSTO_VUOTO )
 #define CHECK_ALARM_FUSTO_VUOTO 	(global_flags &  ALARM_FUSTO_VUOTO )
@@ -266,36 +278,36 @@ void WriteMyFlashSector(void);
 
 
 
-#define PUMP_STATE_RIPOSO 						0x400
+#define PUMP_STATE_RIPOSO 						0x800
 #define MARK_PUMP_STATE_RIPOSO  	(global_flags |= PUMP_STATE_RIPOSO )
 #define CLEAR_PUMP_STATE_RIPOSO 	(global_flags &=~PUMP_STATE_RIPOSO )
 #define CHECK_PUMP_STATE_RIPOSO 	(global_flags &  PUMP_STATE_RIPOSO )
 
 
-#define PUMP_STATE_ATTIVO 						0x800
+#define PUMP_STATE_ATTIVO 						0x1000
 #define MARK_PUMP_STATE_ATTIVO  	(global_flags |= PUMP_STATE_ATTIVO )
 #define CLEAR_PUMP_STATE_ATTIVO 	(global_flags &=~PUMP_STATE_ATTIVO )
 #define CHECK_PUMP_STATE_ATTIVO 	(global_flags &  PUMP_STATE_ATTIVO )
 
-#define PUMP_STATE_WAIT 						0x1000
+#define PUMP_STATE_WAIT 						0x2000
 #define MARK_PUMP_STATE_WAIT  	(global_flags |= PUMP_STATE_WAIT )
 #define CLEAR_PUMP_STATE_WAIT 	(global_flags &=~PUMP_STATE_WAIT )
 #define CHECK_PUMP_STATE_WAIT 	(global_flags &  PUMP_STATE_WAIT )
 
-#define PUMP_STATE (PUMP_STATE_RIPOSO | PUMP_STATE_ATTIVO)
-
-#define CHECK_PUMP_STATE                (global_flags &  PUMP_STATE)          
-
-
+#define PUMP_STATE (PUMP_STATE_RIPOSO | PUMP_STATE_ATTIVO | PUMP_STATE_WAIT)
+#define CLEAR_PUMP_STATES (global_flags &=PUMP_STATE_RIPOSO | PUMP_STATE_ATTIVO | PUMP_STATE_WAIT)
+#define CHECK_PUMP_STATE       (global_flags &  PUMP_STATE)          
 
 
-#define HEATER_STATE_RIPOSO 						0x2000
+
+
+#define HEATER_STATE_RIPOSO 						0x4000
 #define MARK_HEATER_STATE_RIPOSO  	(global_flags |= HEATER_STATE_RIPOSO )
 #define CLEAR_HEATER_STATE_RIPOSO 	(global_flags &=~HEATER_STATE_RIPOSO )
 #define CHECK_HEATER_STATE_RIPOSO 	(global_flags &  HEATER_STATE_RIPOSO )
 
 
-#define HEATER_STATE_ATTIVO 						0x4000
+#define HEATER_STATE_ATTIVO 						0x8000
 #define MARK_HEATER_STATE_ATTIVO  	(global_flags |= HEATER_STATE_ATTIVO )
 #define CLEAR_HEATER_STATE_ATTIVO 	(global_flags &=~HEATER_STATE_ATTIVO )
 #define CHECK_HEATER_STATE_ATTIVO 	(global_flags &  HEATER_STATE_ATTIVO )
@@ -309,12 +321,12 @@ void WriteMyFlashSector(void);
 //mettere flag indicante uscita da menu,considerata come riaccensione,riazzera timers
 
 
-#define CONTROL_CONC_ENA 						0x8000
+#define CONTROL_CONC_ENA 						0x10000
 #define MARK_CONTROL_CONC_ENA  		        (global_flags |= CONTROL_CONC_ENA )
 #define CLEAR_CONTROL_CONC_ENA 		        (global_flags &=~CONTROL_CONC_ENA )
 #define CHECK_CONTROL_CONC_ENA 		        (global_flags &  CONTROL_CONC_ENA )
 
-#define CONTROL_TEMP_ENA 						0x10000
+#define CONTROL_TEMP_ENA 						0x20000
 #define MARK_CONTROL_TEMP_ENA  			(global_flags |= CONTROL_TEMP_ENA )
 #define CLEAR_CONTROL_TEMP_ENA 			(global_flags &=~CONTROL_TEMP_ENA )
 #define CHECK_CONTROL_TEMP_ENA 			(global_flags &  CONTROL_TEMP_ENA )
@@ -322,27 +334,32 @@ void WriteMyFlashSector(void);
 
 
 
-#define ARROW_KEYS_MOVE_UPDOWN 						0x20000
+#define ARROW_KEYS_MOVE_UPDOWN 						0x40000
 #define MARK_ARROW_KEYS_MOVE_UPDOWN  	(global_flags |= ARROW_KEYS_MOVE_UPDOWN )
 #define CLEAR_ARROW_KEYS_MOVE_UPDOWN 	(global_flags &=~ARROW_KEYS_MOVE_UPDOWN )
 #define CHECK_ARROW_KEYS_MOVE_UPDOWN 	(global_flags &  ARROW_KEYS_MOVE_UPDOWN )
 
 
-#define PIU_MENO_ENABLED 						0x40000
+#define PIU_MENO_ENABLED 						0x80000
 #define MARK_PIU_MENO_ENABLED  		(global_flags |= PIU_MENO_ENABLED )
 #define CLEAR_PIU_MENO_ENABLED 		(global_flags &=~PIU_MENO_ENABLED )
 #define CHECK_PIU_MENO_ENABLED 		(global_flags &  PIU_MENO_ENABLED )
 
-#define ACCENSIONE_CONC 						0x80000
+#define ACCENSIONE_CONC 						0x100000
 #define MARK_ACCENSIONE_CONC  	(global_flags |= ACCENSIONE_CONC )
 #define CLEAR_ACCENSIONE_CONC 	(global_flags &=~ACCENSIONE_CONC )
 #define CHECK_ACCENSIONE_CONC 	(global_flags &  ACCENSIONE_CONC )
 
-#define ACCENSIONE_TEMP 						0x100000
+#define ACCENSIONE_TEMP 						0x200000
 #define MARK_ACCENSIONE_TEMP  	(global_flags |= ACCENSIONE_TEMP )
 #define CLEAR_ACCENSIONE_TEMP 	(global_flags &=~ACCENSIONE_TEMP )
 #define CHECK_ACCENSIONE_TEMP 	(global_flags &  ACCENSIONE_TEMP )
 
+
+#define STATE_ABILITATO 						0x400000
+#define MARK_STATE_ABILITATO  	(global_flags |= STATE_ABILITATO )
+#define CLEAR_STATE_ABILITATO 	(global_flags &=~STATE_ABILITATO )
+#define CHECK_STATE_ABILITATO 	(global_flags &  STATE_ABILITATO )
 
                    /*  +-+-+-+-+-+-+-+-+-+-+-+
                        |p|r|i|n|t|_|f|l|a|g|s|
@@ -442,6 +459,54 @@ void WriteMyFlashSector(void);
 #define MARK_TIMER9_EXPIRED  		(timer_flags |= TIMER9_EXPIRED )
 #define CLEAR_TIMER9_EXPIRED 		(timer_flags &=~TIMER9_EXPIRED )
 #define CHECK_TIMER9_EXPIRED 		(timer_flags &  TIMER9_EXPIRED )
+
+
+      /*        +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+                |o|u|t|p|u|t|_|i|m|a|g|e|_|b|i|t|s|
+                +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+*/
+
+#define OUT_BUZZER_ENA 					        0x1
+#define MARK_OUT_BUZZER_ENA  		(immagine_stato_uscite |= OUT_BUZZER_ENA )
+#define CLEAR_OUT_BUZZER_ENA 		(immagine_stato_uscite &=~OUT_BUZZER_ENA )
+#define CHECK_OUT_BUZZER_ENA 		(immagine_stato_uscite &  OUT_BUZZER_ENA ) 
+                       
+#define OUT_TANK_ALARM_ENA 		        	                0x2
+#define MARK_OUT_TANK_ALARM_ENA  	(immagine_stato_uscite |= OUT_TANK_ALARM_ENA )
+#define CLEAR_OUT_TANK_ALARM_ENA 	(immagine_stato_uscite &=~OUT_TANK_ALARM_ENA )
+#define CHECK_OUT_TANK_ALARM_ENA 	(immagine_stato_uscite &  OUT_TANK_ALARM_ENA )                       
+                       
+#define OUT_MIN_CONC_ALARM 						        0x4
+#define MARK_OUT_MIN_CONC_ALARM  	(immagine_stato_uscite |= OUT_MIN_CONC_ALARM )
+#define CLEAR_OUT_MIN_CONC_ALARM 	(immagine_stato_uscite &=~OUT_MIN_CONC_ALARM )
+#define CHECK_OUT_MIN_CONC_ALARM 	(immagine_stato_uscite &  OUT_MIN_CONC_ALARM )                       
+
+#define OUT_PUMP_ENABLE 						        0x8
+#define MARK_OUT_PUMP_ENABLE  		(immagine_stato_uscite |= OUT_PUMP_ENABLE )
+#define CLEAR_OUT_PUMP_ENABLE 		(immagine_stato_uscite &=~OUT_PUMP_ENABLE )
+#define CHECK_OUT_PUMP_ENABLE 		(immagine_stato_uscite &  OUT_PUMP_ENABLE )
+
+#define OUT_MAX_CONC_ALARM 						        0x10
+#define MARK_OUT_MAX_CONC_ALARM  	(immagine_stato_uscite |= OUT_MAX_CONC_ALARM )
+#define CLEAR_OUT_MAX_CONC_ALARM 	(immagine_stato_uscite &=~OUT_MAX_CONC_ALARM )
+#define CHECK_OUT_MAX_CONC_ALARM 	(immagine_stato_uscite &  OUT_MAX_CONC_ALARM )
+
+#define OUT_MIN_TEMP_ALARM 						        0x20
+#define MARK_OUT_MIN_TEMP_ALARM  	(immagine_stato_uscite |= OUT_MIN_TEMP_ALARM )
+#define CLEAR_OUT_MIN_TEMP_ALARM 	(immagine_stato_uscite &=~OUT_MIN_TEMP_ALARM )
+#define CHECK_OUT_MIN_TEMP_ALARM 	(immagine_stato_uscite &  OUT_MIN_TEMP_ALARM )
+
+#define OUT_HEATER_ENABLE 						        0x40
+#define MARK_OUT_HEATER_ENABLE  	(immagine_stato_uscite |= OUT_HEATER_ENABLE )
+#define CLEAR_OUT_HEATER_ENABLE 	(immagine_stato_uscite &=~OUT_HEATER_ENABLE )
+#define CHECK_OUT_HEATER_ENABLE 	(immagine_stato_uscite &  OUT_HEATER_ENABLE )
+
+#define OUT_MAX_TEMP_ALARM 						        0x80
+#define MARK_OUT_MAX_TEMP_ALARM  	(immagine_stato_uscite |= OUT_MAX_TEMP_ALARM )
+#define CLEAR_OUT_MAX_TEMP_ALARM 	(immagine_stato_uscite &=~OUT_MAX_TEMP_ALARM )
+#define CHECK_OUT_MAX_TEMP_ALARM 	(immagine_stato_uscite &  MAX_TEMP_ALARM )                       
+                       
+
+
 
 
 #define STATO_POMPA_RIPOSO 			0
