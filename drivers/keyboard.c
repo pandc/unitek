@@ -30,8 +30,11 @@
 
 static xSemaphoreHandle xSemaKeybo;
 static xQueueHandle xKeyQueue;
+static TaskHandle_t tockhandle;
 
 static void keyboard_task(void *par);
+static void tock_signal(void);
+static void tock_task(void *par);
 
 static uint8_t key_decode(uint16_t mask)
 {
@@ -164,6 +167,7 @@ EXTI_InitTypeDef EXTI_InitStructure;
 	EXTI_ClearITPendingBit(KBD_IRQn_EXTI_LINE);
 
 	xTaskCreate(keyboard_task,"keyboard",256, NULL,tskIDLE_PRIORITY,NULL);
+	xTaskCreate(tock_task,"tock",128, NULL,tskIDLE_PRIORITY,&tockhandle);
 }
 
 static void keyboard_task(void *par)
@@ -203,7 +207,7 @@ uint8_t keyb_last,code;
 					{
 						// still pressed
 						key_putstroke(keyb_last,0);
-						//BuzzerSet(BUZTYPE_TOCK);
+						tock_signal();
 					}
 					else
 					{
@@ -218,5 +222,29 @@ uint8_t keyb_last,code;
 				Dprintf(DBGLVL_Keyboard,"keyboard: released");
 			}
 		}
+	}
+}
+
+static void tock_signal(void)
+{
+	xTaskNotifyGive(tockhandle);
+}
+
+#define TOCK_TIME	(kDec/2)
+#define NOTOCK_TIME	kDec
+static void tock_task(void *par)
+{
+
+	for (;;)
+	{
+		ulTaskNotifyTake(pdFALSE,portMAX_DELAY);
+
+		// buzzer on
+		// inserire chiamata a funzione che gestisce le uscite dell'io expander
+		vTaskDelay(TOCK_TIME);
+
+		// buzzer off
+		// inserire chiamata a funzione che gestisce le uscite dell'io expander
+		vTaskDelay(NOTOCK_TIME);
 	}
 }
