@@ -212,7 +212,7 @@ const char StringsSubmenuImpostaTimer [4][9][20]={{	                            
 const char StringsSubmenuTipoCurvLav [4][2][20]={{ 	"Calibrazione Centr",//ITALIANO
                                                                                                         "Calibrazione L-C-H"},
 
-                                                                                                    {"Calibration Centr",//ENGLISH
+                                                                                                        {"Calibration Centr",//ENGLISH
                                                                                                          "Calibration L-C-H"},
 
                                                                                                         {"Calibration Centr",
