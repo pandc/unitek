@@ -6,6 +6,7 @@
 #include "stdio.h"
 #include "string.h"
 #include "timers.h"
+#include "meas.h"
 /*
 #include "freertos.h"
 #include "task.h"
@@ -320,8 +321,60 @@ void CalcPrintOnly_milliSiemens_xy(unsigned int  bin,unsigned int x,unsigned int
     //LCDPrintString(StringsSubmenuSimboliConc[UNIT_MIS_CONCENTR_mSIEMENS],x+START_UNITA_MISURA,y);
     LCD_CopyPartialScreen(x,x+28,y,y+12);
 }
+//***************************************************************************************
+void CalcPrintTemperatura(float * t_float)
+{
+  char string_to_print[16];
+  unsigned int len;
+  //float generic_float;
+  
+  
+  *t_float=measures.temp_resist;
+  Convers_Res_to_Temp(t_float);
+  
+ /*+-+-+-+-+-+-+ +-+-+-+-+-+-+-+-+-+-+-+ +-+-+-+-+ +-+-+
+  |S|T|A|M|P|A| |T|E|M|P|E|R|A|T|U|R|A| |F|O|N|T| |2|0|
+  +-+-+-+-+-+-+ +-+-+-+-+-+-+-+-+-+-+-+ +-+-+-+-+ +-+-+  */             
+ 
+ CleanArea_Ram_and_Screen(60,120,14,36);
+ //BinToBCDisp(ADC_array[LETTURA_TEMP]/*temperature_to_print*/,UN_DECIMALE,68,14);
+ sprintf(string_to_print,"%.1f",*t_float);//pot=206,5 ohm
+ len=strlen(string_to_print);
+ LCDPrintString(string_to_print,125-(width_font*len)-5,14);
+ LCD_CopyPartialScreen(60,120,14,36);
+ 
+  
+}
+//***************************************************************************************
+void PrintConc_WorkMenu(float* c_float)
+{
+  char string_to_print[16];
+  unsigned int len;
+   
+   switch (struct_conc_print.decimali_to_print)
+   {
+     case INTERO:
+        sprintf(string_to_print,"%.0f",*c_float);//pot=206,5 ohm
+        break;
+                          
+      case UN_DECIMALE:
+        sprintf(string_to_print,"%.1f",*c_float);//pot=206,5 ohm
+      break;
+      
+      case DUE_DECIMALI:
+        sprintf(string_to_print,"%.2f",*c_float);//pot=206,5 ohm
+      break;
+      
+      default:
+      break;
+    }
+   CleanArea_Ram_and_Screen(00,62,14,36);
+   len=strlen(string_to_print);
+   LCDPrintString(string_to_print,62-(width_font*len)-5,14);
+   LCD_CopyPartialScreen(00,62,14,36);
 
-
+  
+}
 
 
 //
@@ -981,4 +1034,11 @@ void DisegnaCarattereBlink(char char_to_blink,unsigned short x,unsigned short y,
 		}
 	}
 
+}
+//***************************************************************************************
+void Update_KeyOld(void)
+{
+	/*unsigned int temp;
+	temp=global_flags & KEYS_MASK;
+	keyold_flags=temp;*/
 }
