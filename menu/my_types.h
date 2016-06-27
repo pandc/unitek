@@ -59,7 +59,7 @@ typedef struct
   unsigned int T3_Rit_Dos;
   unsigned int T4_AllMin_C;
   unsigned int T5_AllMax_C;
-  unsigned int T6_Rit_Accensione_CH_C;
+  unsigned int T6_Rit_Accensione_CH_T;
   unsigned int T7_Riscald;
   unsigned int T8_AllMin_T;
   unsigned int T9_AllMax_T;
