@@ -293,12 +293,7 @@ void GPIO_ETH_Configuration(void)
 void NVIC_Configuration(void)
 {
 	/* Set the Vector Table base location at 0x08000000 */
-	//NVIC_SetVectorTable(NVIC_VectTab_FLASH, INTVEC_START - NVIC_VectTab_FLASH);
-#if defined(IAP)
-	NVIC_SetVectorTable(NVIC_VectTab_FLASH, 0x10000);
-#else
-	NVIC_SetVectorTable(NVIC_VectTab_FLASH, 0);
-#endif	
+	NVIC_SetVectorTable(NVIC_VectTab_FLASH, INTVEC_START - NVIC_VectTab_FLASH);
 
 	/* 4 bits for pre-emption priority, 0 bits for subpriority */
 	NVIC_PriorityGroupConfig(NVIC_PriorityGroup_4); 

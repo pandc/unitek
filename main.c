@@ -28,10 +28,8 @@
 #include "tools.h"
 #include "io.h"
 
-#if defined(USE_DFMEM)
 #include "ffile.h"
 #include "config.h"
-#endif
 
 #include "freertos.h"
 #include "task.h"
@@ -66,10 +64,12 @@ void vApplicationMallocFailedHook(void)
 	for (;;);
 }
 
+#if configCHECK_FOR_STACK_OVERFLOW
 void vApplicationStackOverflowHook( xTaskHandle *pxTask, signed portCHAR *pcTaskName )
 {
 	for (;;);
 }
+#endif
 
 static void vInitTask(void *pvParameters)
 {
@@ -81,9 +81,7 @@ portTickType xLastWakeTime;
 	I2C_Open(MAX_I2C_FREQ);
 	EEP_Init();
 
-#if defined(USE_DFMEM)
 	ffstart();
-#endif
 
 	DBG_Init();
 
@@ -104,9 +102,8 @@ portTickType xLastWakeTime;
 	{
 		WDOG_Refresh();
 
-#if defined(USE_DFMEM)
 		ffrefresh();
-#endif
+
 		vTaskDelayUntil( &xLastWakeTime, kSec );
 	}
 }
@@ -129,7 +126,6 @@ int main(void)
 
 	xTaskCreate(vInitTask,"initTask",128,NULL,tskIDLE_PRIORITY,NULL);
         
-
 	vTaskStartScheduler();
 }
 

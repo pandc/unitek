@@ -9,10 +9,8 @@
 #include "com.h"
 #include "tools.h"
 
-#if defined(USE_DFMEM)
 #include "ffile.h"
 #include "config.h"
-#endif
 
 #include "freertos.h"
 #include "task.h"
@@ -112,7 +110,7 @@ static int parser_backup(char *arg);
 static int parser_calib(char *arg);
 static int parser_date(char *arg);
 static int parser_debug(char *arg);
-#if defined(USE_DFMEM)
+
 static int parser_dcat(char *arg);
 static int parser_dcopy(char *arg);
 static int parser_ddir(char *arg);
@@ -120,8 +118,8 @@ static int parser_ddel(char *arg);
 static int parser_dformat(char *arg);
 static int parser_dmove(char *arg);
 static int parser_dwrite(char *arg);
-#endif
 static int parser_file_check(char *arg);
+
 static int parser_devid(char *arg);
 static int parser_devsz(char *arg);
 static int parser_display(char *arg);
@@ -156,7 +154,7 @@ const struct CommandSt commandsList[] = {
 	{ "CAL", TRUE, TRUE, parser_calib },
 	{ "DATE", TRUE, TRUE, parser_date },
 	{ "DBG", TRUE, TRUE, parser_debug },
-#if defined(USE_DFMEM)
+
 	{ "DCAT=", TRUE, TRUE, parser_dcat },
 	{ "DCOPY=", TRUE, TRUE, parser_dcopy },
 	{ "DDIR", FALSE, TRUE, parser_ddir },
@@ -165,7 +163,7 @@ const struct CommandSt commandsList[] = {
 	{ "DFILECHK=", TRUE, TRUE, parser_file_check },
 	{ "DMOVE=", TRUE, TRUE, parser_dmove },
 	{ "DWRITE=", TRUE, TRUE, parser_dwrite },
-#endif
+
 	{ "DEVID", FALSE, TRUE, parser_devid },
 	{ "DEVSZ", FALSE, TRUE, parser_devsz },
 	{ "DISPLAY", TRUE, TRUE, parser_display },
