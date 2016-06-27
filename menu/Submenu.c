@@ -121,7 +121,16 @@ void SubmenuINOUT(void)
 			
 			if(submenuINOUT_index==0)
 			{
-				RamSettings.abilita_disabilita=ABILITA;
+                            RamSettings.abilita_disabilita=ABILITA;
+                            {
+                                  //controllo se arrivo da stato abilita
+                                  //in tal caso azzero i timeouts
+                                  if(!CHECK_STATE_ABILITATO)//se arrivo da disabilitato
+                                  {
+                                    CLEAR_TIMEOUT_CONC;  
+                                    CLEAR_TIMEOUT_TEMP;
+                                  }
+                             }
 			}//chiudi i relay ecc
 			else
 			{
