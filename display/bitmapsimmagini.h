@@ -48,6 +48,12 @@ extern const unsigned char riscaldatoreWidthPages;
 extern const unsigned char riscaldatoreHeightPixels;
 
 
+/* Bitmap info for unitekLogo */
+extern const unsigned char unitekLogo_bmp [];
+extern const unsigned char unitekLogoWidthPages;
+extern const unsigned char unitekLogoHeightPixels;
+
+
 
 
 

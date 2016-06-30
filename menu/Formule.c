@@ -47,14 +47,12 @@ void Formula_ConcConvers_Percent(unsigned int  bin)
 //****************************************************************************************************************************************************
 unsigned int FormulaInversa_Conc_Percent(void)
 {
-  unsigned int decimillesimi,multiplied,temp_test;
+  unsigned int decimillesimi,multiplied;
   
   if(struct_conc_print.decimali_to_print==UN_DECIMALE)  	{decimillesimi=struct_conc_print.conc_to_print*10;  }
   if(struct_conc_print.decimali_to_print==DUE_DECIMALI)	{	 decimillesimi=struct_conc_print.conc_to_print   ;	 }
   multiplied=decimillesimi*1;
- // multiplied+=struct_conc_print.resto;
-  temp_test=multiplied/1;//era 10
-  return  temp_test;
+  return multiplied;
 }
 //****************************************************************************************************************************************************
 void Formula_ConcConvers_PuntTitol(unsigned int  bin)
@@ -81,14 +79,13 @@ void Formula_ConcConvers_PuntTitol(unsigned int  bin)
 //****************************************************************************************************************************************************
 unsigned int  FormulaInversa_Conc_PuntTitol(void)
 {
-  unsigned int decimillesimi,multiplied,temp_test;
+  unsigned int decimillesimi,multiplied;
   
   if(struct_conc_print.decimali_to_print==UN_DECIMALE)  {	 decimillesimi=struct_conc_print.conc_to_print*10;  }
   if(struct_conc_print.decimali_to_print==DUE_DECIMALI)	{	 decimillesimi=struct_conc_print.conc_to_print   ;	 }
-  multiplied=decimillesimi*64;
+  multiplied=decimillesimi;//*64;
   multiplied+=struct_conc_print.resto;
-  temp_test=multiplied/10;
-  return temp_test;
+  return multiplied;
  
 }
 //****************************************************************************************************************************************************
@@ -115,14 +112,13 @@ void Formula_ConcConvers_grammiLitro(unsigned int  bin)
 //****************************************************************************************************************************************************
 unsigned int  FormulaInversa_Conc_grammiLitro(void)
 {
-  unsigned int decimillesimi,multiplied,temp_test;
+  unsigned int decimillesimi,multiplied;
   
   if(struct_conc_print.decimali_to_print==INTERO     )  {	 decimillesimi=struct_conc_print.conc_to_print*10;  }
   if(struct_conc_print.decimali_to_print==UN_DECIMALE)	{	 decimillesimi=struct_conc_print.conc_to_print   ;	 }
-  multiplied=decimillesimi*64;
+  multiplied=decimillesimi;//*64;
   multiplied+=struct_conc_print.resto;
-  temp_test=multiplied/10;
-  return temp_test;
+  return multiplied;
  
 }
 //****************************************************************************************************************************************************
@@ -139,15 +135,13 @@ void Formula_ConcConvers_uSiemens(unsigned int  bin)
 //****************************************************************************************************************************************************
 unsigned int  FormulaInversa_Conc_uSiemens(void)
 {
-  unsigned int decimillesimi,multiplied,temp_test;
+  unsigned int decimillesimi,multiplied;
   
   if(struct_conc_print.decimali_to_print==INTERO)  {decimillesimi=struct_conc_print.conc_to_print*1;}
   
-  multiplied=decimillesimi*64;
+  multiplied=decimillesimi;//*64;
   multiplied+=struct_conc_print.resto;
-  temp_test=multiplied;
-  
-  return temp_test;
+  return multiplied;
 }
 //****************************************************************************************************************************************************
 void Formula_ConcConvers_milliSiemens(unsigned int  bin)
@@ -162,15 +156,13 @@ void Formula_ConcConvers_milliSiemens(unsigned int  bin)
 //****************************************************************************************************************************************************
 unsigned int  FormulaInversa_Conc_milliSiemens(void)
 {
-  unsigned int decimillesimi,multiplied,temp_test;
+  unsigned int decimillesimi,multiplied;
   
   if(struct_conc_print.decimali_to_print==INTERO)  {decimillesimi=struct_conc_print.conc_to_print*1;}
   
-  multiplied=decimillesimi*64;
+  multiplied=decimillesimi;//*64;
   multiplied+=struct_conc_print.resto;
-  temp_test=multiplied;
-  
-  return temp_test;
+  return multiplied;
 }
 
 //****************************************************************************************************************************************************
@@ -208,14 +200,44 @@ float CompensConduc_TK(float* meas_conduc) //
   
   float delta_temp=PROGR_IN_USO.temp_acq_curva_lav-f1;//delta_temp è in °C
   
-  if(PROGR_IN_USO.curva_lav_cal_type==CURVA_LAV_1PT)
+  if(1)//PROGR_IN_USO.curva_lav_cal_type==CURVA_LAV_1PT)
   {/*
     f1=(ftk/100)*delta_temp;
     f1=(1+(ftk/100)*delta_temp);*/
     f1=*meas_conduc  *(1+(ftk/100)*delta_temp);
   }
-  else  //curva_lav_3pt
+  else  //curva_lav_3pt 
   {
+    
+  }
+  
+  
+  return f1;
+  
+}
+
+
+//****************************************************************************************************************************************************
+float NormalizzaConduc_TK(float* conduc_to_correct,float* fixed_temp) //
+{
+  float f1,ftk;
+  
+  ftk=(float)PROGR_IN_USO.TK.tk2.old_TK/100;
+  
+  f1=*fixed_temp;
+  //Convers_Res_to_Temp(&f1);//ora f1 è temperatura in °C,la temp di riferimento è già in °C
+  
+  float delta_temp=PROGR_IN_USO.temp_acq_curva_lav-f1;//delta_temp è in °C
+  
+  if(1)//PROGR_IN_USO.curva_lav_cal_type==CURVA_LAV_1PT)
+  {/*
+    f1=(ftk/100)*delta_temp;
+    f1=(1+(ftk/100)*delta_temp);*/
+    f1=*conduc_to_correct  *(1+(ftk/100)*delta_temp);
+  }
+  else  //curva_lav_3pt 
+  {
+    
   }
   
   
@@ -248,11 +270,16 @@ float CalcoloConcent_Now(float conduc_meas)
     switch(PROGR_IN_USO.unita_mis_concentr)
     {
       case UNIT_MIS_CONCENTR_PERCENTUALE:
-            if((conduc_meas-CONDUC_H20_DISTILL)<0)return 0;
+            if((conduc_meas-CONDUC_H20_DISTILL)<0)
+            {  
+              global_float=0;
+              return 0;
+            }
             f_concent=pendenza_m*(conduc_meas-CONDUC_H20_DISTILL);
             if   (f_concent<1000)struct_conc_print.decimali_to_print=DUE_DECIMALI;
-            else                struct_conc_print.decimali_to_print=UN_DECIMALE;
+            else                 struct_conc_print.decimali_to_print=UN_DECIMALE;
             f_concent/=100; // devo dare il vero valore da stampare,sprintf pensa solo a arrotondarlo a n decimali
+            global_float=f_concent;
             if(f_concent>99.9)f_concent=99.9;
             break ;
             
@@ -261,6 +288,7 @@ float CalcoloConcent_Now(float conduc_meas)
             f_concent=pendenza_m*(conduc_meas-CONDUC_H20_DISTILL);
             if   (f_concent<1000)struct_conc_print.decimali_to_print=DUE_DECIMALI;
             else                 struct_conc_print.decimali_to_print=UN_DECIMALE;
+            global_float=f_concent/100;
             f_concent/=10;
             if(f_concent>999)f_concent=999;
             break ;
@@ -270,22 +298,46 @@ float CalcoloConcent_Now(float conduc_meas)
             f_concent=pendenza_m*(conduc_meas-CONDUC_H20_DISTILL);
             if   (f_concent<1000)struct_conc_print.decimali_to_print=DUE_DECIMALI;
             else                struct_conc_print.decimali_to_print=UN_DECIMALE;
+            global_float=f_concent/100;
             f_concent/=10;
             if(f_concent>999)f_concent=999;
             break ;
             
       case UNIT_MIS_CONCENTR_uSIEMENS:
-            f_concent=conduc_meas*100000;
+        
+//#define VALORE_RAW
+#ifdef VALORE_RAW
+            f_concent=conduc_meas*MULTIPLIER_uS;
+#else
+            
+            if((conduc_meas-CONDUC_H20_DISTILL)<0)return CONDUC_H20_DISTILL;
+            f_concent=pendenza_m*(conduc_meas-CONDUC_H20_DISTILL);
+            
+            
+#endif       
             if   (f_concent<10) struct_conc_print.decimali_to_print=DUE_DECIMALI;
             else                struct_conc_print.decimali_to_print=UN_DECIMALE;
             if(f_concent>999)f_concent=999;
+            global_float=conduc_meas;
             break ;
+ 
+            
+            
             
       case UNIT_MIS_CONCENTR_mSIEMENS:
-            f_concent=conduc_meas*1000;
+#ifdef VALORE_RAW
+            f_concent=conduc_meas*MULTIPLIER_mS;
+#else
+            
+            if((conduc_meas-CONDUC_H20_DISTILL)<0)return (CONDUC_H20_DISTILL/MULTIPLIER_mS);
+            f_concent=pendenza_m*(conduc_meas-CONDUC_H20_DISTILL);
+            
+            
+#endif   
             if   (f_concent<10) struct_conc_print.decimali_to_print=DUE_DECIMALI;
             else                struct_conc_print.decimali_to_print=UN_DECIMALE;
             if(f_concent>999)f_concent=999;
+            global_float=conduc_meas;
             break ;
     }//fine switch(PROGR_IN_USO.unita_mis_concentr)
     
@@ -311,6 +363,7 @@ float CalcoloConcent_Now(float conduc_meas)
   
 }
 //****************************************************************************************************************************************************
+//NB  il risultato è la stessa variabile modificata che gli viene data come argomento
 void Convers_Res_to_Temp(float* float_res)
 {
 //funzione mia che fa interpolazione lineare a segmenti

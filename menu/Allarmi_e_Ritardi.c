@@ -87,7 +87,11 @@ void ControlloSoglieAllarmi_Conc(float*c_float)
             generic_float/=100;
             if(*c_float<generic_float)
             {
+              CleanArea_Ram_and_Screen(2,62,42,64);
               MARK_OVER_CONC_NORMAL;
+              CLEAR_ALARM_CONC_MAX;
+              CLEAR_OUT_MAX_CONC_ALARM;
+              I2C_RandWrite(0x20,0x01,1,&immagine_stato_uscite,1);
             }
          }
        break;
@@ -115,8 +119,11 @@ void ControlloSoglieAllarmi_Conc(float*c_float)
               MARK_OVER_CONC_NORMAL;
               CLEAR_ALARM_CONC_MIN;
               
-              if( xTimerStart( xTimers[ TIMER4_RIT_ALL_MIN_CONC ], 0 ) != pdPASS )
-              {}// The timer could not be set into the Active state. 
+             CleanArea_Ram_and_Screen(2,62,42,64);
+             MARK_OVER_CONC_NORMAL;
+             CLEAR_ALARM_CONC_MIN;
+             CLEAR_OUT_MIN_CONC_ALARM;
+             I2C_RandWrite(0x20,0x01,1,&immagine_stato_uscite,1);
             }
        }
       break;
@@ -167,7 +174,7 @@ void ControlloSoglieAllarmi_Temp(float*t_float)
           if(*t_float < generic_float)
           {
             MARK_OVER_TEMP_MIN;
-            CLEAR_OVER_TEMP_MAX;//se è min non può e non deve essere max
+            //CLEAR_OVER_TEMP_MAX;//se è min non può e non deve essere max
             CLEAR_ALARM_TEMP_MAX;
             if( xTimerStart( xTimers[ TIMER8_RIT_ALL_MIN_TEMP ], 0 ) != pdPASS ){}
           }
@@ -195,6 +202,11 @@ void ControlloSoglieAllarmi_Temp(float*t_float)
             {
               MARK_OVER_TEMP_NORMAL;
               CLEAR_ALARM_TEMP_MAX;
+              CLEAR_OVER_TEMP_MAX;
+              CleanArea_Ram_and_Screen(66,126,42,64);
+
+              CLEAR_OUT_MAX_TEMP_ALARM;
+              I2C_RandWrite(0x20,0x01,1,&immagine_stato_uscite,1);
             }
          }
        break;
@@ -221,6 +233,11 @@ void ControlloSoglieAllarmi_Temp(float*t_float)
             {
               MARK_OVER_TEMP_NORMAL;
               CLEAR_ALARM_TEMP_MIN;
+              
+             CleanArea_Ram_and_Screen(66,126,42,64);
+
+             CLEAR_OUT_MIN_CONC_ALARM;
+             I2C_RandWrite(0x20,0x01,1,&immagine_stato_uscite,1);
             }
        }
       break;
@@ -357,7 +374,13 @@ void ControlloRitardi(void)
       CLEAR_TIMER4_EXPIRED;
       if(CHECK_OVER_CONC_MIN)
       {
-        CLEAR_CONTROL_CONC_ENA ;
+       // CLEAR_CONTROL_CONC_ENA ;
+        xTimerStop( xTimers[TIMER2_TOUT_DOSAGGIO], 0 );
+        //cancello metà sx e scrivo(da decidere bene)
+        SelectFont(CALIBRI_10);
+        CleanArea_Ram_and_Screen(2,62,42,64);
+        LCDPrintString("Alarm Min",2,42);
+        LCD_CopyPartialScreen(2,62,42,64);
         
         MARK_OUT_MIN_CONC_ALARM;
         CLEAR_OUT_PUMP_ENABLE;
@@ -373,7 +396,14 @@ void ControlloRitardi(void)
     {
       if(CHECK_OVER_TEMP_MIN)
       {
-        CLEAR_CONTROL_TEMP_ENA ;
+        xTimerStop( xTimers[TIMER7_TOUT_TEMP], 0 );
+        //CLEAR_CONTROL_TEMP_ENA ;
+        SelectFont(CALIBRI_10);
+
+        CleanArea_Ram_and_Screen(66,126,42,64);
+        LCDPrintString("Alarm Min",66,42);
+        LCD_CopyPartialScreen(66,126,42,64);
+        
         
         MARK_OUT_MIN_TEMP_ALARM;
         CLEAR_OUT_HEATER_ENABLE;
@@ -395,7 +425,7 @@ void ControlloRitardi(void)
         //cancello metà sx e scrivo(da decidere bene)
         SelectFont(CALIBRI_10);
         CleanArea_Ram_and_Screen(2,62,42,64);
-        LCDPrintString("ALARM MAX",2,42);
+        LCDPrintString("Alarm Max",2,42);
         LCD_CopyPartialScreen(2,62,42,64);
         
         
@@ -416,7 +446,7 @@ void ControlloRitardi(void)
         //cancello metà sx e scrivo(da decidere bene)
         SelectFont(CALIBRI_10);
         CleanArea_Ram_and_Screen(66,126,42,64);
-        LCDPrintString("ALARM MAX",62,42);
+        LCDPrintString("Alarm Max",66,42);
         LCD_CopyPartialScreen(66,126,42,64);
         
         

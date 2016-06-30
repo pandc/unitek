@@ -114,19 +114,19 @@ void SchermataDiLavoro(void)
              } 
              else//se ero disabilitato cancello 
              {
-               CleanArea_Ram_and_Screen(2,128,34,60); //cancello scritte Outs off
+               //CleanArea_Ram_and_Screen(2,128,34,60); //cancello scritte Outs off
                MARK_STATE_ABILITATO;
               }
          }
         else //cioè if(RamSettings.abilita_disabilita==DISABILITA) //Se trovo disabilitato ed ero abilitato finora
         {
-          if(CHECK_STATE_ABILITATO) //allora scrivo
-           { 
              SelectFont(CALIBRI_20);  
              CleanArea_Ram_and_Screen(2,28,42,54);//cancella area pompa
              CleanArea_Ram_and_Screen(6,124,34,56);
-             LCDPrintString("OUTs OFF",6,38);
+             LCDPrintString("OUT OFF",14,38);
              LCD_CopyPartialScreen(6,124,34,58);
+           if(CHECK_STATE_ABILITATO) //allora scrivo
+           { 
              CLEAR_STATE_ABILITATO;
            } 
            else//se ero giàdisabilitato 
@@ -219,6 +219,7 @@ void SchermataDiLavoro(void)
                    c_float=CalcoloConcent_Now(c_float);
                    PrintConc_WorkMenu(&c_float); 
                    MARK_CONTROL_CONC_ENA;
+                   c_float=global_float;//da qui in avanti i confronti sono fatti col valore non convertito in unità di misura
 
                 }
                         /* +-+-+-+-+ +-+-+-+-+-+-+ +-+-+-+-+-+-+
@@ -490,6 +491,18 @@ void TempHeater_AtWork(float * t_float)
                  CLEAR_HEATER_STATE_RIPOSO;
                  MARK_HEATER_STATE_ATTIVO;
                  MARK_PRINT_HEATER;
+                 
+                 CleanArea_Ram_and_Screen(70,124,42,64);
+                  mybmp_struct2.bmp_pointer=riscaldatore_bmp;
+                  mybmp_struct2.righe	 =riscaldatoreHeightPixels;
+                  mybmp_struct2.colonne =riscaldatoreWidthPages;
+                  mybmp_struct2.start_x=104;
+                  mybmp_struct2.start_y=42;
+                  GetBitmap();
+                  LCD_CopyPartialScreen(90,128,44,64);
+                 
+                 MARK_OUT_HEATER_ENABLE;
+                 I2C_RandWrite(0x20,0x01,1,&immagine_stato_uscite,1);
                  CLEAR_PRINT_TEMP_LIMITS;
                  if( xTimerStart( xTimers[ TIMER7_TOUT_TEMP ], 0 ) != pdPASS ){} //Timeout parte qui              
               }

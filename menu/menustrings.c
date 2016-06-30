@@ -209,17 +209,21 @@ const char StringsSubmenuImpostaTimer [4][9][20]={{	                            
 
 
 //anche per 2 stringhe strutturo così perchè poi ci saranno diverse lingue
-const char StringsSubmenuTipoCurvLav [4][2][20]={{ 	"Calibrazione Centr",//ITALIANO
-                                                                                                        "Calibrazione L-C-H"},
+const char StringsSubmenuTipoCurvLav [4][3][20]={{ 	                                                "Curva 1 pt",//ITALIANO
+                                                                                                        "Curva 2 pt",
+                                                                                                        "Curva 3 pt"},
 
-                                                                                                        {"Calibration Centr",//ENGLISH
-                                                                                                         "Calibration L-C-H"},
+                                                                                                        {"Curve 1 pt",//ENGLISH
+                                                                                                         "Curve 2 pt",
+                                                                                                         "Curve 3 pt"},
 
-                                                                                                        {"Calibration Centr",
-                                                                                                         "Calibration L-C-H"},
+                                                                                                        {"Courbe 1 pt",
+                                                                                                         "Courbe 2 pt",
+                                                                                                         "Courbe 3 pt"},
 
-                                                                                                        {"Calibraccion Centr",
-                                                                                                         "Calibraccion L-C-H"}
+                                                                                                        {"Curva 1 pt",
+                                                                                                         "Curva 2 pt",
+                                                                                                         "Curva 3 pt"}
                                                                                                 };//ITALIANO	//ENGLISH	//FRANCAIS	//ESPANOL
 
 

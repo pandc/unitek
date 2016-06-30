@@ -36,7 +36,7 @@ struct
 }StructSoglie;
 */
 
-unsigned char incr_step,incr_counter;
+int incr_step,incr_counter;
 
 extern bitmap_struct_type mybmp_struct1,mybmp_struct2;
 
@@ -175,7 +175,7 @@ void SubmenuSelProgr(void)
 */
 	unsigned short submenuSelProg_index;
 
-	
+	if(RamSettings.selected_program_id>NUM_PROGRAMMI_MAX_INDEX)RamSettings.selected_program_id=0;
 	submenuSelProg_index=RamSettings.selected_program_id;
 
 	menu_triang_limit_up=2;

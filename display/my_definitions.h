@@ -65,7 +65,8 @@ typedef struct
 #define ABILITA 	1
 #define DISABILITA 	0
 
-
+#define PENULTIMO_INDICE_CURVA 14
+#define ULTIMO_INDICE_CURVA    15
 
 
 #define MENU_STAY 128
@@ -75,13 +76,16 @@ typedef struct
 #define INTERO       0
 
 
+#define CURVA_LAVORO_1PT 0
+#define CURVA_LAVORO_2PT 1
+#define CURVA_LAVORO_3PT 2
 
 
 
 #define H_RIGA_CALIBRI10 		12
 #define PRIMA_RIGA_CALIBRI10 	 2
 #define TEMP_MAX_LIMIT		   1300
-#define TEMP_MIN_LIMIT		    100
+#define TEMP_MIN_LIMIT		     10
 
 void SchermataDiLavoro(void);
 void MenuProg(void);
@@ -117,6 +121,10 @@ void MoveTriangolinoSx(void);
 void DisegnaTriangolinoMenu(unsigned short triang_x,unsigned short triang_y);
 void DisegnaCornice (void);
 void DisegnaMarker(unsigned short x,unsigned short y,unsigned short y_old);
+
+void AumentaIncrDecrStep(int * step,int * counter);
+void RiduciIncrDecrStep(int * step,int * counter);
+
 void DisegnaCarattereBlink(char char_to_blink,unsigned short x,unsigned short y,unsigned char *toggler);
 void RicalcolaCurvaLavoro(void);
 void RicalcolaCurvaLavoro3pt(void);
@@ -524,12 +532,19 @@ void WriteMyFlashSector(void);
 #define CURVA_LAV_1PT 0
 #define CURVA_LAV_3PT 1
 
-
-#define CONDUC_H20_DISTILL 0.0000055
+#define CONDUC_H2O_RUBINETTO 0.000661
+#define CONDUC_H20_DISTILL   0//0.0000055      //     CONDUC_H2O_RUBINETTO//5.5us
 #define SCALED_TK_DIV      10000
+                       
+#define MULTIPLIER_uS  1000000
+#define MULTIPLIER_mS  1000
 
 #define TIMERS_MAX_VAL     10000
+#define TK_MAX_VAL             0                 
 
+                  
+#define NUM_PROGRAMMI_MAX_INDEX 4 //l'indice va da 0 a 4,quindi 5 programmi
+#define NUM_UN_MIS_MAX_INDEX    4
 
 
 

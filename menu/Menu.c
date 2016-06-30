@@ -43,6 +43,9 @@ unsigned char menu_triang_limit_sx;
 unsigned char menu_triang_index;
 
 
+float global_float;
+
+
 
  // An array to hold handles to the created timers.
  TimerHandle_t xTimers[ NUM_TIMERS ];
@@ -86,11 +89,15 @@ static void menu_task(void *par)
     {  
         test= I2C_RandWrite(0x20,0x4F,1,&I2C_conf_buf[0], 1);
         if(test==FALSE)continue;
+        vTaskDelay(10);
         test= I2C_RandWrite(0x20,0x01,1,&I2C_conf_buf[1], 1);
+        vTaskDelay(10);
         if(test==FALSE)continue;
         test= I2C_RandWrite(0x20,0x03,1,&I2C_conf_buf[2], 1);
+        vTaskDelay(10);
         if(test==FALSE)continue;
         test= I2C_RandWrite(0x20,0x43,1,&I2C_conf_buf[3], 1);
+        vTaskDelay(10);
     }    
     
 
@@ -115,6 +122,8 @@ static void menu_task(void *par)
     {
             MARK_ARROW_KEYS_MOVE_UPDOWN;
             menu_triang_x=0;
+            menu_triang_index=0;
+            menu_triang_y=2;
             MenuFunctionPt[MenuFunction_Index]();
     }
 }

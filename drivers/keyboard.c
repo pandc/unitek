@@ -12,6 +12,7 @@
 
 #include "com.h"
 #include "debug.h"
+#include "my_definitions.h"
 
 #include "keyboard.h"
 
@@ -35,6 +36,8 @@ static TaskHandle_t tockhandle;
 static void keyboard_task(void *par);
 static void tock_signal(void);
 static void tock_task(void *par);
+
+extern unsigned char immagine_stato_uscite;
 
 static uint8_t key_decode(uint16_t mask)
 {
@@ -230,7 +233,7 @@ static void tock_signal(void)
 	xTaskNotifyGive(tockhandle);
 }
 
-#define TOCK_TIME	(kDec/2)
+#define TOCK_TIME	(kDec/8)
 #define NOTOCK_TIME	kDec
 static void tock_task(void *par)
 {
@@ -241,10 +244,14 @@ static void tock_task(void *par)
 
 		// buzzer on
 		// inserire chiamata a funzione che gestisce le uscite dell'io expander
+                MARK_OUT_BUZZER_ENA;
+                I2C_RandWrite(0x20,0x01,1,&immagine_stato_uscite,1);
 		vTaskDelay(TOCK_TIME);
 
 		// buzzer off
 		// inserire chiamata a funzione che gestisce le uscite dell'io expander
+                CLEAR_OUT_BUZZER_ENA;
+                I2C_RandWrite(0x20,0x01,1,&immagine_stato_uscite,1);
 		vTaskDelay(NOTOCK_TIME);
 	}
 }

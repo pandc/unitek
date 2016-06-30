@@ -379,7 +379,7 @@ void PrintConc_WorkMenu(float* c_float)
 
 //
 //***************************************************************************************************************************************
-void DecrParamConc(unsigned int* par_pt,unsigned short incr)//il valore da stampare si troverà nella struttura struct_conc_to_print
+void DecrParamConc(unsigned int* par_pt,unsigned short decr)//il valore da stampare si troverà nella struttura struct_conc_to_print
 {
 
 
@@ -388,7 +388,7 @@ void DecrParamConc(unsigned int* par_pt,unsigned short incr)//il valore da stamp
     case UNIT_MIS_CONCENTR_PERCENTUALE:
             //64000=100%  qui vogliono la risoluzione dello 0,1% quindi 64000=>10000
             Formula_ConcConvers_Percent(*par_pt);
-            if(struct_conc_print.conc_to_print)struct_conc_print.conc_to_print-=incr;
+            if(struct_conc_print.conc_to_print>decr)struct_conc_print.conc_to_print-=decr;
             *par_pt=FormulaInversa_Conc_Percent();
 
             break;
@@ -396,7 +396,7 @@ void DecrParamConc(unsigned int* par_pt,unsigned short incr)//il valore da stamp
     case UNIT_MIS_CONCENTR_PUNT_TITOL:
             //64000=100%  qui vogliono la risoluzione dello 0,1% quindi 64000=>10000
             Formula_ConcConvers_PuntTitol(*par_pt);
-            if(struct_conc_print.conc_to_print)struct_conc_print.conc_to_print-=incr;
+            if(struct_conc_print.conc_to_print>decr)struct_conc_print.conc_to_print-=decr;
             *par_pt=FormulaInversa_Conc_PuntTitol();
 
             break;
@@ -404,7 +404,7 @@ void DecrParamConc(unsigned int* par_pt,unsigned short incr)//il valore da stamp
     case UNIT_MIS_CONCENTR_GRAMMILITRO:
             //64000=100%  qui vogliono la risoluzione dello 0,1% quindi 64000=>10000
             Formula_ConcConvers_grammiLitro(*par_pt);
-            if(struct_conc_print.conc_to_print)struct_conc_print.conc_to_print-=incr;
+            if(struct_conc_print.conc_to_print>decr)struct_conc_print.conc_to_print-=decr;
             *par_pt=FormulaInversa_Conc_grammiLitro();//prima di assegnare il nuovo valore alla varibile alla quale il programma farà riferimento lo testo
             
             break;
@@ -412,14 +412,14 @@ void DecrParamConc(unsigned int* par_pt,unsigned short incr)//il valore da stamp
     case UNIT_MIS_CONCENTR_uSIEMENS:
             //64000=100%  qui vogliono la risoluzione dello 0,1% quindi 64000=>10000
             Formula_ConcConvers_uSiemens(*par_pt);
-            if(struct_conc_print.conc_to_print)struct_conc_print.conc_to_print-=incr;
+            if(struct_conc_print.conc_to_print>decr)struct_conc_print.conc_to_print-=decr;
             *par_pt=FormulaInversa_Conc_uSiemens();//prima di assegnare il nuovo valore alla varibile alla quale il programma farà riferimento lo testo
             break;
 
     case UNIT_MIS_CONCENTR_mSIEMENS:
             //64000=100%  qui vogliono la risoluzione dello 0,1% quindi 64000=>10000
             Formula_ConcConvers_milliSiemens(*par_pt);
-            if(struct_conc_print.conc_to_print)struct_conc_print.conc_to_print-=incr;
+            if(struct_conc_print.conc_to_print>decr)struct_conc_print.conc_to_print-=decr;
             *par_pt=FormulaInversa_Conc_milliSiemens();//prima di assegnare il nuovo valore alla varibile alla quale il programma farà riferimento lo testo
             break;
 
@@ -583,7 +583,7 @@ void DecrSoglia(unsigned short index,unsigned short incr)//viene chiamata riga p
 
 
 
-	//controllo che il valore minimo non sia superiore al massimo
+	//controllo che il valore minimo delle soglie di allarme non sia superiore al massimo
 	if(index==SOGLIE_ALL_CONC_MAX_INDEX)
 	{
 		if(!(PROGR_IN_USO.setp_e_soglie.setp_e_soglie_arr[SOGLIE_ALL_CONC_MAX_INDEX]> PROGR_IN_USO.setp_e_soglie.setp_e_soglie_arr[SOGLIE_ALL_CONC_MIN_INDEX]))
@@ -877,7 +877,15 @@ void DisegnaTriangolinoMenu(unsigned short triang_x,unsigned short triang_y)
 //***************************************************************************************
 void LoadDisplay_Logo(void)
 {
-  
+    mybmp_struct2.bmp_pointer=unitekLogo_bmp;
+    mybmp_struct2.righe	     =unitekLogoHeightPixels;
+    mybmp_struct2.colonne    =unitekLogoWidthPages;
+    mybmp_struct2.start_x=18;
+    mybmp_struct2.start_y=2;
+    GetBitmap();
+    LCD_CopyPartialScreen(0,128,0,64);
+    
+    vTaskDelay(2000);
 }
 //***************************************************************************************
 void LoadRamSettingsFrom_uC_Flash(void)
@@ -919,6 +927,11 @@ void LoadRamSettingsFrom_External_DataFlash(void)
     ffread(FileMyParameters,&RamSettings,size);
     ffclose(FileMyParameters);
   } 
+  
+  
+  
+  
+  if(RamSettings.selected_program_id>NUM_PROGRAMMI_MAX_INDEX)RamSettings.selected_program_id=0;
 }
 //***************************************************************************************
 unsigned char SaveRamSettings_in_External_DataFlash(void)
@@ -1041,4 +1054,40 @@ void Update_KeyOld(void)
 	/*unsigned int temp;
 	temp=global_flags & KEYS_MASK;
 	keyold_flags=temp;*/
+}
+//***************************************************************************************
+//viene chiamata quando ci si avvicina al limite della variabile da decrementare
+void RiduciIncrDecrStep(int * step,int * counter)
+{
+  if(*step==1)return;
+  
+  if(*step==100)
+  {
+    *step=10;
+    *counter=11;
+  }
+  else
+  {
+    if(*step==10)*step=1;
+    *counter=0;
+  }
+ 
+}
+//***************************************************************************************
+void AumentaIncrDecrStep(int * step,int * counter)
+{
+    if(*step==100)
+    {
+      *counter=21;
+      return;
+    }
+    if(*counter>10)
+    {
+          *step=10;
+    }
+    if(*counter>20)
+    {
+          *step=100;
+          *counter=21;
+    }
 }

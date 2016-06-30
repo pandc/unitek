@@ -38,7 +38,7 @@ struct
 */
 
 
-extern unsigned char incr_step,incr_counter;
+extern  int incr_step,incr_counter;
 
 extern bitmap_struct_type mybmp_struct1,mybmp_struct2;
 
@@ -78,12 +78,12 @@ void  Sub2MenuSelTipoCurvaLavoro(void)
 	unsigned short string_index=0,strings_y=14,y_old;
         unsigned char loop_flag=1,test;
         unsigned char selected_progr=RamSettings.selected_program_id;
-        static unsigned short submenuCurLavType_index;
+        unsigned short submenuCurLavType_index=0;
          
         submenuCurLavType_index=RamSettings.ptype_arr[selected_progr].curva_lav_cal_type;
 
         menu_triang_limit_up=14;
-        menu_triang_limit_dn=26;
+        menu_triang_limit_dn=38;
         menu_triang_y=14+(submenuCurLavType_index*12);
 
         LCD_Fill_ImageRAM(0x00);
@@ -96,7 +96,7 @@ void  Sub2MenuSelTipoCurvaLavoro(void)
         SelectFont(CALIBRI_10);
 
 
-        for(string_index=0;string_index<2;string_index++)
+        for(string_index=0;string_index<3;string_index++)
         {
                 LCDPrintString(StringsSubmenuTipoCurvLav[RamSettings.Linguaggio][string_index],12,strings_y);
                 strings_y+=12;
@@ -132,8 +132,8 @@ void  Sub2MenuSelTipoCurvaLavoro(void)
 
                         DisegnaMarker(102,menu_triang_y,y_old);
                         y_old=menu_triang_y;
-                        if(submenuCurLavType_index==CALIBR_CENTR)MenuFunction_Index=SUB3MENU_CURVA_DI_LAVORO;
-                        else					 MenuFunction_Index=SUB3MENU_SEL_LCH;
+                        
+                        MenuFunction_Index=SUB3MENU_SEL_LCH;
 
                         loop_flag=0;
                 }
@@ -171,7 +171,7 @@ void Sub2Sel_L_C_H(void)
 {
 	uint8_t key/*,last_key*/;
         unsigned short string_index=0;
-	unsigned short menu_L_C_H=0;
+
 	unsigned char loop_flag=1,test;
 	unsigned char to_print=1;
 	unsigned char *L_index;
@@ -180,29 +180,73 @@ void Sub2Sel_L_C_H(void)
         
         //unsigned int sel_progr_num=RamSettings.selected_program_id;
         unsigned int un_misura=PROGR_IN_USO.unita_mis_concentr;
-
-	L_index=&PROGR_IN_USO.curva_lav_L_index;
-	C_index=&PROGR_IN_USO.curva_lav_C_index;
-	H_index=&PROGR_IN_USO.curva_lav_H_index;
-
-	LCD_Fill_ImageRAM(0x00);
-	SelectFont(CALIBRI_10);
         
-	LCDPrintString("L=",68,2);
-	LCDPrintString("C=",68,26);
-	LCDPrintString("H=",68,50);
-
-	LCDPrintString("0x",8,2);
-	LCDPrintString("0x",8,26);
-	LCDPrintString("0x",8,50);
-
-	menu_triang_limit_up=2;
-	menu_triang_limit_dn=50;
+        float temp_temporanea_L,temp_temporanea_H;
+        //nel caso io non effettui le letture d L e H
+        temp_temporanea_L=PROGR_IN_USO.temp_acq_curva_lav;
+        temp_temporanea_H=PROGR_IN_USO.temp_acq_curva_lav;
+        
+        
+        if(PROGR_IN_USO.curva_lav_cal_type>2)PROGR_IN_USO.curva_lav_cal_type=0;
+        
+        menu_triang_limit_up=2;
+	
         menu_triang_limit_dx=60;
         menu_triang_limit_sx=0;
 	menu_triang_y=menu_triang_limit_up;
         menu_triang_index=0;
-	DisegnaTriangolinoMenu(0,menu_triang_y);
+	
+        
+        
+	
+
+	LCD_Fill_ImageRAM(0x00);
+	SelectFont(CALIBRI_10);
+        
+        switch(PROGR_IN_USO.curva_lav_cal_type)
+        {
+          case CURVA_LAVORO_1PT:
+            LCDPrintString("Pt1", 8,26);
+            LCDPrintString("C=", 68,26);
+            
+            break;
+          case CURVA_LAVORO_2PT:
+            LCDPrintString("Pt1", 8, 2);
+            LCDPrintString("L=", 68, 2);
+            
+            LCDPrintString("Pt2", 8,26);
+            LCDPrintString("C=", 68,26);
+            
+            DisegnaTriangolinoMenu(0,menu_triang_y);
+            menu_triang_limit_dn=26;
+            break;
+          case CURVA_LAVORO_3PT:
+            LCDPrintString("Pt1", 8, 2);
+            LCDPrintString("L=", 68, 2);
+            
+            LCDPrintString("Pt2", 8,26);
+            LCDPrintString("C=", 68,26);
+            
+            LCDPrintString("Pt3", 8,50);
+            LCDPrintString("H=", 68,50);
+            
+            DisegnaTriangolinoMenu(0,menu_triang_y);
+            menu_triang_limit_dn=50;
+
+            break;
+            
+          default:
+            break;
+         }
+        
+        //solo abbreviazioni
+        L_index=&PROGR_IN_USO.curva_lav_L_index;
+	C_index=&PROGR_IN_USO.curva_lav_C_index;
+	H_index=&PROGR_IN_USO.curva_lav_H_index;
+        
+
+
+	
         
         LCD_CopyScreen();
         
@@ -219,21 +263,23 @@ void Sub2Sel_L_C_H(void)
           
         if(CHECK_ARROW_KEYS_MOVE_UPDOWN)
         {
-               
-          if(key==KEY_DOWNRIGHT)
-          {
-                  MoveTriangolinoDown();
-                  MoveTriangolinoDown();
-                  if(menu_L_C_H<15)menu_L_C_H+=1;
-                  
-          }
+          if( PROGR_IN_USO.curva_lav_cal_type>0)   
+          { 
+            if(key==KEY_DOWNRIGHT)
+            {
+                    MoveTriangolinoDown();
+                    MoveTriangolinoDown();
 
-          if(key==KEY_UPLEFT)
-          {
-                  MoveTriangolinoUp();
-                  MoveTriangolinoUp();
-                  if(menu_L_C_H)menu_L_C_H-=1;
-                  
+                    
+            }
+
+            if(key==KEY_UPLEFT)
+            {
+                    MoveTriangolinoUp();
+                    MoveTriangolinoUp();
+
+                    
+            }
           }
         }
         else//cioè 
@@ -247,24 +293,17 @@ void Sub2Sel_L_C_H(void)
             if(key==KEY_PLUS)
             {
 
-                    if(menu_triang_x==menu_triang_limit_dx)//se devo variare il valore
+                    if(menu_triang_x==menu_triang_limit_dx)//se devo incrementare il valore
                     {
                             incr_counter++;
-                            if(incr_counter>10)
-                            {
-                                    incr_step=10;
-                            }
-                            if(incr_counter>20)
-                            {
-                                    incr_step=100;
-                                    incr_counter=21;
-                            }
+                            AumentaIncrDecrStep(&incr_step,&incr_counter);
 
 
                             string_index=menu_triang_index;
 
                              if(menu_triang_index==0)
                             {  
+                              
                               IncrParamConc(&PROGR_IN_USO.curva_lav_Yconcent[PROGR_IN_USO.curva_lav_L_index],incr_step);
                               CalcPrint_UnMisura_Conc[un_misura](PROGR_IN_USO.curva_lav_Yconcent[string_index],80,menu_triang_y);
                               
@@ -286,22 +325,26 @@ void Sub2Sel_L_C_H(void)
                     }
                     else
                     {  
-                      if(menu_triang_x==menu_triang_limit_sx)//se devo variare la posizione
+                      if(menu_triang_x==menu_triang_limit_sx)//se devo incrementare la posizione
                       {
                         incr_step=1;
                         if(menu_triang_index==0)
                         {  
-                          if(*L_index<*C_index)*L_index+=incr_step;
+                          //if(*L_index<*C_index)*L_index+=incr_step;
                         }
                         
                        if(menu_triang_index==2)
                         {  
-                           if(*C_index<*H_index)*C_index+=incr_step;
+                           if(*C_index<PENULTIMO_INDICE_CURVA)*C_index+=1;
+                           if(*H_index>*C_index)
+                           {
+                             *H_index=*C_index+1;//voglio che l'indice alto si porti da se  a 1 posizione sopra l'indice centrale
+                           }
                         }
                         
                        if(menu_triang_index==4)
                         {  
-                           if(*H_index<15)*H_index+=incr_step;
+                           if(*H_index<ULTIMO_INDICE_CURVA)*H_index+=1;
                         } 
                         
                         to_print=1;
@@ -326,16 +369,7 @@ void Sub2Sel_L_C_H(void)
                     if(menu_triang_x==menu_triang_limit_dx)//se devo variare il valore
                     {
                             incr_counter++;
-                            if(incr_counter>10)
-                            {
-                                    incr_step=10;
-                            }
-                            if(incr_counter>20)
-                            {
-                                    incr_step=100;
-                                    incr_counter=21;
-                            }
-
+                            AumentaIncrDecrStep(&incr_step,&incr_counter);
 
                             string_index=menu_triang_index;
 
@@ -373,17 +407,17 @@ void Sub2Sel_L_C_H(void)
                         incr_step=1;
                         if(menu_triang_index==0)
                         {  
-                          if(*L_index)*L_index-=incr_step;
+                         // if(*L_index)*L_index-=incr_step;
                         }
                         
                        if(menu_triang_index==2)
                         {  
-                           if(*C_index>*L_index)*C_index-=incr_step;
+                           if(*C_index>1)*C_index-=1;
                         }
                         
                        if(menu_triang_index==4)
                         {  
-                           if(*H_index>*C_index)*H_index-=incr_step;
+                           if(*H_index>*C_index)*H_index-=1;
                         } 
                         
                         to_print=1;
@@ -403,8 +437,21 @@ void Sub2Sel_L_C_H(void)
                 if (key == KEY_PROG)
                 
                 {
-                        
-                        MenuFunction_Index=SUB2MENU_SEL_TIPO_CURV_LAV;
+                        //Normalizzazione dei punti di calibrazione L e H rispetto alla temperatura di C
+                        //prendo TK che deve essere già stato inserito
+                        //Normalizza_L_H_vs_C();
+                        PROGR_IN_USO.curva_lav_XconducL=NormalizzaConduc_TK(&PROGR_IN_USO.curva_lav_XconducL,&temp_temporanea_L);
+                        PROGR_IN_USO.curva_lav_XconducH=NormalizzaConduc_TK(&PROGR_IN_USO.curva_lav_XconducH,&temp_temporanea_H);                            
+                            
+                        test=SaveRamSettings_in_External_DataFlash();
+                        if(!test)
+                        {
+                            LCD_Fill_ImageRAM(0x00);
+                            SelectFont(CALIBRI_10);
+                            LCDPrintString("File system error",4,24);
+                            LCD_CopyPartialScreen(4,80,24,36);
+                        }
+                        MenuFunction_Index=SUB3MENU_CURVA_DI_LAVORO3pt;//era SUB2MENU_SEL_TIPO_CURV_LAV;
                         loop_flag=0;
 
                 }
@@ -416,9 +463,10 @@ void Sub2Sel_L_C_H(void)
 	{
 	       
                
-               if(menu_triang_x==menu_triang_limit_sx)//se devo variare la posizione
+               if(menu_triang_x==menu_triang_limit_sx)//se devo variare la posizione orizzontale
                {
                   MoveTriangolinoDx();
+                  MARK_ARROW_KEYS_MOVE_UPDOWN;
           
                }
                else
@@ -428,52 +476,44 @@ void Sub2Sel_L_C_H(void)
                    if(menu_triang_x==menu_triang_limit_dx)//se devo variare la posizione
                    {
                         
+                      CLEAR_ARROW_KEYS_MOVE_UPDOWN;
+                     
                        RicalcolaCurvaLavoro3pt();
                        if(measures.temp_ok)
                        {
                             measures.temp_ok=0;
-                            
-                            
+                                                        
 
                             if(menu_triang_index==0)
                             {  
-                            PROGR_IN_USO.curva_lav_XconducL=measures.conduc;
+                              PROGR_IN_USO.curva_lav_XconducL=measures.conduc;
+                              temp_temporanea_L=measures.temp_resist;
+                              Convers_Res_to_Temp(&temp_temporanea_L);
                             }
 
+                            
                             if(menu_triang_index==2)
                             {  
-                             PROGR_IN_USO.curva_lav_XconducC=measures.conduc;
-                             PROGR_IN_USO.temp_acq_curva_lav=measures.temp_resist;
-                             Convers_Res_to_Temp(&PROGR_IN_USO.temp_acq_curva_lav);//NB questa funzione modifica il parametro stesso che le viene passato
+                              PROGR_IN_USO.curva_lav_XconducC=measures.conduc;
+                              PROGR_IN_USO.temp_acq_curva_lav=measures.temp_resist;
+                              Convers_Res_to_Temp(&PROGR_IN_USO.temp_acq_curva_lav);//NB questa funzione modifica il parametro stesso che le viene passato
                             }
 
+                            
                             if(menu_triang_index==4)
                             {  
                              PROGR_IN_USO.curva_lav_XconducH=measures.conduc;
+                             temp_temporanea_H=measures.temp_resist;
+                             Convers_Res_to_Temp(&temp_temporanea_H);
                             } 
+                            
+                            
                             MoveTriangolinoSx();
-                            
-                            MenuFunction_Index=SUB3MENU_CURVA_DI_LAVORO3pt;
-                            
-                            test=SaveRamSettings_in_External_DataFlash();
-                            if(!test)
-                            {
-                                LCD_Fill_ImageRAM(0x00);
-                                SelectFont(CALIBRI_10);
-                                LCDPrintString("File system error",4,24);
-                                LCD_CopyPartialScreen(4,80,24,36);
-                            }
-                            return;
   
                         
                         
                         }
-                     
-                     
-                     
-                     
-                     
-                        
+                         
               
                    }
                }
@@ -486,22 +526,52 @@ void Sub2Sel_L_C_H(void)
 	{
 		 to_print=0; 
                  
-                 CleanArea_Ram_and_Screen(20,40,2,12);
-                 BinToBCDisp(*L_index,INTERO,8,2);
-                 LCD_CopyPartialScreen(20,40,2,12);
+         
                  
-                 CleanArea_Ram_and_Screen(20,40,26,36);
-                 BinToBCDisp(*C_index,INTERO,8,26);
-                 LCD_CopyPartialScreen(20,40,26,36);
                  
-                 CleanArea_Ram_and_Screen(20,40,50,60);
-                 BinToBCDisp(*H_index,INTERO,8,50);
-                 LCD_CopyPartialScreen(20,40,50,60);
-                 
-                 //scelgo funzione da puntare a seconda dell unità misura concentrazione 
-                 CalcPrint_UnMisura_Conc[un_misura](PROGR_IN_USO.curva_lav_Yconcent[*L_index],80,2);
-                 CalcPrint_UnMisura_Conc[un_misura](PROGR_IN_USO.curva_lav_Yconcent[*C_index],80,26);
-                 CalcPrint_UnMisura_Conc[un_misura](PROGR_IN_USO.curva_lav_Yconcent[*H_index],80,50);
+        switch(PROGR_IN_USO.curva_lav_cal_type)
+        {
+          case CURVA_LAVORO_1PT:
+              CleanArea_Ram_and_Screen(20,40,26,36);
+              BinToBCDisp(*C_index,INTERO,8,26);
+              LCD_CopyPartialScreen(20,40,26,36);
+              CalcPrint_UnMisura_Conc[un_misura](PROGR_IN_USO.curva_lav_Yconcent[*C_index],80,26);//scelgo funzione da puntare a seconda dell unità misura concentrazione 
+            
+            break;
+          case CURVA_LAVORO_2PT:
+              CleanArea_Ram_and_Screen(20,40,2,12);
+              BinToBCDisp(*L_index,INTERO,8,2);
+              LCD_CopyPartialScreen(20,40,2,12);
+
+              CleanArea_Ram_and_Screen(20,40,26,36);
+              BinToBCDisp(*C_index,INTERO,8,26);
+              LCD_CopyPartialScreen(20,40,26,36);
+              
+              CalcPrint_UnMisura_Conc[un_misura](PROGR_IN_USO.curva_lav_Yconcent[*L_index],80,2);
+              CalcPrint_UnMisura_Conc[un_misura](PROGR_IN_USO.curva_lav_Yconcent[*C_index],80,26);
+            break;
+          case CURVA_LAVORO_3PT:
+              CleanArea_Ram_and_Screen(20,40,2,12);
+              BinToBCDisp(*L_index,INTERO,8,2);
+              LCD_CopyPartialScreen(20,40,2,12);
+
+              CleanArea_Ram_and_Screen(20,40,26,36);
+              BinToBCDisp(*C_index,INTERO,8,26);
+              LCD_CopyPartialScreen(20,40,26,36);
+
+              CleanArea_Ram_and_Screen(20,40,50,60);
+              BinToBCDisp(*H_index,INTERO,8,50);
+              LCD_CopyPartialScreen(20,40,50,60);
+              
+              CalcPrint_UnMisura_Conc[un_misura](PROGR_IN_USO.curva_lav_Yconcent[*L_index],80,2);
+              CalcPrint_UnMisura_Conc[un_misura](PROGR_IN_USO.curva_lav_Yconcent[*C_index],80,26);
+              CalcPrint_UnMisura_Conc[un_misura](PROGR_IN_USO.curva_lav_Yconcent[*H_index],80,50);
+
+            break;
+            
+          default:
+            break;
+         }
          
 	}
     }
@@ -615,12 +685,7 @@ void Sub2MenuCurvadiLavoro(void)
                                 if(menu_triang_x==menu_triang_limit_dx)
                                 {
                                         incr_counter++;
-                                        if(incr_counter>10) incr_step=10;
-                                        if(incr_counter>20)
-                                        {
-                                                incr_step=100;
-                                                incr_counter=21;
-                                        }
+                                        AumentaIncrDecrStep(&incr_step,&incr_counter);
 
                                         string_index=menu_triang_index+ page*5;
                                         //incremento
@@ -645,15 +710,7 @@ void Sub2MenuCurvadiLavoro(void)
                                 if(menu_triang_x==menu_triang_limit_dx)
                                 {
                                         incr_counter++;
-                                        if(incr_counter>10)
-                                        {
-                                                incr_step=10;
-                                        }
-                                        if(incr_counter>20)
-                                        {
-                                                incr_step=100;
-                                                incr_counter=21;
-                                        }
+                                        AumentaIncrDecrStep(&incr_step,&incr_counter);
 
 
                                         string_index=menu_triang_index+ page*5;
@@ -1061,12 +1118,18 @@ void Sub2MenuCurvadiLavoro3Punti(void)
 //***************************************************************************************
 void Sub2MenuImpostaSoglie(void)
 {
-	uint8_t key,last_key;
+#define MENU_IMPOSTA_SOGLIE_MAX_INDEX            7
+#define MENU_IMPOSTA_SOGLIE_MIN_SCROLL_DN_LIMIT  4
+#define MENU_IMPOSTA_SOGLIE_MAX_SCROLL_UP_LIMIT  3
+#define MENU_IMPOSTA_SOGLIE_DIFF_INDEX_RIGHE_SCHERMATA  4//schermata sempre piena di 5 righe
+  
+  
+        uint8_t key,last_key;
 	unsigned short string_index=0,strings_y=2;
-	static unsigned short menu_ImpostaSoglie_index=0;
-	static unsigned short scroll_old=0;
+	unsigned short menu_ImpostaSoglie_index=0;
+
 	unsigned char loop_flag=1,test;
-	unsigned char first_string_to_print,last_string_to_print;
+	unsigned char first_string_to_print=0,last_string_to_print=4;
 	unsigned char to_print=1;
         //unsigned int sel_progr_num=RamSettings.selected_program_id;
 
@@ -1137,19 +1200,14 @@ void Sub2MenuImpostaSoglie(void)
                                 if(menu_triang_x==menu_triang_limit_dx)
                                 {
                                         incr_counter++;
-                                        if(incr_counter>10) incr_step=10;
-                                        if(incr_counter>20)
-                                        {
-                                                incr_step=100;
-                                                incr_counter=21;
-                                        }
+                                        AumentaIncrDecrStep(&incr_step,&incr_counter);
 
 
                                         string_index=menu_triang_index;
-                                        IncrSoglia(string_index,incr_step);
+                                        IncrSoglia(menu_ImpostaSoglie_index,incr_step);
                                         //LCDPrintString(StringsSubmenuImpostaSoglie[string_index],10,strings_y);
                                         CleanArea_Ram_and_Screen(82,110,menu_triang_y,menu_triang_y+10);
-                                        PrintSoglia(string_index,82,menu_triang_y);
+                                        PrintSoglia(menu_ImpostaSoglie_index,82,menu_triang_y);
                                         LCD_CopyPartialScreen(82,110,menu_triang_y,menu_triang_y+10);
                                         //PrintUnitMis(string_index,112,strings_y);
                                 }
@@ -1169,22 +1227,14 @@ void Sub2MenuImpostaSoglie(void)
                                 if(menu_triang_x==menu_triang_limit_dx)
                                 {
                                         incr_counter++;
-                                        if(incr_counter>10)
-                                        {
-                                                incr_step=10;
-                                        }
-                                        if(incr_counter>20)
-                                        {
-                                                incr_step=100;
-                                                incr_counter=21;
-                                        }
+                                        AumentaIncrDecrStep(&incr_step,&incr_counter);
 
 
                                         string_index=menu_triang_index;
-                                        DecrSoglia(string_index,incr_step);
+                                        DecrSoglia(menu_ImpostaSoglie_index,incr_step);
                                         //LCDPrintString(StringsSubmenuImpostaSoglie[string_index],10,strings_y);
                                         CleanArea_Ram_and_Screen(82,110,menu_triang_y,menu_triang_y+10);
-                                        PrintSoglia(string_index,82,menu_triang_y);
+                                        PrintSoglia(menu_ImpostaSoglie_index,82,menu_triang_y);
                                         LCD_CopyPartialScreen(82,110,menu_triang_y,menu_triang_y+10);
                                         //PrintUnitMis(string_index,112,strings_y);
                                 }
@@ -1205,14 +1255,21 @@ void Sub2MenuImpostaSoglie(void)
                         //if(CHECK_TASTO_DN_DX_PRESSED)
                         {
                                 MoveTriangolinoDown();
-                                if(menu_ImpostaSoglie_index<7)menu_ImpostaSoglie_index+=1;
-                                if(menu_ImpostaSoglie_index>4)//lo scroll in basso serve solo nei casi che debba mostrare oltre la 5a stringa
-                                {
-                                        if(scroll_old==menu_ImpostaSoglie_index)to_print=0;
-                                        else                           to_print=1;
+                                if(menu_ImpostaSoglie_index<MENU_IMPOSTA_SOGLIE_MAX_INDEX)//se sono già al massimo non faccio nessuna azione
+                                {  
+                                  menu_ImpostaSoglie_index+=1;
+                                  if(menu_ImpostaSoglie_index>MENU_IMPOSTA_SOGLIE_MIN_SCROLL_DN_LIMIT)//lo scroll in basso serve solo nei casi che debba mostrare oltre la 5a stringa
+                                  {
+                                          to_print=0;
+                                          if(menu_ImpostaSoglie_index>last_string_to_print)//se devo andare sotto l'ultima stringa che ho in basso serve scroll in basso
+                                          {
+                                            to_print=1;
+                                            last_string_to_print=menu_ImpostaSoglie_index;
+                                            first_string_to_print=last_string_to_print-MENU_IMPOSTA_SOGLIE_DIFF_INDEX_RIGHE_SCHERMATA;
+                                          }
 
-                                }
-                                
+                                  }
+                                }  
                         }
 
                         if (key == KEY_UPLEFT)
@@ -1220,10 +1277,14 @@ void Sub2MenuImpostaSoglie(void)
                         {
                                 MoveTriangolinoUp();
                                 if(menu_ImpostaSoglie_index)menu_ImpostaSoglie_index-=1;
-                                if(menu_ImpostaSoglie_index<3)//lo scroll in alto può servire se sono prima della 4 stringa
+                                if(menu_ImpostaSoglie_index<MENU_IMPOSTA_SOGLIE_MAX_SCROLL_UP_LIMIT)//lo scroll in alto può servire se sono prima della 4 stringa
                                 {
-                                        if(scroll_old==menu_ImpostaSoglie_index)to_print=0;
-                                        else                           to_print=1;
+                                        to_print=0;
+                                        if(menu_ImpostaSoglie_index<first_string_to_print)//se devo andare sopra la 1a stringa che vedo in alto serve scroll in alto
+                                        {
+                                          to_print=1;
+                                          first_string_to_print=menu_ImpostaSoglie_index;
+                                        }
                                 }
                                 
                         }
@@ -1242,37 +1303,6 @@ void Sub2MenuImpostaSoglie(void)
 		{
 			to_print=0;
 
-			if(menu_ImpostaSoglie_index==0)
-			{
-				first_string_to_print=0;
-			}
-
-			if(menu_ImpostaSoglie_index==1)
-			{
-				first_string_to_print=1;
-
-			}
-
-			if(menu_ImpostaSoglie_index==2)
-			{
-				first_string_to_print=2;
-			}
-
-			if(menu_ImpostaSoglie_index==5)
-			{
-				first_string_to_print=1;
-			}
-
-			if(menu_ImpostaSoglie_index==6)
-			{
-				first_string_to_print=2;
-			}
-
-			if(menu_ImpostaSoglie_index==7)
-			{
-				first_string_to_print=3;
-			}
-
 			LCD_Fill_ImageRAM(0x00);
 
 
@@ -1280,8 +1310,8 @@ void Sub2MenuImpostaSoglie(void)
 			SelectFont(CALIBRI_10);
 
 			strings_y=2;
-			last_string_to_print=first_string_to_print + 5;
-			for(string_index=first_string_to_print;string_index<last_string_to_print;string_index++)
+			last_string_to_print=first_string_to_print + MENU_IMPOSTA_SOGLIE_DIFF_INDEX_RIGHE_SCHERMATA;
+			for(string_index=first_string_to_print;string_index<(last_string_to_print+1);string_index++)
 			{
 				LCDPrintString(StringsSubmenuImpostaSoglie[RamSettings.Linguaggio][string_index],10,strings_y);
 				PrintSoglia(string_index,82,strings_y);
@@ -1293,7 +1323,7 @@ void Sub2MenuImpostaSoglie(void)
 
 
 			LCD_CopyScreen();
-			scroll_old=menu_ImpostaSoglie_index;
+
 		}
 
 
@@ -1304,13 +1334,17 @@ void Sub2MenuImpostaSoglie(void)
 //***************************************************************************************
 void Sub2MenuImpostaTimer(void)
 {
+#define MENU_IMPOSTA_TIMERs_MAX_INDEX            8
+#define MENU_IMPOSTA_TIMERs_MIN_SCROLL_DN_LIMIT  4
+#define MENU_IMPOSTA_TIMERs_MAX_SCROLL_UP_LIMIT  4
+#define MENU_IMPOSTA_TIMERs_DIFF_INDEX_RIGHE_SCHERMATA  4//schermata sempre piena di 5 righe
+  
   uint8_t key,last_key;
-  unsigned char loop_flag=1,to_print=1,resto,test;
-  unsigned short page=0,page_old;
+  unsigned char loop_flag=1,to_print=1,test;
   unsigned short string_index=0,strings_y=2;
   unsigned short menu_ImpostaTimers_index=0;
-  unsigned char first_string_to_print,last_string_to_print;
-  unsigned int prova=80;
+  unsigned char first_string_to_print=0,last_string_to_print=4;
+  int prova=80;
   
 
   menu_triang_limit_up=2;
@@ -1334,9 +1368,7 @@ void Sub2MenuImpostaTimer(void)
 			last_key = key;
 		else	key = 0;
                 
-                if (key_getstroke(&key,kDec*2))
-			last_key = key;
-		else	key = 0;
+
 		
       
     if (key == KEY_PROG)
@@ -1386,48 +1418,43 @@ void Sub2MenuImpostaTimer(void)
       
       if(CHECK_ARROW_KEYS_MOVE_UPDOWN)
       {
-              if (key == KEY_DOWNRIGHT)
-              //if(CHECK_TASTO_DN_DX_PRESSED)
-              {
-                      MoveTriangolinoDown();
-                      if(menu_ImpostaTimers_index<15)menu_ImpostaTimers_index+=1;
-                      page=(menu_ImpostaTimers_index)/5;
-
-                      if(page!=page_old)
-                      {
+          if (key == KEY_DOWNRIGHT)
+          //if(CHECK_TASTO_DN_DX_PRESSED)
+          {
+                  MoveTriangolinoDown();
+                  if(menu_ImpostaTimers_index<MENU_IMPOSTA_TIMERs_MAX_INDEX)//se sono già al massimo non faccio nessuna azione
+                  {  
+                    menu_ImpostaTimers_index+=1;
+                    if(menu_ImpostaTimers_index>MENU_IMPOSTA_TIMERs_MIN_SCROLL_DN_LIMIT)//lo scroll in basso serve solo nei casi che debba mostrare oltre la 5a stringa
+                    {
+                            to_print=0;
+                            if(menu_ImpostaTimers_index>last_string_to_print)//se devo andare sotto l'ultima stringa che ho in basso serve scroll in basso
+                            {
                               to_print=1;
-                              if(page==3)menu_triang_limit_dn=2;
-                              else 	  menu_triang_limit_dn=50;
-                              menu_triang_index=0;
-                              menu_triang_y=menu_triang_limit_up;
-                      }
-                      else              to_print=0;
+                              last_string_to_print=menu_ImpostaTimers_index;
+                              first_string_to_print=last_string_to_print-MENU_IMPOSTA_TIMERs_DIFF_INDEX_RIGHE_SCHERMATA;
+                            }
 
+                    }
+                  }  
+          }
 
-                      
-              }
-
-              if (key == KEY_UPLEFT)
-              //if(CHECK_TASTO_UP_SX_PRESSED)
-              {
-                      MoveTriangolinoUp();
-                      if(menu_ImpostaTimers_index)menu_ImpostaTimers_index-=1;
-
-                      page=(menu_ImpostaTimers_index)/5;
-
-                      if(page!=page_old)
-                      {
-                              to_print=1;
-                              if(page==3)menu_triang_limit_dn=2;
-                              else 	  menu_triang_limit_dn=50;
-                              menu_triang_index=4;
-                              menu_triang_y=menu_triang_limit_dn;
-
-                      }
-                      else              to_print=0;
-
-                      
-              }
+          if (key == KEY_UPLEFT)
+          //if(CHECK_TASTO_UP_SX_PRESSED)
+          {
+                  MoveTriangolinoUp();
+                  if(menu_ImpostaTimers_index)menu_ImpostaTimers_index-=1;
+                  if(menu_ImpostaTimers_index<MENU_IMPOSTA_TIMERs_MAX_SCROLL_UP_LIMIT)//lo scroll in alto può servire se sono prima della 4 stringa
+                  {
+                          to_print=0;
+                          if(menu_ImpostaTimers_index<first_string_to_print)//se devo andare sopra la 1a stringa che vedo in alto serve scroll in alto
+                          {
+                            to_print=1;
+                            first_string_to_print=menu_ImpostaTimers_index;
+                          }
+                  }
+                  
+          }
       }
       else
       {
@@ -1443,28 +1470,24 @@ void Sub2MenuImpostaTimer(void)
                       if(menu_triang_x==menu_triang_limit_dx)
                       {
                               incr_counter++;
-                              if(incr_counter>10) incr_step=10;
-                              if(incr_counter>20)
-                              {
-                                      incr_step=100;
-                                      incr_counter=21;
-                              }
+                              AumentaIncrDecrStep(&incr_step,&incr_counter);
 
-                              string_index=menu_triang_index+ page*5;
+                              string_index=menu_triang_index;
                               //incremento
-                              prova=PROGR_IN_USO.Timers.Timers_values[string_index];
-                              if((prova+incr_step)<TIMERS_MAX_VAL)
+                              prova=PROGR_IN_USO.Timers.Timers_values[menu_ImpostaTimers_index];
+                              if((prova+incr_step)<TIMERS_MAX_VAL  || (prova+incr_step)==TIMERS_MAX_VAL )
                               {
                                 CleanArea_Ram_and_Screen(92,120,menu_triang_y,menu_triang_y+10);
                                 prova+=incr_step;
-                                PROGR_IN_USO.Timers.Timers_values[string_index]=prova;
-                                BinToBCDisp(PROGR_IN_USO.Timers.Timers_values[string_index],INTERO,96,menu_triang_y);
+                                PROGR_IN_USO.Timers.Timers_values[menu_ImpostaTimers_index]=prova;
+                                BinToBCDisp(PROGR_IN_USO.Timers.Timers_values[menu_ImpostaTimers_index],INTERO,96,menu_triang_y);
                                 LCD_CopyPartialScreen(92,120,menu_triang_y,menu_triang_y+10);
                               }
-                              
-                              
-                              
-                      }
+                              else
+                              {
+                                RiduciIncrDecrStep(&incr_step,&incr_counter);
+                              }
+                       }
               }
               else if (key == (KEY_PLUS | KEY_RELEASED))
               
@@ -1473,6 +1496,10 @@ void Sub2MenuImpostaTimer(void)
                       incr_counter=0;
                       
               }
+              
+              
+              
+              
 
               if ((key == KEY_MINUS) || (last_key == KEY_MINUS))
               //if(CHECK_TASTO_MENO_PRESSED)
@@ -1481,30 +1508,27 @@ void Sub2MenuImpostaTimer(void)
                       if(menu_triang_x==menu_triang_limit_dx)
                       {
                               incr_counter++;
-                              if(incr_counter>10)
+                              AumentaIncrDecrStep(&incr_step,&incr_counter);
+
+
+                              string_index=menu_triang_index;
+
+                              
+                              prova=PROGR_IN_USO.Timers.Timers_values[menu_ImpostaTimers_index];
+                              if((prova-incr_step)<0 || (prova-incr_step)==0)
                               {
-                                      incr_step=10;
+                                RiduciIncrDecrStep(&incr_step,&incr_counter);
                               }
-                              if(incr_counter>20)
+                              else
                               {
-                                      incr_step=100;
-                                      incr_counter=21;
-                              }
-
-
-                              string_index=menu_triang_index+ page*5;
-
-                              //sistemare...per step>1 può scendere sotto 0
-                              prova=PROGR_IN_USO.Timers.Timers_values[string_index];
-                              if((prova-incr_step)>0)
-                              {
+                                
+                                
                                 prova-=incr_step;
                                 CleanArea_Ram_and_Screen(92,120,menu_triang_y,menu_triang_y+10);
-                                PROGR_IN_USO.Timers.Timers_values[string_index]=prova;
-                                BinToBCDisp(PROGR_IN_USO.Timers.Timers_values[string_index],INTERO,96,menu_triang_y);
+                                PROGR_IN_USO.Timers.Timers_values[menu_ImpostaTimers_index]=prova;
+                                BinToBCDisp(PROGR_IN_USO.Timers.Timers_values[menu_ImpostaTimers_index],INTERO,96,menu_triang_y);
                                 LCD_CopyPartialScreen(92,120,menu_triang_y,menu_triang_y+10);
                               }
-                              
                       }
               }
               else if (key == (KEY_MINUS | KEY_RELEASED))
@@ -1520,32 +1544,13 @@ void Sub2MenuImpostaTimer(void)
       if(to_print)
       {
         to_print=0;
-        switch(page)
-      {
-        case 0:
-                first_string_to_print=0;
-                last_string_to_print =5;//sarebbe 4
-                menu_triang_limit_dn=50;
-                break;
 
-        case 1:
-                first_string_to_print=5;
-                last_string_to_print =8;//sarebbe 9
-                menu_triang_limit_dn=26;
-                break;
-
-        default:
-            break;
-        }
+        LCD_Fill_ImageRAM(0x00);
         
-        if(page!=page_old)
-        {
-          LCD_Fill_ImageRAM(0x00);
-          strings_y=2;
-        }
-        
+        strings_y=2;
         DisegnaTriangolinoMenu(0,menu_triang_y);
-        for(string_index=first_string_to_print;string_index<last_string_to_print;string_index++)
+        last_string_to_print=first_string_to_print + MENU_IMPOSTA_SOGLIE_DIFF_INDEX_RIGHE_SCHERMATA;
+        for(string_index=first_string_to_print;string_index<(last_string_to_print+1);string_index++)
         {
             LCDPrintString(StringsSubmenuImpostaTimer[RamSettings.Linguaggio][string_index],10,strings_y);
             BinToBCDisp(PROGR_IN_USO.Timers.Timers_values[string_index],INTERO,96,strings_y);
@@ -1554,16 +1559,7 @@ void Sub2MenuImpostaTimer(void)
                 
         }
         
-        page_old=	PROGR_IN_USO.curva_lav_C_index / 5;
-        resto=		PROGR_IN_USO.curva_lav_C_index % 5;//es scelgo 7,è nella pag 1 riga 2(0,1,2)
-        if(page==page_old)
-        {
-                strings_y=(resto*H_RIGA_CALIBRI10)+2;
-                
-        }
-
-
-        page_old=page;
+       
         
         LCD_CopyScreen();
         
@@ -1571,6 +1567,8 @@ void Sub2MenuImpostaTimer(void)
         
         
       }
+    
+    
           
           
   }
@@ -1586,7 +1584,8 @@ void Sub2MenuImpostaSimboli(void)
 
 	unsigned short submenuImpostaSimboli_index;
 	unsigned char loop_flag=1,test;
-
+        
+        if(PROGR_IN_USO.unita_mis_concentr>NUM_UN_MIS_MAX_INDEX)PROGR_IN_USO.unita_mis_concentr=0;//se ho un valore che mi fa puntare oltre mSiemens forzo a %
 	submenuImpostaSimboli_index=PROGR_IN_USO.unita_mis_concentr;
 
 	loop_flag=1;
@@ -1685,6 +1684,7 @@ void Sub2MenuTK(void)
 	unsigned char loop_flag=1,to_print=1,test;
 	static unsigned short submenuTK_index=0;
 	//unsigned int nuovo_TK=2345;
+        int prova;
 
 	LCD_Fill_ImageRAM(0x00);
 
@@ -1792,17 +1792,17 @@ void Sub2MenuTK(void)
 						if(menu_triang_x==76)
 						{
 							incr_counter++;
-							if(incr_counter>10) incr_step=10;
-							if(incr_counter>20)
-							{
-								incr_step=100;
-								incr_counter=21;
-							}
-							if(PROGR_IN_USO.TK.TK_array[submenuTK_index]<9999)
+							AumentaIncrDecrStep(&incr_step,&incr_counter);
+                                                        prova=PROGR_IN_USO.TK.TK_array[submenuTK_index];
+                                                        if((prova+incr_step)<TK_MAX_VAL  || (prova+incr_step)==TK_MAX_VAL )
                                                         {
                                                               PROGR_IN_USO.TK.TK_array[submenuTK_index]+=incr_step;
                                                               to_print=1;
 							}
+                                                        else
+                                                        {
+                                                          RiduciIncrDecrStep(&incr_step,&incr_counter);
+                                                        }
 
 
 						}
@@ -1824,15 +1824,7 @@ void Sub2MenuTK(void)
 						if(menu_triang_x==76)
 						{
 							incr_counter++;
-							if(incr_counter>10)
-							{
-								incr_step=10;
-							}
-							if(incr_counter>20)
-							{
-								incr_step=100;
-								incr_counter=21;
-							}
+							AumentaIncrDecrStep(&incr_step,&incr_counter);
 
 
 							if(!((PROGR_IN_USO.TK.TK_array[submenuTK_index]-incr_step)<0))
