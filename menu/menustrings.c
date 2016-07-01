@@ -21,22 +21,22 @@ const char StringsSubmenuSimboliConc   [5][4]={ "%",
 												"mS"
 													};
 
-const char StringsSubmenuCurvaLavoro  [16][4]={                                                 "0sX",
-												"01X",
-												"02X",
-												"03X",
-												"04X",
-												"05X",
-												"06X",
-												"07X",
-												"08X",
-												"09X",
-												"10X",
-												"11X",
-												"12X",
-												"13X",
-												"14X",
-												"15X"
+const char StringsSubmenuCurvaLavoro  [16][4]={                                                 "Pt00",
+												"Pt01",
+												"Pt02",
+												"Pt03",
+												"Pt04",
+												"Pt05",
+												"Pt06",
+												"Pt07",
+												"Pt08",
+												"Pt09",
+												"Pt10",
+												"Pt11",
+												"Pt12",
+												"Pt13",
+												"Pt14",
+												"Pt15"
 													};
 
 
