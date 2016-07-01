@@ -865,13 +865,18 @@ Quindi al momento dell'inserimento della concentrazione va aanche fatta partire 
 //***************************************************************************************
 void Sub2MenuCurvadiLavoro3Punti(void)
 {
-	uint8_t key,last_key;
+#define MENU_CURVA_LAV3_MAX_INDEX            9
+#define MENU_CURVA_LAV3_MIN_SCROLL_DN_LIMIT  4
+#define MENU_CURVA_LAV3_MAX_SCROLL_UP_LIMIT  4
+#define MENU_CURVA_LAV3_DIFF_INDEX_RIGHE_SCHERMATA  4//schermata sempre piena di 5 righe
+  
+        uint8_t key,last_key;
 	unsigned short string_index=0,strings_y=2;
 	unsigned short menu_CurvaLavoro_index=0;
-	unsigned short page=0,page_old;
+
 	unsigned char loop_flag=1;
 	unsigned char first_string_to_print=0,last_string_to_print;
-	unsigned char to_print=1,resto,test;
+	unsigned char to_print=1;
 
 	menu_triang_limit_up=2;
 	menu_triang_limit_dn=50;
@@ -884,236 +889,174 @@ void Sub2MenuCurvadiLavoro3Punti(void)
 
         RicalcolaCurvaLavoro3pt();
         
+        
+        
+        
+        
 	key = last_key = 0;
 	while(loop_flag)
 	{
-		if (key_getstroke(&key,kDec * 2))
-			last_key = key;
-		else
-			key = 0;
-		
-		
-		{
-			
+          if (key_getstroke(&key,kDec * 2))
+                  last_key = key;
+          else
+          {
+            key = 0;
+          }
+      
+         
+              
 
-			if (key == KEY_OK)
-			//if(CHECK_TASTO_OK_PRESSED)
-			{
-				
+              if (key == KEY_OK)
+              {
+                      
 
-				switch(menu_triang_y)
-				{
-				}
+                      switch(menu_triang_y)
+                      {
+                      }
 
-				if(menu_triang_x==0)
-				{
-					MoveTriangolinoDx();
-					//non marcare MOVE_SXDX!!
-					CLEAR_ARROW_KEYS_MOVE_UPDOWN;
-					MARK_PIU_MENO_ENABLED;
-				}
-				else  //se quindi confermo la scelta
-				{
-					MoveTriangolinoSx();
-					MARK_ARROW_KEYS_MOVE_UPDOWN;
-					
-					CLEAR_PIU_MENO_ENABLED;
-					PROGR_IN_USO.curva_lav_C_index=page*5+menu_triang_index;
+                      if(menu_triang_x==0)
+                      {
+                              MoveTriangolinoDx();
+                              //non marcare MOVE_SXDX!!
+                              CLEAR_ARROW_KEYS_MOVE_UPDOWN;
+                              MARK_PIU_MENO_ENABLED;
+                      }
+                      else  //se quindi confermo la scelta
+                      {
+                              MoveTriangolinoSx();
+                              MARK_ARROW_KEYS_MOVE_UPDOWN;
+                              
+                              CLEAR_PIU_MENO_ENABLED;
+                              
 
-					RicalcolaCurvaLavoro();
-                                        
-                                        test=SaveRamSettings_in_External_DataFlash();
-                                        if(!test)
-                                        {
-                                        LCD_Fill_ImageRAM(0x00);
-                                        SelectFont(CALIBRI_10);
-                                        LCDPrintString("File system error",4,24);
-                                        LCD_CopyPartialScreen(4,80,24,36);
-                                        }
+                              //RicalcolaCurvaLavoro();
+                              MenuFunction_Index=SUB2MENU_SEL_TIPO_CURV_LAV;//era SUB2MENU_SEL_TIPO_CURV_LAV;
+                              loop_flag=0;
+                              
+                             //non salvo niente,
 
-					to_print=1;
-				}
-			}
+                              to_print=1;
+                      }
+              }
 
-			if (key == KEY_PROG)
-			
-			{
-				
-				MenuFunction_Index=SUB3MENU_SEL_LCH;
-				loop_flag=0;
+             if (key == KEY_PROG)
+              
+              {
+                      
+                      MenuFunction_Index=SUB2MENU_SEL_TIPO_CURV_LAV;
+                      loop_flag=0;
 
-			}
+              }
 
-			if(CHECK_PIU_MENO_ENABLED)
-			{
-				if ((key == KEY_PLUS) || (last_key == KEY_PLUS))
-				//if(CHECK_TASTO_PLUS_PRESSED)
-				{
+            if(CHECK_PIU_MENO_ENABLED)
+            {
+                    if ((key == KEY_PLUS) || (last_key == KEY_PLUS))
+                    //if(CHECK_TASTO_PLUS_PRESSED)
+                    {
 
-					
-				}
-				else if (key == (KEY_PLUS | KEY_RELEASED))
-				
-				{
-					incr_step=1;
-					incr_counter=0;
-					
-				}
+                            
+                    }
+                    else if (key == (KEY_PLUS | KEY_RELEASED))
+                    
+                    {
+                            ;
+                            
+                    }
 
-				if ((key == KEY_MINUS) || (last_key == KEY_MINUS))
-				//if(CHECK_TASTO_MENO_PRESSED)
-				{
+                    if ((key == KEY_MINUS) || (last_key == KEY_MINUS))
+                    //if(CHECK_TASTO_MENO_PRESSED)
+                    {
 
-					
-				}
-				else if (key == (KEY_MINUS | KEY_RELEASED))
-				//if(CHECK_TASTO_MENO_RELEASED)
-				{
-					incr_step=1;
-					incr_counter=0;
+                            
+                    }
+                    else if (key == (KEY_MINUS | KEY_RELEASED))
+                    //if(CHECK_TASTO_MENO_RELEASED)
+                    {
+                           
 
-				}
+                    }
 
-			}
+            }
+              
+          if(CHECK_ARROW_KEYS_MOVE_UPDOWN)
+          {
+          if (key == KEY_DOWNRIGHT)
+          //if(CHECK_TASTO_DN_DX_PRESSED)
+          {
+                  MoveTriangolinoDown();
+                  if(menu_CurvaLavoro_index<MENU_CURVA_LAV3_MAX_INDEX)//se sono già al massimo non faccio nessuna azione
+                  {  
+                    menu_CurvaLavoro_index+=1;
+                    if(menu_CurvaLavoro_index>MENU_CURVA_LAV3_MIN_SCROLL_DN_LIMIT)//lo scroll in basso serve solo nei casi che debba mostrare oltre la 5a stringa
+                    {
+                            to_print=0;
+                            if(menu_CurvaLavoro_index>last_string_to_print)//se devo andare sotto l'ultima stringa che ho in basso serve scroll in basso
+                            {
+                              to_print=1;
+                              last_string_to_print=menu_CurvaLavoro_index;
+                              first_string_to_print=last_string_to_print-MENU_CURVA_LAV3_DIFF_INDEX_RIGHE_SCHERMATA;
+                            }
 
-			if(CHECK_ARROW_KEYS_MOVE_UPDOWN)
-			{
-				if (key == KEY_DOWNRIGHT)
-				//if(CHECK_TASTO_DN_DX_PRESSED)
-				{
-					MoveTriangolinoDown();
-					if(menu_CurvaLavoro_index<15)menu_CurvaLavoro_index+=1;
-					page=(menu_CurvaLavoro_index)/5;
-
-					if(page!=page_old)
-					{
-						to_print=1;
-						if(page==3)menu_triang_limit_dn=2;
-						else 	  menu_triang_limit_dn=50;
-						menu_triang_index=0;
-						menu_triang_y=menu_triang_limit_up;
-					}
-					else              to_print=0;
+                    }
+                  }  
+          }
 
 
-					
-				}
-
-				if (key == KEY_UPLEFT)
-				//if(CHECK_TASTO_UP_SX_PRESSED)
-				{
-					MoveTriangolinoUp();
-					if(menu_CurvaLavoro_index)menu_CurvaLavoro_index-=1;
-
-					page=(menu_CurvaLavoro_index)/5;
-
-					if(page!=page_old)
-					{
-						to_print=1;
-						if(page==3)menu_triang_limit_dn=2;
-						else 	  menu_triang_limit_dn=50;
-						menu_triang_index=4;
-						menu_triang_y=menu_triang_limit_dn;
-
-					}
-					else              to_print=0;
-
-					
-				}
-			}
-			else//cioè 
-			{
-				//if(CHECK_TASTO_DN_DX_PRESSED)
-				//if(CHECK_TASTO_UP_SX_PRESSED)
-			}
-		}//fine if(CHECK_KEY_READY)
+            if(CHECK_ARROW_KEYS_MOVE_UPDOWN)
+            {
 
 
+                  if (key == KEY_UPLEFT)
+                  //if(CHECK_TASTO_UP_SX_PRESSED)
+                  {
+                          MoveTriangolinoUp();
+                          if(menu_CurvaLavoro_index)menu_CurvaLavoro_index-=1;
+                          if(menu_CurvaLavoro_index<MENU_CURVA_LAV3_MAX_SCROLL_UP_LIMIT)//lo scroll in alto può servire se sono prima della 4 stringa
+                          {
+                                  to_print=0;
+                                  if(menu_CurvaLavoro_index<first_string_to_print)//se devo andare sopra la 1a stringa che vedo in alto serve scroll in alto
+                                  {
+                                    to_print=1;
+                                    first_string_to_print=menu_CurvaLavoro_index;
+                                  }
+                          }
+                          
+                  }
+            }
+            else//cioè 
+            {
+                    //if(CHECK_TASTO_DN_DX_PRESSED)
+                    //if(CHECK_TASTO_UP_SX_PRESSED)
+            }
+    }//fine if(CHECK_KEY_READY)
+      
+     
+      if(to_print)
+      {
+        to_print=0;
 
-		if(to_print)
-		{
-			to_print=0;
-
-			switch(page)
-			{
-				case 0:
-					first_string_to_print=0;
-					last_string_to_print =5;//sarebbe 4
-
-					break;
-
-				case 1:
-					first_string_to_print=5;
-					last_string_to_print =10;//sarebbe 9
-
-					break;
-
-				case 2:
-					first_string_to_print=10;
-					last_string_to_print =15;//sarebbe 14
-
-					break;
-
-				case 3:
-					first_string_to_print=15;
-					last_string_to_print= 16;//sarebbe 15
-
-					break;
-
-				default:
-
-					break;
-			}
-
-			LCD_Fill_ImageRAM(0x00);
-
-#ifdef DISEGNA_CORNICE
-			DisegnaCornice();
-#endif
-			DisegnaTriangolinoMenu(0,menu_triang_y);
-			SelectFont(CALIBRI_10);
-
-			strings_y=2;
-
-			for(string_index=first_string_to_print;string_index < last_string_to_print;string_index++)
-			{
-				LCDPrintString(StringsSubmenuCurvaLavoro[string_index],10,strings_y);
-                                CalcPrint_UnMisura_Conc[un_mis_conc](PROGR_IN_USO.curva_lav_Yconcent[string_index],80,strings_y);
-
-				strings_y+=H_RIGA_CALIBRI10;
-			}
-			//uso la variabile page_old perchè tanto verrà aggiornata tra poco
-			page_old=	PROGR_IN_USO.curva_lav_L_index / 5;
-			resto=		PROGR_IN_USO.curva_lav_L_index % 5;
-			if(page==page_old)
-			{
-				strings_y=(resto*H_RIGA_CALIBRI10)+2;
-				LCDPrintString("L",74,strings_y);
-			}
-
-			page_old=	PROGR_IN_USO.curva_lav_C_index / 5;
-			resto=		PROGR_IN_USO.curva_lav_C_index % 5;
-			if(page==page_old)
-			{
-				strings_y=(resto*H_RIGA_CALIBRI10)+2;
-				LCDPrintString("C",74,strings_y);
-			}
-
-			page_old=	PROGR_IN_USO.curva_lav_H_index / 5;
-			resto=		PROGR_IN_USO.curva_lav_H_index % 5;
-			if(page==page_old)
-			{
-				strings_y=(resto*H_RIGA_CALIBRI10)+2;
-				LCDPrintString("H",74,strings_y);
-			}
+        LCD_Fill_ImageRAM(0x00);
+        
+        strings_y=2;
+        DisegnaTriangolinoMenu(0,menu_triang_y);
+        last_string_to_print=first_string_to_print + MENU_CURVA_LAV3_DIFF_INDEX_RIGHE_SCHERMATA;
+        for(string_index=first_string_to_print;string_index<(last_string_to_print+1);string_index++)
+        {
+            LCDPrintString(StringsSubmenuCurvaLavoro[string_index],10,strings_y);
+            CalcPrint_UnMisura_Conc[un_mis_conc](PROGR_IN_USO.curva_lav_Yconcent[string_index],80,strings_y);
+            strings_y+=H_RIGA_CALIBRI10;
+        }
+        
+       
+        
+        LCD_CopyScreen();
+        
+      } 
+        
+        
+      }
 
 
-			page_old=page;
-
-			LCD_CopyScreen();
-
-		}
-	}
 }//fine Sub2MenuCurvaDiLavoro3Punti();
 //***************************************************************************************
 void Sub2MenuImpostaSoglie(void)
