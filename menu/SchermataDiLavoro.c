@@ -292,6 +292,9 @@ void SchermataDiLavoro(void)
                     mybmp_struct2.start_x=2;
                     mybmp_struct2.start_y=42;
                     GetBitmap();
+                    
+                    PrintSoglia(PROGR_IN_USO.setp_e_soglie.ses_struct.SetConc,32,54);
+                    
                     LCD_CopyPartialScreen(2,26,42,64);
                   }
                   
@@ -333,6 +336,9 @@ void SchermataDiLavoro(void)
                     mybmp_struct2.start_x=104;
                     mybmp_struct2.start_y=42;
                     GetBitmap();
+                    
+                    PrintSoglia(PROGR_IN_USO.setp_e_soglie.ses_struct.SetTemp,62,54);
+                    
                     LCD_CopyPartialScreen(90,128,44,64);
                   }
                   
