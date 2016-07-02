@@ -386,6 +386,8 @@ void ControlloRitardi(void)
         CLEAR_OUT_PUMP_ENABLE;
         I2C_RandWrite(0x20,0x01,1,&immagine_stato_uscite,1);
         MARK_ALARM_CONC_MIN;//se quando il timer di preallarme è scaduto la condizione è confermata allora marca allarme
+        
+        tock_signal();
         //SPEGNI POMPA
         //DISABILITA FUNZ LAV CONCENTRAZIONE
       }
@@ -409,6 +411,8 @@ void ControlloRitardi(void)
         CLEAR_OUT_HEATER_ENABLE;
         I2C_RandWrite(0x20,0x01,1,&immagine_stato_uscite,1); 
         MARK_ALARM_TEMP_MIN;//se quando il timer di preallarme è scaduto la condizione è confermata allora marca allarme
+        
+        tock_signal();
         //SPEGNI HEATER
         //DISABILITA FUNZ LAV TEMPERATURA
       }
@@ -433,6 +437,8 @@ void ControlloRitardi(void)
         MARK_OUT_MAX_CONC_ALARM;
         CLEAR_OUT_PUMP_ENABLE;
         I2C_RandWrite(0x20,0x01,1,&immagine_stato_uscite,1);
+        
+        tock_signal();
         //SPEGNI POMPA
         //DISABILITA FUNZ LAV CONCENTRAZIONE
       }
@@ -454,6 +460,8 @@ void ControlloRitardi(void)
         MARK_OUT_MAX_TEMP_ALARM;
         CLEAR_OUT_HEATER_ENABLE;
         I2C_RandWrite(0x20,0x01,1,&immagine_stato_uscite,1);
+        
+        tock_signal();
         //SPEGNI HEATER
         //DISABILITA FUNZ LAV TEMPERATURA
       }
