@@ -947,7 +947,7 @@ void Sub2MenuCurvadiLavoro3Punti(void)
                       loop_flag=0;
 
               }
-
+/*
             if(CHECK_PIU_MENO_ENABLED)
             {
                     if ((key == KEY_PLUS) || (last_key == KEY_PLUS))
@@ -977,7 +977,7 @@ void Sub2MenuCurvadiLavoro3Punti(void)
                     }
 
             }
-              
+*/              
           if(CHECK_ARROW_KEYS_MOVE_UPDOWN)
           {
           if (key == KEY_DOWNRIGHT)
@@ -1042,6 +1042,22 @@ void Sub2MenuCurvadiLavoro3Punti(void)
         last_string_to_print=first_string_to_print + MENU_CURVA_LAV3_DIFF_INDEX_RIGHE_SCHERMATA;
         for(string_index=first_string_to_print;string_index<(last_string_to_print+1);string_index++)
         {
+            if(string_index==PROGR_IN_USO.curva_lav_L_index)LCDPrintString("L",68,strings_y);
+            switch(PROGR_IN_USO.curva_lav_cal_type)
+            {
+              case 0:
+                break;
+              case 1:
+                if(string_index==PROGR_IN_USO.curva_lav_C_index)LCDPrintString("C",68,strings_y);
+                break;
+              case 2:
+                if(string_index==PROGR_IN_USO.curva_lav_C_index)LCDPrintString("C",68,strings_y);
+                if(string_index==PROGR_IN_USO.curva_lav_H_index)LCDPrintString("H",68,strings_y);
+                break;
+              default:
+                break;
+              
+            }
             LCDPrintString(StringsSubmenuCurvaLavoro[string_index],10,strings_y);
             CalcPrint_UnMisura_Conc[un_mis_conc](PROGR_IN_USO.curva_lav_Yconcent[string_index],80,strings_y);
             strings_y+=H_RIGA_CALIBRI10;
