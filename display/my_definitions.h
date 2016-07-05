@@ -82,10 +82,12 @@ typedef struct
 
 
 
-#define H_RIGA_CALIBRI10 		12
-#define PRIMA_RIGA_CALIBRI10 	 2
+#define H_RIGA_CALIBRI10 	     12
+#define PRIMA_RIGA_CALIBRI10 	      2
 #define TEMP_MAX_LIMIT		   1300
 #define TEMP_MIN_LIMIT		     10
+
+#define MAX_CONCENT_LIMIT_9990     9990
 
 void SchermataDiLavoro(void);
 void MenuProg(void);
@@ -124,6 +126,8 @@ void DisegnaMarker(unsigned short x,unsigned short y,unsigned short y_old);
 
 void AumentaIncrDecrStep(int * step,int * counter);
 void RiduciIncrDecrStep(int * step,int * counter);
+
+unsigned char ControlloCongruita_CurvaLav(void);
 
 void DisegnaCarattereBlink(char char_to_blink,unsigned short x,unsigned short y,unsigned char *toggler);
 void RicalcolaCurvaLavoro(void);
