@@ -21,7 +21,7 @@ const char StringsSubmenuSimboliConc   [5][4]={ "%",
 												"mS"
 													};
 
-const char StringsSubmenuCurvaLavoro  [16][4]={                                                 "Pt00",
+const char StringsSubmenuCurvaLavoro  [16][5]={                                                 "Pt00",
 												"Pt01",
 												"Pt02",
 												"Pt03",
