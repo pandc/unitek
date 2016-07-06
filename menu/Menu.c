@@ -47,7 +47,7 @@ unsigned char menu_triang_index;
 
 // An array to hold handles to the created timers.
 TimerHandle_t xTimers[ NUM_TIMERS ];
-TimerHandle_t xTimerTank;
+
 // An array to hold a count of the number of times each timer expires.
 //int32_t lExpireCounters[ NUM_TIMERS ] = { 0 };
 
