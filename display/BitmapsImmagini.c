@@ -24,6 +24,23 @@ const unsigned char gradi_bmp[] =
 const unsigned char gradi_WidthPages = 1;
 const unsigned char gradi_HeightPixels = 4;
 
+
+//
+//  Image data for gradi_small
+//
+
+const unsigned char gradi_small_bmp[] =
+{
+	0x02, //  #
+	0x05, // # #
+	0x02  //  #
+};
+
+// Bitmap sizes for gradi
+const unsigned char gradi_small_WidthPages = 1;
+const unsigned char gradi_small_HeightPixels = 3;
+
+
 /*
 **  Image data for triangolino
 */
