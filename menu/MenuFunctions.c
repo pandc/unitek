@@ -346,7 +346,7 @@ void CalcPrintTemperatura(float * t_float)
   
 }
 //***************************************************************************************
-void PrintConc_WorkMenu(float* c_float)
+void PrintConc_WorkMenu(void)
 {
   char string_to_print[16];
   unsigned int len;
@@ -354,15 +354,15 @@ void PrintConc_WorkMenu(float* c_float)
    switch (struct_conc_print.decimali_to_print)
    {
      case INTERO:
-        sprintf(string_to_print,"%.0f",*c_float);//pot=206,5 ohm
+        sprintf(string_to_print,"%.0f",struct_conc_print.fconc_to_print);//pot=206,5 ohm
         break;
                           
       case UN_DECIMALE:
-        sprintf(string_to_print,"%.1f",*c_float);//pot=206,5 ohm
+        sprintf(string_to_print,"%.1f",struct_conc_print.fconc_to_print);//pot=206,5 ohm
       break;
       
       case DUE_DECIMALI:
-        sprintf(string_to_print,"%.2f",*c_float);//pot=206,5 ohm
+        sprintf(string_to_print,"%.2f",struct_conc_print.fconc_to_print);//pot=206,5 ohm
       break;
       
       default:
@@ -388,7 +388,7 @@ void DecrParamConc(unsigned int* par_pt,unsigned short decr)//il valore da stamp
     case UNIT_MIS_CONCENTR_PERCENTUALE:
             //64000=100%  qui vogliono la risoluzione dello 0,1% quindi 64000=>10000
             Formula_ConcConvers_Percent(*par_pt);
-            if(struct_conc_print.conc_to_print>decr)struct_conc_print.conc_to_print-=decr;
+            if(!(struct_conc_print.conc_to_print<decr))struct_conc_print.conc_to_print-=decr;
             *par_pt=FormulaInversa_Conc_Percent();
 
             break;
@@ -396,7 +396,7 @@ void DecrParamConc(unsigned int* par_pt,unsigned short decr)//il valore da stamp
     case UNIT_MIS_CONCENTR_PUNT_TITOL:
             //64000=100%  qui vogliono la risoluzione dello 0,1% quindi 64000=>10000
             Formula_ConcConvers_PuntTitol(*par_pt);
-            if(struct_conc_print.conc_to_print>decr)struct_conc_print.conc_to_print-=decr;
+            if(!(struct_conc_print.conc_to_print<decr))struct_conc_print.conc_to_print-=decr;
             *par_pt=FormulaInversa_Conc_PuntTitol();
 
             break;
@@ -404,7 +404,7 @@ void DecrParamConc(unsigned int* par_pt,unsigned short decr)//il valore da stamp
     case UNIT_MIS_CONCENTR_GRAMMILITRO:
             //64000=100%  qui vogliono la risoluzione dello 0,1% quindi 64000=>10000
             Formula_ConcConvers_grammiLitro(*par_pt);
-            if(struct_conc_print.conc_to_print>decr)struct_conc_print.conc_to_print-=decr;
+            if(!(struct_conc_print.conc_to_print<decr))struct_conc_print.conc_to_print-=decr;
             *par_pt=FormulaInversa_Conc_grammiLitro();//prima di assegnare il nuovo valore alla varibile alla quale il programma farà riferimento lo testo
             
             break;
@@ -412,14 +412,14 @@ void DecrParamConc(unsigned int* par_pt,unsigned short decr)//il valore da stamp
     case UNIT_MIS_CONCENTR_uSIEMENS:
             //64000=100%  qui vogliono la risoluzione dello 0,1% quindi 64000=>10000
             Formula_ConcConvers_uSiemens(*par_pt);
-            if(struct_conc_print.conc_to_print>decr)struct_conc_print.conc_to_print-=decr;
+            if(!(struct_conc_print.conc_to_print<decr))struct_conc_print.conc_to_print-=decr;
             *par_pt=FormulaInversa_Conc_uSiemens();//prima di assegnare il nuovo valore alla varibile alla quale il programma farà riferimento lo testo
             break;
 
     case UNIT_MIS_CONCENTR_mSIEMENS:
             //64000=100%  qui vogliono la risoluzione dello 0,1% quindi 64000=>10000
             Formula_ConcConvers_milliSiemens(*par_pt);
-            if(struct_conc_print.conc_to_print>decr)struct_conc_print.conc_to_print-=decr;
+            if(!(struct_conc_print.conc_to_print<decr))struct_conc_print.conc_to_print-=decr;
             *par_pt=FormulaInversa_Conc_milliSiemens();//prima di assegnare il nuovo valore alla varibile alla quale il programma farà riferimento lo testo
             break;
 
@@ -741,7 +741,13 @@ void PrintUnitMis(unsigned short index,unsigned short x ,unsigned short y)//vien
 	}
 	else
 	{
-		LCDPrintString("'C",x,y);
+              mybmp_struct2.bmp_pointer=gradi_small_bmp;
+              mybmp_struct2.righe   =gradi_small_HeightPixels;
+              mybmp_struct2.colonne =gradi_small_WidthPages;
+              mybmp_struct2.start_x=x;
+              mybmp_struct2.start_y=y;
+              GetBitmap();	
+              LCDPrintString("C",x+4,y);
 	}
 }
 
@@ -984,6 +990,8 @@ void MyCreateTimers(void)
               }*/
           }
       }
+      
+      
   
 }
 //***************************************************************************************   
@@ -1090,4 +1098,37 @@ void AumentaIncrDecrStep(int * step,int * counter)
           *step=100;
           *counter=21;
     }
+}
+//***************************************************************************************                                                                 
+unsigned char ControlloCongruita_CurvaLav(void)
+{
+
+  //controllo indici
+  if(PROGR_IN_USO.curva_lav_L_index<PROGR_IN_USO.curva_lav_C_index){}
+   else return FALSE;
+   
+  if(PROGR_IN_USO.curva_lav_C_index<PROGR_IN_USO.curva_lav_H_index){}
+   else return FALSE;
+  
+  
+  //controllo valori immessi
+   if(PROGR_IN_USO.curva_lav_Yconcent[PROGR_IN_USO.curva_lav_L_index]  < 
+      PROGR_IN_USO.curva_lav_Yconcent[PROGR_IN_USO.curva_lav_C_index]){}
+   else return FALSE; 
+  
+   if(PROGR_IN_USO.curva_lav_Yconcent[PROGR_IN_USO.curva_lav_C_index]  < 
+      PROGR_IN_USO.curva_lav_Yconcent[PROGR_IN_USO.curva_lav_H_index]){}
+   else return FALSE; 
+   
+   //controllo valori misurati all'ok
+    if(PROGR_IN_USO.curva_lav_XconducL  < PROGR_IN_USO.curva_lav_XconducC  ){}
+   else return FALSE;
+   
+   //controllo valori misurati all'ok
+    if(PROGR_IN_USO.curva_lav_XconducC  < PROGR_IN_USO.curva_lav_XconducH  ){}
+   else return FALSE;
+   
+   
+  
+  return TRUE;
 }
