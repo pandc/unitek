@@ -86,6 +86,9 @@ void SchermataDiLavoro(void)
         MARK_OVER_TEMP_NORMAL;
         MARK_OVER_CONC_NORMAL;
         
+        if(CHECK_ACCENSIONE_CONC)MARK_PRINT_CONC_WAIT;
+        if(CHECK_ACCENSIONE_TEMP)MARK_PRINT_TEMP_WAIT;
+        
         un_misura=PROGR_IN_USO.unita_mis_concentr;
         
         immagine_stato_uscite=0x00;
@@ -140,7 +143,9 @@ void SchermataDiLavoro(void)
          //valuto ancora la stessa variabile...lo faccio solo per chiarezza di lettura 
          if(RamSettings.abilita_disabilita==ABILITA)
          { 
-          if(CHECK_TIMEOUT_CONC)
+          
+           
+           if(CHECK_TIMEOUT_CONC)
           {
             SelectFont(CALIBRI_10);
             CleanArea_Ram_and_Screen(2,64,42,64);//cancella pompa e limiti
@@ -217,9 +222,9 @@ void SchermataDiLavoro(void)
                       +-+-+-+-+-+-+-+ +-+ +-+-+-+-+-+-+ +-+-+-+-+-+-+-+-+-+-+-+-+-+-+ */
                    measures.meas_ok=0;
                    c_float=CalcoloConcent_Now(c_float);
-                   PrintConc_WorkMenu(&c_float); 
+                   PrintConc_WorkMenu(); 
                    MARK_CONTROL_CONC_ENA;
-                   c_float=global_float;//da qui in avanti i confronti sono fatti col valore non convertito in unità di misura
+                  // c_float=global_float;//da qui in avanti i confronti sono fatti col valore non convertito in unità di misura
 
                 }
                         /* +-+-+-+-+ +-+-+-+-+-+-+ +-+-+-+-+-+-+
@@ -284,7 +289,7 @@ void SchermataDiLavoro(void)
                 {  
                   if(CHECK_PRINT_PUMP)
                   {
-                    CLEAR_PRINT_PUMP;
+                    /*CLEAR_PRINT_PUMP;
                     CleanArea_Ram_and_Screen(2,62,42,64);
                     mybmp_struct2.bmp_pointer=pompa_OK_bmp;
                     mybmp_struct2.righe	 =pompa_OKHeightPixels;
@@ -295,7 +300,7 @@ void SchermataDiLavoro(void)
                     
                     PrintSoglia(PROGR_IN_USO.setp_e_soglie.ses_struct.SetConc,32,54);
                     
-                    LCD_CopyPartialScreen(2,26,42,64);
+                    LCD_CopyPartialScreen(2,26,42,64);*/
                   }
                   
                   
@@ -311,10 +316,10 @@ void SchermataDiLavoro(void)
 
 
                     LCDPrintString("Max",2,42);
-                    generic_ui=PROGR_IN_USO.setp_e_soglie.ses_struct.AllConcMax;
+                    generic_ui=PROGR_IN_USO.setp_e_soglie.ses_struct.SetConc + PROGR_IN_USO.setp_e_soglie.ses_struct.IsteresiConc;
                     CalcPrint_Conc_Only[un_misura](generic_ui,28,42);
                     LCDPrintString("Min",2,54);
-                    generic_ui=PROGR_IN_USO.setp_e_soglie.ses_struct.AllConcMin;
+                    generic_ui=PROGR_IN_USO.setp_e_soglie.ses_struct.SetConc - PROGR_IN_USO.setp_e_soglie.ses_struct.IsteresiConc;
                     CalcPrint_Conc_Only[un_misura](generic_ui,28,54);
                     
 
@@ -328,7 +333,7 @@ void SchermataDiLavoro(void)
                   //mettere anche qui un bit
                   if(CHECK_PRINT_HEATER)
                   {
-                    CLEAR_PRINT_HEATER;
+                   /* CLEAR_PRINT_HEATER;
                     CleanArea_Ram_and_Screen(70,124,42,64);
                     mybmp_struct2.bmp_pointer=riscaldatore_bmp;
                     mybmp_struct2.righe	 =riscaldatoreHeightPixels;
@@ -339,7 +344,7 @@ void SchermataDiLavoro(void)
                     
                     PrintSoglia(PROGR_IN_USO.setp_e_soglie.ses_struct.SetTemp,62,54);
                     
-                    LCD_CopyPartialScreen(90,128,44,64);
+                    LCD_CopyPartialScreen(90,128,44,64);*/
                   }
                   
                   if(CHECK_PRINT_TEMP_LIMITS ) //print limiti temperatura
@@ -350,11 +355,11 @@ void SchermataDiLavoro(void)
                     
 
                     LCDPrintString("Max",70,42);
-                    generic_ui=PROGR_IN_USO.setp_e_soglie.ses_struct.AllTempMax;
+                    generic_ui=PROGR_IN_USO.setp_e_soglie.ses_struct.SetTemp + PROGR_IN_USO.setp_e_soglie.ses_struct.IsteresiTemp;
                     generic_ui/=10;
                     BinToBCDisp(generic_ui,UN_DECIMALE,96,42);
                     LCDPrintString("Min",70,54);
-                    generic_ui=PROGR_IN_USO.setp_e_soglie.ses_struct.AllTempMin ;
+                    generic_ui=PROGR_IN_USO.setp_e_soglie.ses_struct.SetTemp - PROGR_IN_USO.setp_e_soglie.ses_struct.IsteresiTemp; ;
                     generic_ui/=10;
                     BinToBCDisp(generic_ui,UN_DECIMALE,96,54);
                     
@@ -394,7 +399,7 @@ void ConcPump_AtWork(float * c_float)
                       
               //verifico se vado sotto setp-isteresi 
               generic_float=(float)(PROGR_IN_USO.setp_e_soglie.ses_struct.SetConc - PROGR_IN_USO.setp_e_soglie.ses_struct.IsteresiConc);
-              generic_float/=100;
+              //generic_float/=100;
               if(*c_float < generic_float)
               {
                  CLEAR_PUMP_STATES;
@@ -403,10 +408,7 @@ void ConcPump_AtWork(float * c_float)
                 
                  if( xTimerStart( xTimers[ TIMER3_RIT_DOSAGGIO ], 0 ) != pdPASS ){}
                  //il timer parte,se alla prox misura dovessi avere allarme devo impedire che accenda pompa
-                 /*
-                    SelectFont(CALIBRI_10);
-                    LCDPrintString("WaitMixTime",2,32);
-                    LCD_CopyPartialScreen(2,60,32,42); */
+
               }
              break;
 
@@ -414,7 +416,7 @@ void ConcPump_AtWork(float * c_float)
             case PUMP_STATE_ATTIVO:
              
               generic_float=(float)(PROGR_IN_USO.setp_e_soglie.ses_struct.SetConc + PROGR_IN_USO.setp_e_soglie.ses_struct.IsteresiConc);
-              generic_float/=100;
+              //generic_float/=100;
               if(*c_float >generic_float) //se è abbastanza caldo
               {
                   CLEAR_PUMP_STATES;
@@ -422,7 +424,7 @@ void ConcPump_AtWork(float * c_float)
                                     
                   MARK_PRINT_CONC_LIMITS;
                   CLEAR_PRINT_PUMP;
-                  CleanArea_Ram_and_Screen(2,28,42,64);//cancello subito disegno pompa
+                  CleanArea_Ram_and_Screen(2,64,42,64);//cancello subito disegno pompa
                   CLEAR_OUT_PUMP_ENABLE;
                   I2C_RandWrite(0x20,0x01,1,&immagine_stato_uscite,1);
                   
@@ -441,7 +443,7 @@ void ConcPump_AtWork(float * c_float)
               
               
               generic_float=(float)(PROGR_IN_USO.setp_e_soglie.ses_struct.SetConc );
-              generic_float/=100;
+              //generic_float/=100;
               
               if(*c_float >generic_float) //se è anche solo superiore a setpoint era falso intervento
               {   
@@ -498,14 +500,16 @@ void TempHeater_AtWork(float * t_float)
                  MARK_HEATER_STATE_ATTIVO;
                  MARK_PRINT_HEATER;
                  
-                 CleanArea_Ram_and_Screen(70,124,42,64);
+                  CleanArea_Ram_and_Screen(70,124,42,64);
                   mybmp_struct2.bmp_pointer=riscaldatore_bmp;
                   mybmp_struct2.righe	 =riscaldatoreHeightPixels;
                   mybmp_struct2.colonne =riscaldatoreWidthPages;
                   mybmp_struct2.start_x=104;
                   mybmp_struct2.start_y=42;
                   GetBitmap();
-                  LCD_CopyPartialScreen(90,128,44,64);
+                  PrintSoglia(SOGLIE_SET_TEMP_INDEX,72,42);//come parametro gli basta l'id della soglia da mostrare
+                  LCD_CopyPartialScreen(72,128,42,64);
+                  
                  
                  MARK_OUT_HEATER_ENABLE;
                  I2C_RandWrite(0x20,0x01,1,&immagine_stato_uscite,1);
