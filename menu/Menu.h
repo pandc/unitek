@@ -26,7 +26,7 @@ extern unsigned char menu_triang_limit_sx;
 extern unsigned char menu_triang_index;
 extern unsigned char MenuFunction_Index;
 
-extern float global_float;
+
 
 
 
@@ -94,7 +94,7 @@ float CompensConduc_TK(float*) ;
 float NormalizzaConduc_TK(float* meas_conduc,float* fixed_temp) ;
 
 void CalcPrintTemperatura(float * t_float);
-void PrintConc_WorkMenu(float* c_float);
+void PrintConc_WorkMenu(void);
 void ControlloSoglieAllarmi_Temp(float*);
 void ControlloSoglieAllarmi_Conc(float*);
 void ControlloRitardi(void);
