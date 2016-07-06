@@ -340,7 +340,7 @@ void ControlloRitardi(void)
     {
       CLEAR_TIMER3_EXPIRED;
       //se ho allarmi lascio scadere il timer e non faccio altro
-      if((!CHECK_CONC_ALARMS_MASK)  && (!CHECK_ALARM_FUSTO_VUOTO))
+      if((!CHECK_CONC_ALARMS_MASK)  && (!CHECK_ALARM_TANK))
       {
         if(CHECK_PUMP_STATE_WAIT)
         {
