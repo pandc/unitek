@@ -253,6 +253,9 @@ float CalcoloConcent_Now(float conduc_meas)
   
   
   
+  
+  
+  
   //il punto 0x ha conducibilità dell'acqua distillata: 5,5 us  
   //per il valore in punto intermedio applico formula della curva passante per 2 punti:
   //se devo trovare 
@@ -263,44 +266,125 @@ float CalcoloConcent_Now(float conduc_meas)
   conc_attuale=(conc_rif[C]-0/Conduc[rif]-CONDUC_H20_DISTILL)   *  (Conduc_meas_now - CONDUC_H20_DISTILL)   -  conc_rif[0];
   
   */
-  if(PROGR_IN_USO.curva_lav_cal_type==CURVA_LAV_1PT)
-  {
+  switch(PROGR_IN_USO.curva_lav_cal_type)
+  {  
+    case CURVA_LAV_1PT:
+      
+      if(  ((conduc_meas-CONDUC_H20_DISTILL)<0) ||  ((conduc_meas-CONDUC_H20_DISTILL)==0)  )
+      {
+        f_concent=0;
+        conduc_meas=CONDUC_H20_DISTILL;
+      }
+      else
+      {  
+        //NB la curva di lavoro parte da VALORI DISCRETI IMPOSTATI DA TASTIERA,da qui i decimali sono traformati e salvati in INTERI 100 VOLTE PIU' GRANDI
+        pendenza_m=((float)PROGR_IN_USO.curva_lav_Yconcent[PROGR_IN_USO.curva_lav_C_index])/((PROGR_IN_USO.curva_lav_XconducC)-CONDUC_H20_DISTILL);
+        f_concent=pendenza_m*(conduc_meas-CONDUC_H20_DISTILL);//se per qualche motivo(conduc_meas-CONDUC_H20_DISTILL)<0) uscirò dopo quando questa condizione verrà valutata
+        //si potrebbe mettere qui il limite tipo if(f_concent>xxx)f_concent=xxx;  
+      }
+      break;
+      
+      
+     case CURVA_LAV_2PT: 
+     if((conduc_meas-PROGR_IN_USO.curva_lav_XconducL)<0)
+        {
+          f_concent=0;
+          conduc_meas=PROGR_IN_USO.curva_lav_XconducL;
+        } 
+        
+        else
+        {
+          
+           if(!(conduc_meas>PROGR_IN_USO.curva_lav_XconducC))//per comprendere anche C
+           {
+             pendenza_m=((float)PROGR_IN_USO.curva_lav_Yconcent[PROGR_IN_USO.curva_lav_C_index] - 0) / ((PROGR_IN_USO.curva_lav_XconducC)-(PROGR_IN_USO.curva_lav_XconducL));
+             f_concent=pendenza_m*(conduc_meas-PROGR_IN_USO.curva_lav_XconducL)+0;
+           }
+           else //cioè se sono nel tratto da C a [15]
+           {
+              pendenza_m=((float)PROGR_IN_USO.curva_lav_Yconcent[PROGR_IN_USO.curva_lav_C_index] - 0) / ((PROGR_IN_USO.curva_lav_XconducC)-(PROGR_IN_USO.curva_lav_XconducL));
+             f_concent=pendenza_m*(conduc_meas-PROGR_IN_USO.curva_lav_XconducC) + (float)PROGR_IN_USO.curva_lav_Yconcent[PROGR_IN_USO.curva_lav_C_index];
+             
+             
+           }
+        }
+       
+       
+      break;
     
-    pendenza_m=((float)PROGR_IN_USO.curva_lav_Yconcent[PROGR_IN_USO.curva_lav_C_index])/((PROGR_IN_USO.curva_lav_XconducC)-CONDUC_H20_DISTILL);
-    switch(PROGR_IN_USO.unita_mis_concentr)
+     case CURVA_LAV_3PT: 
+     //nel caso di curva a 3 punti dovrebbe cambiare solo la pendenza...
+      
+        if((conduc_meas-PROGR_IN_USO.curva_lav_XconducL)<0)
+        {
+          f_concent=0;
+          conduc_meas=PROGR_IN_USO.curva_lav_XconducL;
+        } 
+        
+        else
+        {
+           //trova entro quale segmento sono ora
+           if(!(conduc_meas>PROGR_IN_USO.curva_lav_XconducC))//per comprendere anche C
+           {
+             pendenza_m=((float)PROGR_IN_USO.curva_lav_Yconcent[PROGR_IN_USO.curva_lav_C_index]  - 0 ) / ((PROGR_IN_USO.curva_lav_XconducC)-(PROGR_IN_USO.curva_lav_XconducL));
+             f_concent=pendenza_m*(conduc_meas-PROGR_IN_USO.curva_lav_XconducL)+0;
+           }
+           
+           else if(!(conduc_meas>PROGR_IN_USO.curva_lav_XconducH))//per comprendere anche H
+           {
+             pendenza_m=((float)PROGR_IN_USO.curva_lav_Yconcent[PROGR_IN_USO.curva_lav_H_index]-  (float)PROGR_IN_USO.curva_lav_Yconcent[PROGR_IN_USO.curva_lav_C_index]    )/
+                    ((PROGR_IN_USO.curva_lav_XconducH)-(PROGR_IN_USO.curva_lav_XconducC));
+             f_concent=pendenza_m*(conduc_meas-PROGR_IN_USO.curva_lav_XconducC) + (float)PROGR_IN_USO.curva_lav_Yconcent[PROGR_IN_USO.curva_lav_C_index];
+           }
+           else if((conduc_meas>PROGR_IN_USO.curva_lav_XconducH)) 
+           {
+             pendenza_m=((float)PROGR_IN_USO.curva_lav_Yconcent[PROGR_IN_USO.curva_lav_H_index]-  (float)PROGR_IN_USO.curva_lav_Yconcent[PROGR_IN_USO.curva_lav_C_index]    )/
+                    ((PROGR_IN_USO.curva_lav_XconducH)-(PROGR_IN_USO.curva_lav_XconducC));
+             f_concent=pendenza_m*(conduc_meas-PROGR_IN_USO.curva_lav_XconducH)  + (float)PROGR_IN_USO.curva_lav_Yconcent[PROGR_IN_USO.curva_lav_H_index];
+             //((float)PROGR_IN_USO.curva_lav_Yconcent[15])/((MAX_CONCENTR_x100)-(PROGR_IN_USO.curva_lav_XconducH));
+             
+           }
+        }
+    
+      break;
+    
+    
+    
+    
+     
+  }
+  
+
+       
+       
+       
+  switch(PROGR_IN_USO.unita_mis_concentr)
     {
       case UNIT_MIS_CONCENTR_PERCENTUALE:
-            if((conduc_meas-CONDUC_H20_DISTILL)<0)
-            {  
-              global_float=0;
-              return 0;
-            }
-            f_concent=pendenza_m*(conduc_meas-CONDUC_H20_DISTILL);
+
             if   (f_concent<1000)struct_conc_print.decimali_to_print=DUE_DECIMALI;
             else                 struct_conc_print.decimali_to_print=UN_DECIMALE;
-            f_concent/=100; // devo dare il vero valore da stampare,sprintf pensa solo a arrotondarlo a n decimali
-            global_float=f_concent;
-            if(f_concent>99.9)f_concent=99.9;
+            //NB la curva di lavoro parte da VALORI DISCRETI IMPOSTATI DA TASTIERA,da qui i decimali sono traformati e salvati in INTERI 100 VOLTE PIU' GRANDI
+            struct_conc_print.fconc_to_print=f_concent/100; // devo dare il vero valore da stampare,sprintf pensa solo a arrotondarlo a n decimali
+
+            if(struct_conc_print.fconc_to_print>99.9)struct_conc_print.fconc_to_print=99.9;
             break ;
             
       case UNIT_MIS_CONCENTR_PUNT_TITOL:
-            if((conduc_meas-CONDUC_H20_DISTILL)<0)return 0;
-            f_concent=pendenza_m*(conduc_meas-CONDUC_H20_DISTILL);
+            
             if   (f_concent<1000)struct_conc_print.decimali_to_print=DUE_DECIMALI;
             else                 struct_conc_print.decimali_to_print=UN_DECIMALE;
-            global_float=f_concent/100;
-            f_concent/=10;
-            if(f_concent>999)f_concent=999;
+            struct_conc_print.fconc_to_print=f_concent/10;
+            if(struct_conc_print.fconc_to_print>999)struct_conc_print.fconc_to_print=999;
             break ;
             
       case UNIT_MIS_CONCENTR_GRAMMILITRO:
-            if((conduc_meas-CONDUC_H20_DISTILL)<0)return 0;
-            f_concent=pendenza_m*(conduc_meas-CONDUC_H20_DISTILL);
+           
             if   (f_concent<1000)struct_conc_print.decimali_to_print=DUE_DECIMALI;
-            else                struct_conc_print.decimali_to_print=UN_DECIMALE;
-            global_float=f_concent/100;
-            f_concent/=10;
-            if(f_concent>999)f_concent=999;
+            else                 struct_conc_print.decimali_to_print=UN_DECIMALE;
+            struct_conc_print.fconc_to_print=f_concent/10;
+ 
+            if(struct_conc_print.fconc_to_print>999)struct_conc_print.fconc_to_print=999;
             break ;
             
       case UNIT_MIS_CONCENTR_uSIEMENS:
@@ -311,53 +395,38 @@ float CalcoloConcent_Now(float conduc_meas)
 #else
             
             if((conduc_meas-CONDUC_H20_DISTILL)<0)return CONDUC_H20_DISTILL;
-            f_concent=pendenza_m*(conduc_meas-CONDUC_H20_DISTILL);
-            
+
             
 #endif       
             if   (f_concent<10) struct_conc_print.decimali_to_print=DUE_DECIMALI;
             else                struct_conc_print.decimali_to_print=UN_DECIMALE;
-            if(f_concent>999)f_concent=999;
-            global_float=conduc_meas;
+            
+            if(struct_conc_print.fconc_to_print>999)struct_conc_print.fconc_to_print=999;
             break ;
  
-            
-            
-            
-      case UNIT_MIS_CONCENTR_mSIEMENS:
+    case UNIT_MIS_CONCENTR_mSIEMENS:
 #ifdef VALORE_RAW
             f_concent=conduc_meas*MULTIPLIER_mS;
 #else
             
             if((conduc_meas-CONDUC_H20_DISTILL)<0)return (CONDUC_H20_DISTILL/MULTIPLIER_mS);
-            f_concent=pendenza_m*(conduc_meas-CONDUC_H20_DISTILL);
+            //f_concent=pendenza_m*(conduc_meas-CONDUC_H20_DISTILL);
             
             
 #endif   
             if   (f_concent<10) struct_conc_print.decimali_to_print=DUE_DECIMALI;
             else                struct_conc_print.decimali_to_print=UN_DECIMALE;
-            if(f_concent>999)f_concent=999;
-            global_float=conduc_meas;
+            struct_conc_print.fconc_to_print=f_concent/1000;
+            if(struct_conc_print.fconc_to_print>999)struct_conc_print.fconc_to_print=999;
             break ;
-    }//fine switch(PROGR_IN_USO.unita_mis_concentr)
-    
-     
-  }
-  else//nel caso di curva a 3 punti dovrebbe cambiare solo la pendenza...
-  {
-    //trova entro quale segmento sono ora
-     /*                            FORMULA 
-  
-  conc_attuale=(conc_rif[punto super.]-conc_rif[punto infer.]/Conduc[rif superiore]-Conduc[rif_inferiore])   *  (Conduc_meas_now - Conduc[0])   -  conc_rif[inferiore];
-                                                        =
-  conc_attuale=(conc_rif[C]-0/Conduc[rif]-CONDUC_H20_DISTILL)   *  (Conduc_meas_now - CONDUC_H20_DISTILL)   -  conc_rif[0];
-  
-  */
-    
-    
-    
-    
-  }
+            
+          default:
+            if((conduc_meas-CONDUC_H20_DISTILL)<0)return 0;
+            break;
+    }//fine switch(PROGR_IN_USO.unita_mis_concentr)     
+       
+       
+       
   
   return f_concent;
   
@@ -436,8 +505,8 @@ void RicalcolaCurvaLavoro3pt(void)
        stepC_H =(unsigned short)((PROGR_IN_USO.curva_lav_Yconcent[PROGR_IN_USO.curva_lav_H_index]-PROGR_IN_USO.curva_lav_Yconcent[PROGR_IN_USO.curva_lav_C_index])/
         (PROGR_IN_USO.curva_lav_H_index-PROGR_IN_USO.curva_lav_C_index));
       
-      stepH_15 =stepC_H;//(PROGR_IN_USO.curva_lav_Yconcent[15]-PROGR_IN_USO.curva_lav_Yconcent[PROGR_IN_USO.curva_lav_H_index])/
-        //(15-PROGR_IN_USO.curva_lav_H_index);
+      stepH_15 =(MAX_CONCENT_LIMIT_9990-PROGR_IN_USO.curva_lav_Yconcent[PROGR_IN_USO.curva_lav_H_index])/
+        (15-PROGR_IN_USO.curva_lav_H_index);
       
       
       
