@@ -534,11 +534,14 @@ void WriteMyFlashSector(void);
 
 
 #define CURVA_LAV_1PT 0
-#define CURVA_LAV_3PT 1
+#define CURVA_LAV_2PT 1
+#define CURVA_LAV_3PT 2
 
 #define CONDUC_H2O_RUBINETTO 0.000661
 #define CONDUC_H20_DISTILL   0//0.0000055      //     CONDUC_H2O_RUBINETTO//5.5us
 #define SCALED_TK_DIV      10000
+                       
+#define MAX_CONCENTR_x100 10000                       
                        
 #define MULTIPLIER_uS  1000000
 #define MULTIPLIER_mS  1000
