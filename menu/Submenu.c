@@ -272,7 +272,7 @@ void SubmenuSelectedProgr(void)
 	unsigned char x_prova=0,half_x=0;
 	unsigned char y_prova=0,half_y=0;
 */
-	static unsigned short submenuSelProg_index=0;
+	unsigned short submenuSelProg_index=0;
 
 
 	menu_triang_limit_up=2;
