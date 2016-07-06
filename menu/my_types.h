@@ -172,6 +172,7 @@ typedef struct
 
 typedef struct
 {
+  float        fconc_to_print;
   unsigned int conc_to_print;
   unsigned int decimali_to_print;
   unsigned int resto;
