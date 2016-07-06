@@ -43,12 +43,11 @@ unsigned char menu_triang_limit_sx;
 unsigned char menu_triang_index;
 
 
-float global_float;
 
 
-
- // An array to hold handles to the created timers.
- TimerHandle_t xTimers[ NUM_TIMERS ];
+// An array to hold handles to the created timers.
+TimerHandle_t xTimers[ NUM_TIMERS ];
+TimerHandle_t xTimerTank;
 // An array to hold a count of the number of times each timer expires.
 //int32_t lExpireCounters[ NUM_TIMERS ] = { 0 };
 
@@ -108,8 +107,7 @@ static void menu_task(void *par)
     
     MARK_ACCENSIONE_CONC;
     MARK_ACCENSIONE_TEMP;
-    MARK_PRINT_CONC_WAIT;
-    MARK_PRINT_TEMP_WAIT;
+
     
     if(RamSettings.abilita_disabilita==ABILITA) MARK_STATE_ABILITATO;
     else                                        CLEAR_STATE_ABILITATO;
@@ -145,7 +143,7 @@ void MenuInit(void)
 
 	MenuFunctionPt[SUB2MENU_IMPOSTA_SIMBOLI]	=&Sub2MenuImpostaSimboli;
 	MenuFunctionPt[SUB2MENU_TK]			=&Sub2MenuTK;
-	MenuFunctionPt[SUB3MENU_CURVA_DI_LAVORO]	=&Sub2MenuCurvadiLavoro;
+	//MenuFunctionPt[SUB3MENU_CURVA_DI_LAVORO]	=&Sub2MenuCurvadiLavoro;
 	MenuFunctionPt[SUB2MENU_IMPOSTA_SOGLIE] 	=&Sub2MenuImpostaSoglie;
 	MenuFunctionPt[SUB2MENU_IMPOSTA_TIMER]  	=&Sub2MenuImpostaTimer;
 	MenuFunctionPt[SUB2MENU_SEL_TIPO_CURV_LAV]      =&Sub2MenuSelTipoCurvaLavoro;
@@ -167,11 +165,11 @@ void MenuInit(void)
        CalcPrint_UnMisura_Conc[UNIT_MIS_CONCENTR_uSIEMENS    ]=CalcPrint_uSiemens_xy;
        CalcPrint_UnMisura_Conc[UNIT_MIS_CONCENTR_mSIEMENS    ]=CalcPrint_milliSiemens_xy;
        
-      CalcPrint_Conc_Only[UNIT_MIS_CONCENTR_PERCENTUALE ]=CalcPrintOnly_Percent_xy;
-      CalcPrint_Conc_Only[UNIT_MIS_CONCENTR_PUNT_TITOL  ]=CalcPrintOnly_PuntTitol_xy;
-      CalcPrint_Conc_Only[UNIT_MIS_CONCENTR_GRAMMILITRO ]=CalcPrintOnly_GrammiLitro_xy;
-      CalcPrint_Conc_Only[UNIT_MIS_CONCENTR_uSIEMENS    ]=CalcPrintOnly_uSiemens_xy;
-      CalcPrint_Conc_Only[UNIT_MIS_CONCENTR_mSIEMENS    ]=CalcPrintOnly_milliSiemens_xy;
+       CalcPrint_Conc_Only[UNIT_MIS_CONCENTR_PERCENTUALE ]=CalcPrintOnly_Percent_xy;
+       CalcPrint_Conc_Only[UNIT_MIS_CONCENTR_PUNT_TITOL  ]=CalcPrintOnly_PuntTitol_xy;
+       CalcPrint_Conc_Only[UNIT_MIS_CONCENTR_GRAMMILITRO ]=CalcPrintOnly_GrammiLitro_xy;
+       CalcPrint_Conc_Only[UNIT_MIS_CONCENTR_uSIEMENS    ]=CalcPrintOnly_uSiemens_xy;
+       CalcPrint_Conc_Only[UNIT_MIS_CONCENTR_mSIEMENS    ]=CalcPrintOnly_milliSiemens_xy;
        
     
        Formula_ConcConvers      [UNIT_MIS_CONCENTR_PERCENTUALE ]=Formula_ConcConvers_Percent;
