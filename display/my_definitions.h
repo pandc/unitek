@@ -282,10 +282,10 @@ void WriteMyFlashSector(void);
 
 
 
-#define ALARM_FUSTO_VUOTO 						0x400
-#define MARK_ALARM_FUSTO_VUOTO  	(global_flags |= ALARM_FUSTO_VUOTO )
-#define CLEAR_ALARM_FUSTO_VUOTO 	(global_flags &=~ALARM_FUSTO_VUOTO )
-#define CHECK_ALARM_FUSTO_VUOTO 	(global_flags &  ALARM_FUSTO_VUOTO )
+#define ALARM_TANK 						0x400
+#define MARK_ALARM_TANK  	(global_flags |= ALARM_TANK )
+#define CLEAR_ALARM_TANK 	(global_flags &=~ALARM_TANK )
+#define CHECK_ALARM_TANK 	(global_flags &  ALARM_TANK )
 
 
 
@@ -471,6 +471,11 @@ void WriteMyFlashSector(void);
 #define MARK_TIMER9_EXPIRED  		(timer_flags |= TIMER9_EXPIRED )
 #define CLEAR_TIMER9_EXPIRED 		(timer_flags &=~TIMER9_EXPIRED )
 #define CHECK_TIMER9_EXPIRED 		(timer_flags &  TIMER9_EXPIRED )
+                         
+#define TIMER_CHECK_TANK_EXPIRED 					0x200
+#define MARK_TIMER_CHECK_TANK_EXPIRED  	(timer_flags |= TIMER_CHECK_TANK_EXPIRED )
+#define CLEAR_TIMER_CHECK_TANK_EXPIRED 	(timer_flags &=~TIMER_CHECK_TANK_EXPIRED )
+#define CHECK_TIMER_CHECK_TANK_EXPIRED 	(timer_flags &  TIMER_CHECK_TANK_EXPIRED )                         
 
 
       /*        +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
@@ -593,4 +598,6 @@ void WriteMyFlashSector(void);
 
 
 #define NUM_TIMERS 9
+#define TIMER_CHECK_TANK 10
+#define CHECK_TANK_PERIOD 100  //in ms
 #endif /* SOURCES_MY_DEFINITIONS_H_ */
