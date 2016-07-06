@@ -26,14 +26,22 @@
 #define DISP_SCK_PORT		GPIOC
 #define DISP_SCK_PIN		GPIO_Pin_10
 
-#define DISP_VCC_ON_PORT	GPIOD
-#define DISP_VCC_ON_PIN		GPIO_Pin_15
+#define DIG_IN_IRQn_PORT				GPIOD
+#define DIG_IN_IRQn_PIN					GPIO_Pin_2
+#define DIG_IN_IRQn_PIN_SOURCE			GPIO_PinSource2
+#define DIG_IN_IRQn_PORT_SOURCE			GPIO_PortSourceGPIOD
+#define DIG_IN_IRQn_EXTI_LINE			EXTI_Line2
+#define DIG_IN_IRQn_EXTI_IRQ_HANDLER	EXTI2_IRQHandler
+#define DIG_IN_IRQn_EXTI_IRQn			EXTI2_IRQn
 
-#define DISP_RSTn_PORT		GPIOD
-#define DISP_RSTn_PIN		GPIO_Pin_14
+#define DISP_VCC_ON_PORT			GPIOD
+#define DISP_VCC_ON_PIN				GPIO_Pin_15
 
-#define DISP_CMDn_PORT		GPIOD
-#define DISP_CMDn_PIN		GPIO_Pin_13
+#define DISP_RSTn_PORT				GPIOD
+#define DISP_RSTn_PIN				GPIO_Pin_14
+
+#define DISP_CMDn_PORT				GPIOD
+#define DISP_CMDn_PIN				GPIO_Pin_13
 
 #define KBD_IRQn_PORT				GPIOD
 #define KBD_IRQn_PIN				GPIO_Pin_0

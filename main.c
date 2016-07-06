@@ -51,6 +51,7 @@
 #include "parser.h"
 #include "menu.h"
 #include "meas.h"
+#include "ioexp.h"
 
 /* Private typedef -----------------------------------------------------------*/
 /* Private define ------------------------------------------------------------*/
@@ -90,6 +91,8 @@ portTickType xLastWakeTime;
 	parser_create_task();
 	
 	keyboard_init();
+	
+	IOEXP_init();
 
 	MenuInit();
 
