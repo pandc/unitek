@@ -41,7 +41,7 @@ void ControlloSoglieAllarmi_Conc(float*c_float)
       case(OVER_CONC_NORMAL)://allora guardo se sfora soglie
         generic_float=(float)PROGR_IN_USO.setp_e_soglie.ses_struct.AllConcMax +
                       (float)PROGR_IN_USO.setp_e_soglie.ses_struct.IsteresiConc;
-        generic_float/=100;
+        //generic_float/=100;
         if(*c_float>generic_float)
         {
           MARK_OVER_CONC_MAX;
@@ -56,15 +56,16 @@ void ControlloSoglieAllarmi_Conc(float*c_float)
         {
           generic_float=(float)PROGR_IN_USO.setp_e_soglie.ses_struct.AllConcMin -
                         (float)PROGR_IN_USO.setp_e_soglie.ses_struct.IsteresiConc;
-          generic_float/=100;
+          //eneric_float/=100;
           if(*c_float < generic_float)
           {
             MARK_OVER_CONC_MIN;
             CLEAR_OVER_CONC_MAX;//se è min non può e non deve essere max
             CLEAR_ALARM_CONC_MAX;
+            if( xTimerStart( xTimers[ TIMER4_RIT_ALL_MIN_CONC ], 0 ) != pdPASS )
+            {}// The timer could not be set into the Active state. 
           }
-          if( xTimerStart( xTimers[ TIMER4_RIT_ALL_MIN_CONC ], 0 ) != pdPASS )
-          {}// The timer could not be set into the Active state. 
+          
         }
       break;
 
@@ -72,7 +73,7 @@ void ControlloSoglieAllarmi_Conc(float*c_float)
       case(OVER_CONC_MAX)://è già over,guardo se sfora soglie altro lato,o rientra normale
          generic_float=(float)PROGR_IN_USO.setp_e_soglie.ses_struct.AllConcMin -
                               (float)PROGR_IN_USO.setp_e_soglie.ses_struct.IsteresiConc;
-         generic_float/=100; 
+         //generic_float/=100; 
          if(*c_float < generic_float)
           {
             MARK_OVER_CONC_MIN;
@@ -84,7 +85,7 @@ void ControlloSoglieAllarmi_Conc(float*c_float)
           {
             generic_float=(float)PROGR_IN_USO.setp_e_soglie.ses_struct.AllConcMax-
                             (float)PROGR_IN_USO.setp_e_soglie.ses_struct.IsteresiConc;
-            generic_float/=100;
+            //generic_float/=100;
             if(*c_float<generic_float)
             {
               CleanArea_Ram_and_Screen(2,62,42,64);
@@ -100,7 +101,7 @@ void ControlloSoglieAllarmi_Conc(float*c_float)
       case(OVER_CONC_MIN)://è già over,guardo se sfora soglie altro lato,o rientra normale
           generic_float=(float)PROGR_IN_USO.setp_e_soglie.ses_struct.AllConcMax +
                               (float)PROGR_IN_USO.setp_e_soglie.ses_struct.IsteresiConc;
-          generic_float/=100;
+          //generic_float/=100;
           if(*c_float > generic_float)
           {
             MARK_OVER_CONC_MIN;
@@ -113,7 +114,7 @@ void ControlloSoglieAllarmi_Conc(float*c_float)
           {
             generic_float=(float)PROGR_IN_USO.setp_e_soglie.ses_struct.AllConcMin+
                             (float)PROGR_IN_USO.setp_e_soglie.ses_struct.IsteresiConc;
-            generic_float/=100;
+            //generic_float/=100;
             if(*c_float>generic_float)
             {
               MARK_OVER_CONC_NORMAL;
@@ -355,10 +356,17 @@ void ControlloRitardi(void)
           mybmp_struct2.start_y=42;
           GetBitmap();
           LCD_CopyPartialScreen(2,26,42,64);
+          PrintSoglia(SOGLIE_SET_CONC_INDEX,28,42);//come parametro gli basta l'id della soglia da mostrare
+   
+          
+          
+          
+                    
+                    
           
           
           if( xTimerStart( xTimers[ TIMER2_TOUT_DOSAGGIO ], 0 ) != pdPASS ){}
-          MARK_PRINT_PUMP;
+          CLEAR_PRINT_PUMP;
           CLEAR_PRINT_CONC_LIMITS;
           MARK_OUT_PUMP_ENABLE;//>>>>>>>>>>>>>Enable_Pump();
           I2C_RandWrite(0x20,0x01,1,&immagine_stato_uscite,1);
@@ -387,7 +395,7 @@ void ControlloRitardi(void)
         I2C_RandWrite(0x20,0x01,1,&immagine_stato_uscite,1);
         MARK_ALARM_CONC_MIN;//se quando il timer di preallarme è scaduto la condizione è confermata allora marca allarme
         
-        tock_signal();
+        //tock_signal();
         //SPEGNI POMPA
         //DISABILITA FUNZ LAV CONCENTRAZIONE
       }
@@ -412,7 +420,7 @@ void ControlloRitardi(void)
         I2C_RandWrite(0x20,0x01,1,&immagine_stato_uscite,1); 
         MARK_ALARM_TEMP_MIN;//se quando il timer di preallarme è scaduto la condizione è confermata allora marca allarme
         
-        tock_signal();
+        //tock_signal();
         //SPEGNI HEATER
         //DISABILITA FUNZ LAV TEMPERATURA
       }
@@ -438,7 +446,7 @@ void ControlloRitardi(void)
         CLEAR_OUT_PUMP_ENABLE;
         I2C_RandWrite(0x20,0x01,1,&immagine_stato_uscite,1);
         
-        tock_signal();
+        //tock_signal();
         //SPEGNI POMPA
         //DISABILITA FUNZ LAV CONCENTRAZIONE
       }
@@ -461,7 +469,7 @@ void ControlloRitardi(void)
         CLEAR_OUT_HEATER_ENABLE;
         I2C_RandWrite(0x20,0x01,1,&immagine_stato_uscite,1);
         
-        tock_signal();
+        //tock_signal();
         //SPEGNI HEATER
         //DISABILITA FUNZ LAV TEMPERATURA
       }
