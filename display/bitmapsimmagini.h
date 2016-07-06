@@ -12,6 +12,11 @@ extern const unsigned char gradi_bmp[];
 extern const unsigned char gradi_WidthPages;
 extern const unsigned char gradi_HeightPixels;
 
+// Bitmap info for gradi_small
+extern const unsigned char gradi_small_bmp[];
+extern const unsigned char gradi_small_WidthPages;
+extern const unsigned char gradi_small_HeightPixels;
+
 /* Bitmap info for triangolino */
 extern const unsigned char triangolino_bmp[];
 extern const unsigned char triangolino_WidthPages;
