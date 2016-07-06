@@ -74,7 +74,6 @@ unsigned int(* FormulaInversa_Conc      [5])(void);
 //***************************************************************************************
 static void menu_task(void *par)
 {
-    unsigned char test;
   
   
     LCD_Display_Setup();
@@ -83,21 +82,6 @@ static void menu_task(void *par)
     ffready(portMAX_DELAY);
     LoadRamSettingsFrom_External_DataFlash();
     //se voglio forzare uscite disabilitate indipendentemnte da quanto mem lo faccio qui
-    test=0;
-    while(!test)
-    {  
-        test= I2C_RandWrite(0x20,0x4F,1,&I2C_conf_buf[0], 1);
-        if(test==FALSE)continue;
-        vTaskDelay(10);
-        test= I2C_RandWrite(0x20,0x01,1,&I2C_conf_buf[1], 1);
-        vTaskDelay(10);
-        if(test==FALSE)continue;
-        test= I2C_RandWrite(0x20,0x03,1,&I2C_conf_buf[2], 1);
-        vTaskDelay(10);
-        if(test==FALSE)continue;
-        test= I2C_RandWrite(0x20,0x43,1,&I2C_conf_buf[3], 1);
-        vTaskDelay(10);
-    }    
     
 
       
