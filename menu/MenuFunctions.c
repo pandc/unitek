@@ -956,7 +956,30 @@ unsigned char SaveRamSettings_in_External_DataFlash(void)
   }
   else return 0;
 }
-                                                                                                     
+//*************************************************************************************** 
+void SaveInFlash(void)
+{
+  unsigned char test;
+  test=SaveRamSettings_in_External_DataFlash();
+  LCD_Fill_ImageRAM(0x00);
+  
+   if(!test)
+   {
+        
+        SelectFont(CALIBRI_10);
+        LCDPrintString("File system error",4,24);
+        LCD_CopyPartialScreen(4,80,24,36);
+   }
+   else
+   {
+     SelectFont(CALIBRI_20);
+     LCDPrintString("SAVED",30,20);
+     LCD_CopyScreen();
+     vTaskDelay(500);
+     CleanArea_Ram_and_Screen(30,110,20,50);
+   }
+  
+}
 //***************************************************************************************                                                                                                     
 void MyCreateTimers(void)
 {
