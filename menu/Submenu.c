@@ -168,7 +168,7 @@ void SubmenuSelProgr(void)
 {
 	uint8_t key;
 	unsigned short string_index=0,strings_y=2,y_old;
-	unsigned char loop_flag=1,test;
+	unsigned char loop_flag=1;
 /*
 	unsigned char x_prova=0,half_x=0;
 	unsigned char y_prova=0,half_y=0;
@@ -223,15 +223,7 @@ void SubmenuSelProgr(void)
 			loop_flag=0;
 			
                         RamSettings.selected_program_id=submenuSelProg_index;
-                        test=SaveRamSettings_in_External_DataFlash();
-                        if(!test)
-                        {
-                              LCD_Fill_ImageRAM(0x00);
-                              SelectFont(CALIBRI_10);
-                              LCDPrintString("File system error",4,24);
-                              LCD_CopyPartialScreen(4,80,24,36);
-                        }
-			//SaveImageInFlash();
+                        SaveInFlash();
 		}
 
 
@@ -596,7 +588,7 @@ void SumMenuSelLingua(void)
 	uint8_t key;
 
 	unsigned short string_index=0,strings_y=2,y_old;
-        unsigned char loop_flag=1,test;
+        unsigned char loop_flag=1;
 /*
         unsigned char x_prova=0,half_x=0;
         unsigned char y_prova=0,half_y=0;
@@ -636,7 +628,7 @@ void SumMenuSelLingua(void)
 			if (key == KEY_PROG)
 			//
 			{
-				;
+				SaveInFlash();
 				MenuFunction_Index=MENU_PROGR;
 				loop_flag=0;
 
@@ -647,15 +639,7 @@ void SumMenuSelLingua(void)
 			{
 				
 				RamSettings.Linguaggio=submenuSelLing_index;
-                                test=SaveRamSettings_in_External_DataFlash();
-                                if(!test)
-                                {
-                                      LCD_Fill_ImageRAM(0x00);
-                                      SelectFont(CALIBRI_10);
-                                      LCDPrintString("File system error",4,24);
-                                      LCD_CopyPartialScreen(4,80,24,36);
-                                }
-                                
+                                                              
 				DisegnaMarker(72,menu_triang_y,y_old);
 				y_old=menu_triang_y;
 
