@@ -552,7 +552,7 @@ void WriteMyFlashSector(void);
 #define MULTIPLIER_mS  1000
 
 #define TIMERS_MAX_VAL     10000
-#define TK_MAX_VAL             0                 
+#define TK_MAX_VAL          1000                 
 
                   
 #define NUM_PROGRAMMI_MAX_INDEX 4 //l'indice va da 0 a 4,quindi 5 programmi
