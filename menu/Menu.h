@@ -59,6 +59,7 @@ void MenuInit(void);
 void LoadRamSettingsFrom_uC_Flash(void);
 void LoadRamSettingsFrom_External_DataFlash(void);
 unsigned char SaveRamSettings_in_External_DataFlash(void);
+void SaveInFlash(void);
 
 void DecrSoglia(unsigned short index,unsigned short incr);
 void DecrParamConc(unsigned int* par_pt,unsigned short incr);//viene chiamata riga per riga quindi stampa solo 1 valore
