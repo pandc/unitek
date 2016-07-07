@@ -481,7 +481,7 @@ void WriteMyFlashSector(void);
       /*        +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
                 |o|u|t|p|u|t|_|i|m|a|g|e|_|b|i|t|s|
                 +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+*/
-
+#if 0
 #define OUT_BUZZER_ENA 					        0x1
 #define MARK_OUT_BUZZER_ENA  		(immagine_stato_uscite |= OUT_BUZZER_ENA )
 #define CLEAR_OUT_BUZZER_ENA 		(immagine_stato_uscite &=~OUT_BUZZER_ENA )
@@ -521,7 +521,7 @@ void WriteMyFlashSector(void);
 #define MARK_OUT_MAX_TEMP_ALARM  	(immagine_stato_uscite |= OUT_MAX_TEMP_ALARM )
 #define CLEAR_OUT_MAX_TEMP_ALARM 	(immagine_stato_uscite &=~OUT_MAX_TEMP_ALARM )
 #define CHECK_OUT_MAX_TEMP_ALARM 	(immagine_stato_uscite &  MAX_TEMP_ALARM )                       
-                       
+#endif
 
 
 

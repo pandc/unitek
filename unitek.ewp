@@ -3028,6 +3028,9 @@
       <name>$PROJ_DIR$\drivers\i2c.c</name>
     </file>
     <file>
+      <name>$PROJ_DIR$\drivers\ioexp.c</name>
+    </file>
+    <file>
       <name>$PROJ_DIR$\drivers\keyboard.c</name>
     </file>
     <file>

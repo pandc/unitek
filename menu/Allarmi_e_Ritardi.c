@@ -20,6 +20,7 @@
 #include "keyboard.h"
 #include "menu.h"
 #include "my_types.h"
+#include "ioexp.h"
 
 extern bitmap_struct_type mybmp_struct1,mybmp_struct2;
 extern unsigned char screen_image[1024];
@@ -91,8 +92,7 @@ void ControlloSoglieAllarmi_Conc(float*c_float)
               CleanArea_Ram_and_Screen(2,62,42,64);
               MARK_OVER_CONC_NORMAL;
               CLEAR_ALARM_CONC_MAX;
-              CLEAR_OUT_MAX_CONC_ALARM;
-              I2C_RandWrite(0x20,0x01,1,&immagine_stato_uscite,1);
+			  IOEXP_clr(IOEXP0_MAX_CONC_ALARM);
             }
          }
        break;
@@ -123,8 +123,7 @@ void ControlloSoglieAllarmi_Conc(float*c_float)
              CleanArea_Ram_and_Screen(2,62,42,64);
              MARK_OVER_CONC_NORMAL;
              CLEAR_ALARM_CONC_MIN;
-             CLEAR_OUT_MIN_CONC_ALARM;
-             I2C_RandWrite(0x20,0x01,1,&immagine_stato_uscite,1);
+			 IOEXP_clr(IOEXP0_MIN_CONC_ALARM);
             }
        }
       break;
@@ -206,8 +205,7 @@ void ControlloSoglieAllarmi_Temp(float*t_float)
               CLEAR_OVER_TEMP_MAX;
               CleanArea_Ram_and_Screen(66,126,42,64);
 
-              CLEAR_OUT_MAX_TEMP_ALARM;
-              I2C_RandWrite(0x20,0x01,1,&immagine_stato_uscite,1);
+			  IOEXP_clr(IOEXP0_MAX_TEMP_ALARM);
             }
          }
        break;
@@ -237,8 +235,7 @@ void ControlloSoglieAllarmi_Temp(float*t_float)
               
              CleanArea_Ram_and_Screen(66,126,42,64);
 
-             CLEAR_OUT_MIN_CONC_ALARM;
-             I2C_RandWrite(0x20,0x01,1,&immagine_stato_uscite,1);
+			 IOEXP_clr(IOEXP0_MIN_CONC_ALARM);
             }
        }
       break;
@@ -309,8 +306,7 @@ void ControlloRitardi(void)
         MARK_TIMEOUT_CONC;
         CLEAR_PRINT_CONC_LIMITS;
         CLEAR_PRINT_PUMP;
-        CLEAR_OUT_PUMP_ENABLE;
-        I2C_RandWrite(0x20,0x01,1,&immagine_stato_uscite,1);
+		IOEXP_clr(IOEXP0_PUMP_ENABLE);
       }
     }
   
@@ -331,8 +327,7 @@ void ControlloRitardi(void)
         MARK_TIMEOUT_TEMP;
         CLEAR_PRINT_TEMP_LIMITS;
         CLEAR_PRINT_HEATER;
-        CLEAR_OUT_HEATER_ENABLE;
-        I2C_RandWrite(0x20,0x01,1,&immagine_stato_uscite,1);
+		IOEXP_clr(IOEXP0_HEATER_ENABLE);
       }
     }
     
@@ -368,8 +363,7 @@ void ControlloRitardi(void)
           if( xTimerStart( xTimers[ TIMER2_TOUT_DOSAGGIO ], 0 ) != pdPASS ){}
           CLEAR_PRINT_PUMP;
           CLEAR_PRINT_CONC_LIMITS;
-          MARK_OUT_PUMP_ENABLE;//>>>>>>>>>>>>>Enable_Pump();
-          I2C_RandWrite(0x20,0x01,1,&immagine_stato_uscite,1);
+		  IOEXP_set(IOEXP0_PUMP_ENABLE);//>>>>>>>>>>>>>Enable_Pump();
         }
       }
     }
@@ -389,10 +383,9 @@ void ControlloRitardi(void)
         CleanArea_Ram_and_Screen(2,62,42,64);
         LCDPrintString("Alarm Min",2,42);
         LCD_CopyPartialScreen(2,62,42,64);
-        
-        MARK_OUT_MIN_CONC_ALARM;
-        CLEAR_OUT_PUMP_ENABLE;
-        I2C_RandWrite(0x20,0x01,1,&immagine_stato_uscite,1);
+
+		IOEXP_set(IOEXP0_MIN_CONC_ALARM);
+		IOEXP_clr(IOEXP0_PUMP_ENABLE);
         MARK_ALARM_CONC_MIN;//se quando il timer di preallarme è scaduto la condizione è confermata allora marca allarme
         
         //tock_signal();
@@ -414,10 +407,9 @@ void ControlloRitardi(void)
         LCDPrintString("Alarm Min",66,42);
         LCD_CopyPartialScreen(66,126,42,64);
         
-        
-        MARK_OUT_MIN_TEMP_ALARM;
-        CLEAR_OUT_HEATER_ENABLE;
-        I2C_RandWrite(0x20,0x01,1,&immagine_stato_uscite,1); 
+
+		IOEXP_set(IOEXP0_MIN_TEMP_ALARM);
+		IOEXP_clr(IOEXP0_HEATER_ENABLE);
         MARK_ALARM_TEMP_MIN;//se quando il timer di preallarme è scaduto la condizione è confermata allora marca allarme
         
         //tock_signal();
@@ -442,9 +434,8 @@ void ControlloRitardi(void)
         
         
         MARK_ALARM_CONC_MAX;//se quando il timer di preallarme è scaduto la condizione è confermata allora marca allarme
-        MARK_OUT_MAX_CONC_ALARM;
-        CLEAR_OUT_PUMP_ENABLE;
-        I2C_RandWrite(0x20,0x01,1,&immagine_stato_uscite,1);
+		IOEXP_set(IOEXP0_MAX_CONC_ALARM);
+		IOEXP_clr(IOEXP0_PUMP_ENABLE);
         
         //tock_signal();
         //SPEGNI POMPA
@@ -465,9 +456,8 @@ void ControlloRitardi(void)
         
         
         MARK_ALARM_TEMP_MAX;//se quando il timer di preallarme è scaduto la condizione è confermata allora marca allarme
-        MARK_OUT_MAX_TEMP_ALARM;
-        CLEAR_OUT_HEATER_ENABLE;
-        I2C_RandWrite(0x20,0x01,1,&immagine_stato_uscite,1);
+		IOEXP_set(IOEXP0_MAX_TEMP_ALARM);
+		IOEXP_clr(IOEXP0_HEATER_ENABLE);
         
         //tock_signal();
         //SPEGNI HEATER

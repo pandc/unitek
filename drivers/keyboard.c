@@ -13,6 +13,7 @@
 #include "com.h"
 #include "debug.h"
 #include "my_definitions.h"
+#include "ioexp.h"
 
 #include "keyboard.h"
 
@@ -244,14 +245,12 @@ static void tock_task(void *par)
 
 		// buzzer on
 		// inserire chiamata a funzione che gestisce le uscite dell'io expander
-                MARK_OUT_BUZZER_ENA;
-                I2C_RandWrite(0x20,0x01,1,&immagine_stato_uscite,1);
+		IOEXP_set(IOEXP0_BUZZER);
 		vTaskDelay(TOCK_TIME);
 
 		// buzzer off
 		// inserire chiamata a funzione che gestisce le uscite dell'io expander
-                CLEAR_OUT_BUZZER_ENA;
-                I2C_RandWrite(0x20,0x01,1,&immagine_stato_uscite,1);
+		IOEXP_clr(IOEXP0_BUZZER);
 		vTaskDelay(NOTOCK_TIME);
 	}
 }

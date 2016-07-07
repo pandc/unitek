@@ -20,6 +20,7 @@
 #include "keyboard.h"
 #include "menu.h"
 #include "my_types.h"
+#include "ioexp.h"
 
 extern bitmap_struct_type mybmp_struct1,mybmp_struct2;
 extern unsigned char screen_image[1024];
@@ -37,7 +38,7 @@ extern  TimerHandle_t xTimers[ NUM_TIMERS ];
 //***************************************************************************************
 void SchermataDiLavoro(void)
 {
-	uint8_t key,test;
+	uint8_t key;	//,test;
         float c_float,t_float;
        // float generic_float;
         
@@ -90,13 +91,16 @@ void SchermataDiLavoro(void)
         if(CHECK_ACCENSIONE_TEMP)MARK_PRINT_TEMP_WAIT;
         
         un_misura=PROGR_IN_USO.unita_mis_concentr;
-        
+
+#if 0        
         immagine_stato_uscite=0x00;
         test=0;
         while(!test)
         {  
           test=I2C_RandWrite(0x20,0x01,1,&immagine_stato_uscite,1);
         }
+#endif
+		IOEXP_clr(0xff);	// clear all ioexp outputs
         
         if(CHECK_ACCENSIONE_CONC)
         {
@@ -189,12 +193,16 @@ void SchermataDiLavoro(void)
 		{
 		  
                   StopAllTimers();
+#if 0				  
                   immagine_stato_uscite=0x00;
                   test=0;
                   while(!test)
                   {  
                     test=I2C_RandWrite(0x20,0x01,1,&immagine_stato_uscite,1);
                   }
+#endif
+				  IOEXP_clr(0xff);		// clear all ioexp outputs
+
                   MenuFunction_Index=MENU_PROGR;
                   //Funzione che disattiva il tutto,per esempio azzerare i timer
 		  return;
@@ -425,9 +433,7 @@ void ConcPump_AtWork(float * c_float)
                   MARK_PRINT_CONC_LIMITS;
                   CLEAR_PRINT_PUMP;
                   CleanArea_Ram_and_Screen(2,64,42,64);//cancello subito disegno pompa
-                  CLEAR_OUT_PUMP_ENABLE;
-                  I2C_RandWrite(0x20,0x01,1,&immagine_stato_uscite,1);
-                  
+				  IOEXP_clr(IOEXP0_PUMP_ENABLE);                  
                   //>>>>>>>>>>>>>Disable_Pump();    
               }
               else
@@ -456,8 +462,7 @@ void ConcPump_AtWork(float * c_float)
                 MARK_PRINT_CONC_LIMITS;
                 CLEAR_PRINT_PUMP;
                // CleanArea_Ram_and_Screen(2,28,42,64);//cancello subito disegno pompa
-                CLEAR_OUT_PUMP_ENABLE;
-                I2C_RandWrite(0x20,0x01,1,&immagine_stato_uscite,1);
+				IOEXP_clr(IOEXP0_PUMP_ENABLE);
               }
               //>>>>>>>>>>>>>Disable_Pump();    
            
@@ -510,9 +515,8 @@ void TempHeater_AtWork(float * t_float)
                   PrintSoglia(SOGLIE_SET_TEMP_INDEX,72,42);//come parametro gli basta l'id della soglia da mostrare
                   LCD_CopyPartialScreen(72,128,42,64);
                   
-                 
-                 MARK_OUT_HEATER_ENABLE;
-                 I2C_RandWrite(0x20,0x01,1,&immagine_stato_uscite,1);
+
+				  IOEXP_set(IOEXP0_HEATER_ENABLE);
                  CLEAR_PRINT_TEMP_LIMITS;
                  if( xTimerStart( xTimers[ TIMER7_TOUT_TEMP ], 0 ) != pdPASS ){} //Timeout parte qui              
               }
@@ -534,8 +538,7 @@ void TempHeater_AtWork(float * t_float)
                   CLEAR_PRINT_HEATER;
                                     
                   CleanArea_Ram_and_Screen(70,128,42,64);//cancello subito disegno heater
-                  CLEAR_OUT_HEATER_ENABLE;
-                  I2C_RandWrite(0x20,0x01,1,&immagine_stato_uscite,1);
+				  IOEXP_clr(IOEXP0_HEATER_ENABLE);
                   //>>>>>>>>>>>>>Disable_Pump();    
               }
               else

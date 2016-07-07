@@ -436,7 +436,7 @@ I2C_InitTypeDef  I2C_InitStructure;
 		xSemaphoreGive(xSemaphoreI2C_Mutex);
 }
 
-int I2C_RandWrite(uint8_t slave,uint16_t addr,uint8_t addrsize,void *pbuffer, uint16_t len)
+int I2C_RandWrite(uint8_t slave,uint16_t addr,uint8_t addrsize,const void *pbuffer, uint16_t len)
 {
 struct i2c_job_st i2c_jobs[2];
 uint8_t buf_offset[2];
