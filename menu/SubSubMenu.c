@@ -77,7 +77,7 @@ void  Sub2MenuSelTipoCurvaLavoro(void)
 {
 	uint8_t key;
 	unsigned short string_index=0,strings_y=14,y_old;
-        unsigned char loop_flag=1,test;
+        unsigned char loop_flag=1;
         unsigned char selected_progr=RamSettings.selected_program_id;
         unsigned short submenuCurLavType_index=0;
          
@@ -122,14 +122,7 @@ void  Sub2MenuSelTipoCurvaLavoro(void)
                 {
                         
                         RamSettings.ptype_arr[selected_progr].curva_lav_cal_type=submenuCurLavType_index;
-                        test=SaveRamSettings_in_External_DataFlash();
-                        if(!test)
-                        {
-                              LCD_Fill_ImageRAM(0x00);
-                              SelectFont(CALIBRI_10);
-                              LCDPrintString("File system error",4,24);
-                              LCD_CopyPartialScreen(4,80,24,36);
-                        }
+                        
 
                         DisegnaMarker(102,menu_triang_y,y_old);
                         y_old=menu_triang_y;
@@ -173,7 +166,7 @@ void Sub2Sel_L_C_H(void)
 	uint8_t key/*,last_key*/;
         
 
-	unsigned char loop_flag=1,test;
+	unsigned char loop_flag=1;
 	unsigned char to_print=1;
 	unsigned char *L_index;
         unsigned char *C_index;
@@ -488,14 +481,7 @@ void Sub2Sel_L_C_H(void)
                     
          
                      MenuFunction_Index=SUB3MENU_CURVA_DI_LAVORO3pt;//era SUB2MENU_SEL_TIPO_CURV_LAV;    
-                     test=SaveRamSettings_in_External_DataFlash();
-                     if(!test)
-                     {
-                          LCD_Fill_ImageRAM(0x00);
-                          SelectFont(CALIBRI_10);
-                          LCDPrintString("File system error",4,24);
-                          LCD_CopyPartialScreen(4,80,24,36);
-                     }
+                     SaveInFlash();
                      loop_flag=0;
                      
                }    
@@ -643,7 +629,7 @@ void Sub2MenuCurvadiLavoro3Punti(void)
 	unsigned short string_index=0,strings_y=2;
 	unsigned short menu_CurvaLavoro_index=0;
 
-	unsigned char loop_flag=1,test;
+	unsigned char loop_flag=1;
 	unsigned char first_string_to_print=0,last_string_to_print;
 	unsigned char to_print=1;
         unsigned char un_mis_conc=PROGR_IN_USO.unita_mis_concentr;
@@ -703,14 +689,7 @@ void Sub2MenuCurvadiLavoro3Punti(void)
              if (key == KEY_PROG)
               
               {
-                test=SaveRamSettings_in_External_DataFlash();
-                if(!test)
-                {
-                    LCD_Fill_ImageRAM(0x00);
-                    SelectFont(CALIBRI_10);
-                    LCDPrintString("File system error",4,24);
-                    LCD_CopyPartialScreen(4,80,24,36);
-                }
+                SaveInFlash();
                 MenuFunction_Index=SUB2MENU_SEL_TIPO_CURV_LAV;
                 loop_flag=0;
 
@@ -856,7 +835,7 @@ void Sub2MenuImpostaSoglie(void)
 	unsigned short string_index=0,strings_y=2;
 	unsigned short menu_ImpostaSoglie_index=0;
 
-	unsigned char loop_flag=1,test;
+	unsigned char loop_flag=1;
 	unsigned char first_string_to_print=0,last_string_to_print=4;
 	unsigned char to_print=1;
         //unsigned int sel_progr_num=RamSettings.selected_program_id;
@@ -898,14 +877,7 @@ void Sub2MenuImpostaSoglie(void)
                                 CLEAR_PIU_MENO_ENABLED;
                                 
                                 
-                                test=SaveRamSettings_in_External_DataFlash();
-                                if(!test)
-                                {
-                                      LCD_Fill_ImageRAM(0x00);
-                                      SelectFont(CALIBRI_10);
-                                      LCDPrintString("File system error",4,24);
-                                      LCD_CopyPartialScreen(4,80,24,36);
-                                }
+                                
 
                         }
                 }
@@ -913,7 +885,7 @@ void Sub2MenuImpostaSoglie(void)
                 if (key == KEY_PROG)
                 
                 {
-                        
+                        SaveInFlash();
                         MenuFunction_Index=SUBMENU_SELECTED_PROGR;
                         loop_flag=0;
 
@@ -1068,7 +1040,7 @@ void Sub2MenuImpostaTimer(void)
 #define MENU_IMPOSTA_TIMERs_DIFF_INDEX_RIGHE_SCHERMATA  4//schermata sempre piena di 5 righe
   
   uint8_t key,last_key;
-  unsigned char loop_flag=1,to_print=1,test;
+  unsigned char loop_flag=1,to_print=1;
   unsigned short string_index=0,strings_y=2;
   unsigned short menu_ImpostaTimers_index=0;
   unsigned char first_string_to_print=0,last_string_to_print=4;
@@ -1101,7 +1073,7 @@ void Sub2MenuImpostaTimer(void)
       
     if (key == KEY_PROG)
     {
-            
+            SaveInFlash();
             MenuFunction_Index=SUBMENU_SELECTED_PROGR;
             loop_flag=0;
 
@@ -1132,14 +1104,7 @@ void Sub2MenuImpostaTimer(void)
                       CLEAR_PIU_MENO_ENABLED;
                       
                       
-                      test=SaveRamSettings_in_External_DataFlash();
-                      if(!test)
-                      {
-                            LCD_Fill_ImageRAM(0x00);
-                            SelectFont(CALIBRI_10);
-                            LCDPrintString("File system error",4,24);
-                            LCD_CopyPartialScreen(4,80,24,36);
-                      }
+                     
 
               }
       }
@@ -1311,7 +1276,7 @@ void Sub2MenuImpostaSimboli(void)
 
 
 	unsigned short submenuImpostaSimboli_index;
-	unsigned char loop_flag=1,test;
+	unsigned char loop_flag=1;
         
         if(PROGR_IN_USO.unita_mis_concentr>NUM_UN_MIS_MAX_INDEX)PROGR_IN_USO.unita_mis_concentr=0;//se ho un valore che mi fa puntare oltre mSiemens forzo a %
 	submenuImpostaSimboli_index=PROGR_IN_USO.unita_mis_concentr;
@@ -1381,14 +1346,7 @@ void Sub2MenuImpostaSimboli(void)
 		{
 			PROGR_IN_USO.unita_mis_concentr=submenuImpostaSimboli_index;
 			
-                        test=SaveRamSettings_in_External_DataFlash();
-                        if(!test)
-                        {
-                              LCD_Fill_ImageRAM(0x00);
-                              SelectFont(CALIBRI_10);
-                              LCDPrintString("File system error",4,24);
-                              LCD_CopyPartialScreen(4,80,24,36);
-                        }
+                        
 			DisegnaMarker(80,menu_triang_y,y_old);//il 3° parametro è la y del triangolino da cancellare
 
 			y_old=menu_triang_y;
@@ -1398,7 +1356,7 @@ void Sub2MenuImpostaSimboli(void)
 		if (key == KEY_PROG)
 		
 		{
-			
+			SaveInFlash();
 			MenuFunction_Index=SUBMENU_SELECTED_PROGR;
 			loop_flag=0;
 
@@ -1409,7 +1367,7 @@ void Sub2MenuImpostaSimboli(void)
 void Sub2MenuTK(void)
 {
 	uint8_t key,last_key;
-	unsigned char loop_flag=1,to_print=1,test;
+	unsigned char loop_flag=1,to_print=1;
 	static unsigned short submenuTK_index=0;
 	//unsigned int nuovo_TK=2345;
         int prova;
@@ -1449,7 +1407,7 @@ void Sub2MenuTK(void)
 			key = 0;
 		
 		{
-			//if(CHECK_ARROW_KEYS_MOVE_UPDOWN)
+			if(CHECK_ARROW_KEYS_MOVE_UPDOWN)
 			{
 				if (key == KEY_DOWNRIGHT)
 				//if(CHECK_TASTO_DN_DX_PRESSED)
@@ -1498,15 +1456,7 @@ void Sub2MenuTK(void)
 						CLEAR_PIU_MENO_ENABLED;
 
 						PROGR_IN_USO.TK.tk2.old_TK=PROGR_IN_USO.TK.tk2.nuovo_TK;
-                                                test=SaveRamSettings_in_External_DataFlash();
-                                                if(!test)
-                                                {
-                                                      LCD_Fill_ImageRAM(0x00);
-                                                      SelectFont(CALIBRI_10);
-                                                      LCDPrintString("File system error",4,24);
-                                                      LCD_CopyPartialScreen(4,80,24,36);
-                                                }
-
+                                                
 					}
                             }
 			}
@@ -1514,7 +1464,7 @@ void Sub2MenuTK(void)
 			if(CHECK_PIU_MENO_ENABLED)
 			{
 				if ((key == KEY_PLUS) || (last_key == KEY_PLUS))
-				//if(CHECK_TASTO_PLUS_PRESSED)
+				
 					{
 
 						if(menu_triang_x==76)
@@ -1575,7 +1525,7 @@ void Sub2MenuTK(void)
 			if (key == KEY_PROG)
 			
 			{
-				
+				SaveInFlash();
 				MenuFunction_Index=SUBMENU_SELECTED_PROGR;
 				loop_flag=0;
 			}
