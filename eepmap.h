@@ -26,6 +26,8 @@
 #define EEP_GCable_addr				0x54
 #define EEP_Freq_addr				0x58
 #define EEP_Freq_len				4
+#define EEP_RCable_addr				0x5c
+#define EEP_RCable_len				4
 
 #define EEP_fsfirtfree_addr			0xf00	//!< File system non-volatile parameter
 #define EEP_fsfirtfree_len			2		//!< EEP_fsfirtfree_addr length

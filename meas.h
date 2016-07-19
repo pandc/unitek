@@ -10,6 +10,7 @@ enum CALIB_Enum {
 };
 
 #define CALIB_GCable	CALIB_Items
+#define CALIB_RCable	(CALIB_GCable+1)
 #define RES_ADD			300.0
 
 extern struct meas_calpar_st {

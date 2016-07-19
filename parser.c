@@ -434,6 +434,14 @@ uint32_t freq = 0;
 			}
 			item = CALIB_GCable;
 			break;
+		case 'R':
+			if (!mcpok)
+			{
+				COM_Puts("\r\nInvalid calibration parameters\r\n");
+				return CALLBACKRET_Error;
+			}
+			item = CALIB_RCable;
+			break;
 		case 'K':
 			COM_Puts("\r\nEnter kcell: ");
 			i = 0;
@@ -499,6 +507,35 @@ uint32_t freq = 0;
 			break;
 		}
 		COM_Puts("\r\n");
+		if (item == CALIB_RCable)
+		{
+			COM_Puts(">>> Connect reference resistance of 50Ohm and press enter (ESC to abort)\r\n");
+			for (;;)
+			{
+				if (COM_Getch(&c))
+				{
+					if ((c == '\r') || (c == 27))
+						break;
+				}
+				else
+					return CALLBACKRET_Error;
+			}
+			if (c != '\r')
+				return CALLBACKRET_Error;
+			if (!domeas(CALIB_Low,res,&sp))
+			{
+				COM_Puts("Measure error\r\n");
+				return CALLBACKRET_Error;
+			}
+			sp -= mcp[CALIB_Low].sp;
+			float gt = ((res[0] - mcp[CALIB_Low].nos) * mcp[CALIB_Low].gf) * cos(sp);
+			float rc = (1.0 / gt) - RES_ADD - 50;
+			if (rc < 0.0)
+				rc = 0.0;
+			COM_Printf("GT=%.10e RC%.10e=\r\n",gt,rc);
+			EEP_Write(EEP_RCable_addr,&rc,4);
+			return CALLBACKRET_Ok;
+		}
 		if (item == CALIB_GCable)
 		{
 			COM_Puts(">>> Connect reference resistance of 100KOhm and press enter (ESC to abort)\r\n");

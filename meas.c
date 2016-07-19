@@ -51,7 +51,6 @@ const float calib_condutt[4] = {
 	1.0 / (36.0 + RES_ADD)
 };
 
-
 static const uint8_t adg715_cmd[CALIB_Items] = {
 	0x24,
 	0x82,
@@ -60,7 +59,7 @@ static const uint8_t adg715_cmd[CALIB_Items] = {
 };
 
 static xSemaphoreHandle	semaMeas;
-static float real_values,imm_values,final_resist,kcell_factor,gcable;
+static float real_values,imm_values,final_resist,kcell_factor,gcable,rcable;
 static uint32_t ad5934_freq;
 static int meas_samples = DEFAULT_MEAS_SAMPLES,curr_chan = -1;
 static int16_t rsamples[MEAS_SAMPLES],isamples[MEAS_SAMPLES];
@@ -107,6 +106,7 @@ int i;
 	COM_Printf("\r\n*MEASINIT: K,%.7e",kcell_factor);
 	COM_Printf("\r\n*MEASINIT: F,%lu",ad5934_freq);
 	COM_Printf("\r\n*MEASINIT: G,%.7e",gcable);
+	COM_Printf("\r\n*MEASINIT: R,%.7e",rcable);	
 	COM_Puts("\r\n");
 	return TRUE;
 }
@@ -164,10 +164,14 @@ float f;
 	if (isnan(kcell_factor))
 		kcell_factor = 1.0;
 
-
 	EEP_Read(EEP_GCable_addr,&gcable,4);
 	if (isnan(gcable))
 		gcable = 0.0;
+
+	EEP_Read(EEP_RCable_addr,&rcable,4);
+	if (isnan(rcable))
+		rcable = 0.0;
+
 	mcpok = TRUE;
 	return TRUE;
 }
@@ -356,9 +360,9 @@ float val,tphase;
 		Dprintf(DBGLVL_Meas,"meas: nx clamped to ncl");
 	}
 	tphase -= mcp[i].sp;
-	*condut=(((val - mcp[i].nos) * mcp[i].gf) * cos(tphase));
-	*condut=*condut - gcable;
-	*resist=(1.0 / *condut)-RES_ADD;
+	*condut = (((val - mcp[i].nos) * mcp[i].gf) * cos(tphase));
+	*condut = *condut - gcable;
+	*resist = (1.0 / *condut) - RES_ADD - rcable;
 	*condut = 1.0 / *resist;
 	*conduc = *condut / kcell_factor;
 	return TRUE;
