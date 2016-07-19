@@ -62,7 +62,7 @@ extern const char StringsSubmenuImpostaSimboli	[4][5][20];
 extern const char StringsSubmenuImpostaSoglie 	[4][8][20];
 extern const char StringsSubmenuImpostaTimer  	[4][9][20];
 extern const char StringsSubmenuSimboliConc   	    [5][4];
-extern const char StringsServizio               [4][4][22];
+extern const char StringsServizio               [4][5][22];
 
 extern setp_e_soglie_type setp_e_soglie;
 extern setp_e_soglie_type conc_soglie_limit_up,conc_soglie_limit_dn;
@@ -756,7 +756,7 @@ void SubmenuServizio(void)
   DisegnaTriangolinoMenu(0,menu_triang_y);
   
   
-  for(string_index=0;string_index<4;string_index++)
+  for(string_index=0;string_index<5;string_index++)
   {
           LCDPrintString(StringsServizio[RamSettings.Linguaggio][string_index],12,strings_y);
           strings_y+=12;
@@ -795,6 +795,10 @@ void SubmenuServizio(void)
             break;
             
         case 3:
+          MenuFunction_Index=SUB2MENU_RES_SERIE_CAVO;
+        break;
+            
+        case 4:
               MenuFunction_Index=SUB2MENU_LICENZA;
             break;
         }

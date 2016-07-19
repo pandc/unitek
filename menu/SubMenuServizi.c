@@ -24,7 +24,7 @@
 
 
 
-extern const char StringsServizio               [4][4][22];
+extern const char StringsServizio               [4][5][22];
 extern const char Strings_InsertCalRes          [4][25];
 extern const char Strings_RemovePT100           [4][20];    
 extern const char Strings_RemoveProbe           [4][20];
@@ -244,6 +244,93 @@ void Sub2Menu_Cal_Cable(void)
 
 }
 //***********************************************************************
+void Sub2Menu_ResSerie_Cable(void)
+{
+
+  uint8_t key;
+
+  float res[2],sp;
+  
+  unsigned char loop_flag=1,stato;
+
+  LCD_Fill_ImageRAM(0x00);
+  //stampo nella lingua selezionata "Calibrazione PT100)
+  LCDPrintString(StringsServizio[RamSettings.Linguaggio][3],14,2);
+  LCDPrintString(Strings_RemoveProbe[RamSettings.Linguaggio],14,38);
+  LCDPrintString("->PRESS OK",68,54);
+  LCD_CopyScreen();
+  
+  
+
+  stato=0;
+  
+  while(loop_flag)
+  {
+          key_getstroke(&key,portMAX_DELAY);
+          
+          if (key == KEY_PROG)
+          {
+                  if(stato==8)
+                  {
+                    MenuFunction_Index=SUB2MENU_CABLE_COMPENS;
+                    return;
+                  }
+                  else
+                  {  
+                    MenuFunction_Index=MENU_PROGR;
+                    return;
+                  }  
+          }
+          
+          
+          if (key == KEY_OK)
+          {
+            switch(stato) 
+            {
+              
+                case 0: 
+                  CleanArea_Ram_and_Screen(14,120,38,52);
+                  LCDPrintString(Strings_InsertCalRes[RamSettings.Linguaggio],14,26);
+                  LCDPrintString("500 Ohm 0.1%",14,38);
+                  LCD_CopyPartialScreen(2,120,26,54);
+                  stato++;
+                  loop_flag=1;
+                  break;
+            
+                 
+                case 1 :
+                    if (!domeas(CALIB_Low,res,&sp))
+                    {
+                            CleanArea_Ram_and_Screen(14,120,38,52);
+                            LCDPrintString("Error!",2,38);
+                            stato=8;
+                    }
+                    sp -= mcp[CALIB_Low].sp;
+                    float gt = ((res[0] - mcp[CALIB_Low].nos) * mcp[CALIB_Low].gf) * cos(sp);
+                    float rc = (1.0 / gt) - RES_ADD - 50;
+                    if (rc < 0.0)
+                            rc = 0.0;
+                    //COM_Printf("GT=%.10e RC%.10e=\r\n",gt,rc);
+                    EEP_Write(EEP_RCable_addr,&rc,4);
+                    //return CALLBACKRET_Ok;
+                     
+                    meas_loadParams();
+                      
+                    CleanArea_Ram_and_Screen(14,128,26,64);
+                    //LCDPrintString(Strings_InsertCalRes[RamSettings.Linguaggio],14,26);
+                    LCDPrintString(StringsCableCalibOK[RamSettings.Linguaggio],20,26);
+                    LCD_CopyPartialScreen(2,128,26,54);
+                    break;
+               }//fine switch(stato) 
+                    
+                
+                
+         }//fine if(key ==KEY_OK)
+    }//fine while(loop_flag)
+  
+
+}
+//***********************************************************************
 void Sub2Menu_MisuraDiretta(void)
 {
   uint8_t key;
@@ -292,6 +379,7 @@ void Sub2Menu_MisuraDiretta(void)
    }
   
 }
+
 //***********************************************************************
 void Sub2Menu_Licenza(void)
 {
