@@ -174,6 +174,7 @@ void MenuInit(void)
 	MenuFunctionPt[SUBMENU_SELECTED_PROGR]	=&SubmenuSelectedProgr;	//8
         MenuFunctionPt[SUB2MENU_CAL_PT100]	=&Sub2Menu_Cal_PT100;
         MenuFunctionPt[SUB2MENU_CABLE_COMPENS]	=&Sub2Menu_Cal_Cable;
+        MenuFunctionPt[SUB2MENU_RES_SERIE_CAVO] =&Sub2Menu_ResSerie_Cable;
         MenuFunctionPt[SUB2MENU_MISURA_DIRETTA]	=&Sub2Menu_MisuraDiretta;
         MenuFunctionPt[SUB2MENU_LICENZA]	=&Sub2Menu_Licenza;
 
