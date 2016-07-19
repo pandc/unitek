@@ -29,12 +29,7 @@ extern setp_e_soglie_type setp_e_soglie;
 //extern setp_e_soglie_type conc_soglie_limit_up,conc_soglie_limit_dn;
 
 extern unsigned char selected_curva_lavoro_index;
-
-
-
-
-extern unsigned char stato_intervento_temper,stato_intervento_conc;
-
+extern unsigned char global_unit_misura_old;
 
 
 //variabili selezione in uso
@@ -57,6 +52,7 @@ extern my_RamSettings_type RamSettings;
 extern const my_RamSettings_type  ucFlash_Settings;
 
 extern const float TabLinPT100[24];
+
 
 //extern program_type __attribute__((section (".MySector"))) saved_prog_arr[5];
 //extern unsigned char __attribute__((section (".MySector"))) saved_selected_program_id;
