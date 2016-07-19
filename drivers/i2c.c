@@ -23,8 +23,8 @@ static xSemaphoreHandle xSemaphoreI2C_Mutex,xSemaphoreI2C_Work;
 #define I2Cx_SCL_PIN				GPIO_Pin_6
 #define I2Cx_SDA_PIN				GPIO_Pin_7
 
-#define I2Cx						I2C1
-#define I2Cx_CLK					RCC_APB1Periph_I2C1
+#define I2Cx					I2C1
+#define I2Cx_CLK				RCC_APB1Periph_I2C1
 #define I2Cx_EV_IRQn				I2C1_EV_IRQn
 #define I2Cx_ER_IRQn				I2C1_ER_IRQn
 #define I2Cx_EV_IRQHandler			I2C1_EV_IRQHandler
@@ -64,6 +64,8 @@ int i;
 		if (!I2C_GetFlagStatus(I2Cx, I2C_FLAG_BUSY))
 			return FALSE;
 	}
+        I2C_Open(0);
+        
 	return TRUE;
 } 
 
@@ -415,8 +417,8 @@ I2C_InitTypeDef  I2C_InitStructure;
 	NVIC_SetPriority(I2Cx_ER_IRQn,I2Cx_ER_IRQ_PRIO);
 
 	/* I2C configuration */
-	I2C_InitStructure.I2C_Mode = I2C_Mode_I2C;
-	I2C_InitStructure.I2C_DutyCycle = I2C_DutyCycle_2;
+	I2C_InitStructure.I2C_Mode        = I2C_Mode_I2C;
+	I2C_InitStructure.I2C_DutyCycle   =I2C_DutyCycle_2;
 	I2C_InitStructure.I2C_OwnAddress1 = I2Cx_SLAVE_ADDRESS7;
 	I2C_InitStructure.I2C_Ack = I2C_Ack_Enable;
 	I2C_InitStructure.I2C_AcknowledgedAddress = I2C_AcknowledgedAddress_7bit;
