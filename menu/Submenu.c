@@ -62,6 +62,7 @@ extern const char StringsSubmenuImpostaSimboli	[4][5][20];
 extern const char StringsSubmenuImpostaSoglie 	[4][8][20];
 extern const char StringsSubmenuImpostaTimer  	[4][9][20];
 extern const char StringsSubmenuSimboliConc   	    [5][4];
+extern const char StringsServizio               [4][4][22];
 
 extern setp_e_soglie_type setp_e_soglie;
 extern setp_e_soglie_type conc_soglie_limit_up,conc_soglie_limit_dn;
@@ -127,14 +128,16 @@ void SubmenuINOUT(void)
                                   //in tal caso azzero i timeouts
                                   if(!CHECK_STATE_ABILITATO)//se arrivo da disabilitato
                                   {
-                                    CLEAR_TIMEOUT_CONC;  
-                                    CLEAR_TIMEOUT_TEMP;
+                                    ResetChConc_ON();
+                                    ResetChTemp_ON();
                                   }
                              }
 			}//chiudi i relay ecc
 			else
 			{
 				RamSettings.abilita_disabilita=DISABILITA ;
+                                ResetChConc_OFF();
+                                ResetChTemp_OFF();
 			}//apri i relay ecc
 
 			DisegnaMarker(92,menu_triang_y,y_old);
@@ -173,10 +176,11 @@ void SubmenuSelProgr(void)
 	unsigned char x_prova=0,half_x=0;
 	unsigned char y_prova=0,half_y=0;
 */
-	unsigned short submenuSelProg_index;
+	unsigned short submenuSelProg_index,sel_progr_old;
 
 	if(RamSettings.selected_program_id>NUM_PROGRAMMI_MAX_INDEX)RamSettings.selected_program_id=0;
 	submenuSelProg_index=RamSettings.selected_program_id;
+        sel_progr_old=submenuSelProg_index;
 
 	menu_triang_limit_up=2;
 	menu_triang_limit_dn=50;
@@ -206,7 +210,7 @@ void SubmenuSelProgr(void)
 		if (key == KEY_PROG)
 		//
 		{
-			;
+			
 			MenuFunction_Index=MENU_PROGR;
 			loop_flag=0;
 		}
@@ -223,7 +227,7 @@ void SubmenuSelProgr(void)
 			loop_flag=0;
 			
                         RamSettings.selected_program_id=submenuSelProg_index;
-                        SaveInFlash();
+                        if(sel_progr_old!=submenuSelProg_index)SaveInFlash();//salvo solo se ho cambiato
 		}
 
 
@@ -521,7 +525,7 @@ void SubmenuComunic(void)
 			
 			{
 				;
-				MenuFunction_Index=SUBMENU_SELEZIONA_PROG;
+				MenuFunction_Index=MENU_PROGR;
 				loop_flag=0;
 			}
 
@@ -593,12 +597,14 @@ void SumMenuSelLingua(void)
         unsigned char x_prova=0,half_x=0;
         unsigned char y_prova=0,half_y=0;
 */
-        unsigned short submenuSelLing_index;
+        unsigned short submenuSelLing_index,ling_index_old;
 
 
 
         submenuSelLing_index=RamSettings.Linguaggio;
-
+        ling_index_old=submenuSelLing_index;
+          
+          
         menu_triang_limit_up=2;
         menu_triang_limit_dn=38;
 
@@ -628,7 +634,7 @@ void SumMenuSelLingua(void)
 			if (key == KEY_PROG)
 			//
 			{
-				SaveInFlash();
+				if(ling_index_old!=submenuSelLing_index)SaveInFlash();
 				MenuFunction_Index=MENU_PROGR;
 				loop_flag=0;
 
@@ -674,14 +680,152 @@ void SumMenuSelLingua(void)
 //***************************************************************************************
 void SubmenuServizio(void)
 {
+  uint8_t key;
+  
+  unsigned short string_index=0,strings_y=2/*,y_old*/;
+  unsigned char loop_flag=1;
 
-#ifdef DISEGNA_CORNICE
-	DisegnaCornice();
-#endif
-	DisegnaTriangolinoMenu(0,menu_triang_y);
+  unsigned short submenuServizio_index=0;
+   
 
-	//MenuFunction_Index=1;
-	vTaskSuspend(NULL);
+
+  
+
+  LCD_Fill_ImageRAM(0x00);
+
+  
+
+  SelectFont(CALIBRI_10);
+
+  LCDPrintString("PASSWORD?",40,26);
+  LCD_CopyScreen();
+  
+  unsigned char stato=0;
+  
+  while(loop_flag)
+  {
+      key_getstroke(&key,portMAX_DELAY);
+      if (key == KEY_PROG)
+      {
+         
+          MenuFunction_Index=MENU_PROGR;
+          loop_flag=0;
+          return;
+
+      }
+      
+      if (key == KEY_OK)
+      {
+        if(stato==1)stato++;
+        else
+        {
+          MenuFunction_Index=MENU_PROGR;
+          loop_flag=0;
+          return;
+        }
+      }
+      
+      if (key == KEY_MINUS)
+      {
+        if(stato==0)stato++;
+        if(stato==3)stato++;
+      }
+           
+      if (key == KEY_PLUS)
+      {
+        if(stato==2)stato++;
+        else
+        {
+          MenuFunction_Index=MENU_PROGR;
+          loop_flag=0;
+          return;
+        }
+      }
+           
+      if(stato==4)loop_flag=0;      
+  
+  }
+  loop_flag=1;
+  
+  
+  LCD_Fill_ImageRAM(0x00);
+  menu_triang_limit_up=2;
+  menu_triang_limit_dn=38;
+  menu_triang_y=2;
+  
+  DisegnaTriangolinoMenu(0,menu_triang_y);
+  
+  
+  for(string_index=0;string_index<4;string_index++)
+  {
+          LCDPrintString(StringsServizio[RamSettings.Linguaggio][string_index],12,strings_y);
+          strings_y+=12;
+  }
+  
+  LCD_CopyScreen();
+  
+  
+  
+  while(loop_flag)
+  {
+      key_getstroke(&key,portMAX_DELAY);
+      if (key == KEY_PROG)
+      {
+         
+          MenuFunction_Index=MENU_PROGR;
+          loop_flag=0;
+
+      }
+      
+      if (key == KEY_OK)
+      {
+         
+        switch(submenuServizio_index)
+        {
+        case 0:
+              MenuFunction_Index=SUB2MENU_CAL_PT100;
+            break;
+          
+        case 1:
+             MenuFunction_Index=SUB2MENU_CABLE_COMPENS;
+            break;
+            
+        case 2:
+              MenuFunction_Index=SUB2MENU_MISURA_DIRETTA;
+            break;
+            
+        case 3:
+              MenuFunction_Index=SUB2MENU_LICENZA;
+            break;
+        }
+          
+          loop_flag=0;
+
+      }
+      
+      if(CHECK_ARROW_KEYS_MOVE_UPDOWN)
+      {
+              if (key == KEY_DOWNRIGHT)
+              //if(CHECK_TASTO_DN_DX_PRESSED)
+              {
+                      MoveTriangolinoDown();
+                      if( submenuServizio_index<3) submenuServizio_index+=1;
+                      
+              }
+
+              if (key == KEY_UPLEFT)
+              //if(CHECK_TASTO_UP_SX_PRESSED)
+              {
+                      MoveTriangolinoUp();
+                      if( submenuServizio_index) submenuServizio_index-=1;
+                      
+              }
+      }
+  }
+  
+  
+  
+  
 }
 //***************************************************************************************   
 
