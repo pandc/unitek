@@ -29,6 +29,7 @@ extern setp_e_soglie_type conc_soglie_limit_up,conc_soglie_limit_dn;
 
 
 extern  TimerHandle_t xTimers[ NUM_TIMERS ];
+extern  TimerHandle_t AuxTimer; 
 
 //***************************************************************************************
 void ControlloSoglieAllarmi_Conc(float*c_float)
@@ -48,7 +49,7 @@ void ControlloSoglieAllarmi_Conc(float*c_float)
           MARK_OVER_CONC_MAX;
           CLEAR_OVER_CONC_MIN;
           CLEAR_ALARM_CONC_MIN;//s eè max non può e non deve essere min
-          CLEAR_TIMER5_EXPIRED;//Timer Max temp..se era già partito sarebbe da fermare
+          //CLEAR_TIMER5_EXPIRED;//Timer Max temp..se era già partito sarebbe da fermare
           // non fermo altri timer,tanto marcano solo un flag xTimerStop
           if( xTimerStart( xTimers[ TIMER5_RIT_ALL_MAX_CONC ], 0 ) != pdPASS )
           {}// The timer could not be set into the Active state.  
@@ -79,6 +80,8 @@ void ControlloSoglieAllarmi_Conc(float*c_float)
           {
             MARK_OVER_CONC_MIN;
             CLEAR_OVER_CONC_MAX;
+            CLEAR_ALARM_CONC_MAX;
+            IOEXP_clr(IOEXP0_MAX_CONC_ALARM);
             if( xTimerStart( xTimers[ TIMER4_RIT_ALL_MIN_CONC ], 0 ) != pdPASS )
             {}// The timer could not be set into the Active state. 
           }
@@ -89,10 +92,17 @@ void ControlloSoglieAllarmi_Conc(float*c_float)
             //generic_float/=100;
             if(*c_float<generic_float)
             {
-              CleanArea_Ram_and_Screen(2,62,42,64);
+              // DP CleanArea_Ram_and_Screen(2,62,40,64);
+              MARK_PRINT_CONC_LIMITS;
               MARK_OVER_CONC_NORMAL;
               CLEAR_ALARM_CONC_MAX;
-			  IOEXP_clr(IOEXP0_MAX_CONC_ALARM);
+              
+              //DP Cancello segnalazione allarme
+              CleanArea_Ram_and_Screen(AL_CONC_X_START,AL_CONC_X_END ,AL_CONC_Y_START, AL_CONC_Y_END);
+              CleanArea_Ram_and_Screen(AL2r_CONC_X_START,AL2r_CONC_X_END ,AL2r_CONC_Y_START, AL2r_CONC_Y_END); //2 riga
+              //DP END
+              
+	      IOEXP_clr(IOEXP0_MAX_CONC_ALARM);
             }
          }
        break;
@@ -104,10 +114,11 @@ void ControlloSoglieAllarmi_Conc(float*c_float)
           //generic_float/=100;
           if(*c_float > generic_float)
           {
-            MARK_OVER_CONC_MIN;
-            CLEAR_OVER_CONC_MAX;//se è min non può e non deve essere max
-            CLEAR_ALARM_CONC_MAX;
-            if( xTimerStart( xTimers[ TIMER4_RIT_ALL_MIN_CONC ], 0 ) != pdPASS )
+            MARK_OVER_CONC_MAX;
+            CLEAR_OVER_CONC_MIN;//se è min non può e non deve essere max
+            CLEAR_ALARM_CONC_MIN;
+            IOEXP_clr(IOEXP0_MIN_CONC_ALARM);
+            if( xTimerStart( xTimers[ TIMER5_RIT_ALL_MAX_CONC ], 0 ) != pdPASS )
             {}// The timer could not be set into the Active state. 
           }
           else
@@ -119,11 +130,18 @@ void ControlloSoglieAllarmi_Conc(float*c_float)
             {
               MARK_OVER_CONC_NORMAL;
               CLEAR_ALARM_CONC_MIN;
+              MARK_PRINT_CONC_LIMITS;
               
-             CleanArea_Ram_and_Screen(2,62,42,64);
+             //DP CleanArea_Ram_and_Screen(2,62,40,64);
+             
              MARK_OVER_CONC_NORMAL;
              CLEAR_ALARM_CONC_MIN;
-			 IOEXP_clr(IOEXP0_MIN_CONC_ALARM);
+            //DP Cancello segnalazione allarme 
+            CleanArea_Ram_and_Screen(AL_CONC_X_START,AL_CONC_X_END ,AL_CONC_Y_START, AL_CONC_Y_END);
+            CleanArea_Ram_and_Screen(AL2r_CONC_X_START,AL2r_CONC_X_END ,AL2r_CONC_Y_START, AL2r_CONC_Y_END); //2 riga
+            //DP END
+            
+             IOEXP_clr(IOEXP0_MIN_CONC_ALARM);
             }
        }
       break;
@@ -191,6 +209,7 @@ void ControlloSoglieAllarmi_Temp(float*t_float)
             MARK_OVER_TEMP_MIN;
             CLEAR_OVER_TEMP_MAX;//se è min non può e non deve essere max
             CLEAR_ALARM_TEMP_MAX;
+            IOEXP_clr(IOEXP0_MAX_TEMP_ALARM);
             if( xTimerStart( xTimers[ TIMER8_RIT_ALL_MIN_TEMP ], 0 ) != pdPASS ){}
           }
           else
@@ -201,11 +220,17 @@ void ControlloSoglieAllarmi_Temp(float*t_float)
             if(*t_float<generic_float)
             {
               MARK_OVER_TEMP_NORMAL;
+              MARK_PRINT_TEMP_LIMITS;
               CLEAR_ALARM_TEMP_MAX;
               CLEAR_OVER_TEMP_MAX;
-              CleanArea_Ram_and_Screen(66,126,42,64);
-
-			  IOEXP_clr(IOEXP0_MAX_TEMP_ALARM);
+             //DP CleanArea_Ram_and_Screen(66,126,40,64);
+            
+             //DP Cancello segnalazione allarme 
+            CleanArea_Ram_and_Screen(AL_TEMP_X_START,AL_TEMP_X_END ,AL_TEMP_Y_START, AL_TEMP_Y_END);
+            CleanArea_Ram_and_Screen(AL2r_TEMP_X_START,AL2r_TEMP_X_END ,AL2r_TEMP_Y_START, AL2r_TEMP_Y_END); //2 riga
+            //DP END
+	     
+            IOEXP_clr(IOEXP0_MAX_TEMP_ALARM);
             }
          }
        break;
@@ -220,7 +245,8 @@ void ControlloSoglieAllarmi_Temp(float*t_float)
             MARK_OVER_TEMP_MAX;
             CLEAR_OVER_TEMP_MIN;
             CLEAR_ALARM_TEMP_MIN;
-            CLEAR_TIMER9_EXPIRED;
+            
+            IOEXP_clr(IOEXP0_MIN_TEMP_ALARM); //DP TEMP ERA CONC
             if( xTimerStart( xTimers[ TIMER9_RIT_ALL_MAX_TEMP ], 0 ) != pdPASS ){}
           }
           else
@@ -231,24 +257,29 @@ void ControlloSoglieAllarmi_Temp(float*t_float)
             if(*t_float>generic_float)
             {
               MARK_OVER_TEMP_NORMAL;
+              MARK_PRINT_TEMP_LIMITS;
               CLEAR_ALARM_TEMP_MIN;
               
-             CleanArea_Ram_and_Screen(66,126,42,64);
-
-			 IOEXP_clr(IOEXP0_MIN_CONC_ALARM);
+             //DP CleanArea_Ram_and_Screen(66,126,40,64);
+            
+            //DP Cancello segnalazione allarme 
+            CleanArea_Ram_and_Screen(AL_TEMP_X_START,AL_TEMP_X_END ,AL_TEMP_Y_START, AL_TEMP_Y_END);
+            CleanArea_Ram_and_Screen(AL2r_TEMP_X_START,AL2r_TEMP_X_END ,AL2r_TEMP_Y_START, AL2r_TEMP_Y_END); //2 riga
+            //DP END
+              
+	     IOEXP_clr(IOEXP0_MIN_TEMP_ALARM); //DP TEMP ERA CONC
             }
        }
       break;
-
-     
+  
    }//fine switch
   
 }
 //***************************************************************************************
-void ControlloRitardi(void)
+void ControlloTimers(void)
 {
 
-    if(CHECK_TIMER1_EXPIRED)//Ritardo accensione conc(T6 analogo per temperatura)
+    if(CHECK_TIMER1_EXPIRED )//Ritardo accensione conc(T6 analogo per temperatura)
     {
       CLEAR_TIMER1_EXPIRED;
       if(CHECK_ACCENSIONE_CONC)
@@ -258,13 +289,20 @@ void ControlloRitardi(void)
        //se è troppo basso,al prossimo controllo andrò in attivo
        CLEAR_PUMP_STATES;
        MARK_PUMP_STATE_RIPOSO;
-       MARK_PRINT_CONC_LIMITS;
-       
+      // MARK_PRINT_CONC_LIMITS;
        //cancella WAIT lato conc
-       CleanArea_Ram_and_Screen(2,62,38,58);
-       
-       
+      /* CleanArea_Ram_and_Screen(WAIT_CONC_AREA_X_START,WAIT_CONC_AREA_X_END
+                                 ,WAIT_CONC_AREA_Y_START,WAIT_CONC_AREA_Y_END);//pulisco scritta WaitMix Time*/
       }
+        //da power ON o casi che devono essere visti come power ON
+        if(!CHECK_ATTIVAZIONE_EXT_CH_CONC)MARK_PRINT_CONC_CH_OFF;
+        else  
+        {
+          MARK_PRINT_CONC_LIMITS;
+
+
+        }
+      
     }
     
     if(CHECK_TIMER6_EXPIRED)//Ritardo accensione temp(T1 analogo per concentrazione)
@@ -277,10 +315,15 @@ void ControlloRitardi(void)
        //se è troppo basso,al prossimo controllo andrò in attivo
        CLEAR_HEATER_STATE_ATTIVO;
        MARK_HEATER_STATE_RIPOSO;
-       MARK_PRINT_TEMP_LIMITS;
-       
+       //MARK_PRINT_TEMP_LIMITS;
        //cancella WAIT lato temp 
-       CleanArea_Ram_and_Screen(66,126,38,58);
+       /*CleanArea_Ram_and_Screen(WAIT_TEMP_AREA_X_START,WAIT_TEMP_AREA_X_END
+                                 ,WAIT_TEMP_AREA_Y_START,WAIT_TEMP_AREA_Y_END);*/
+        if(!CHECK_ATTIVAZIONE_EXT_CH_TEMP)MARK_PRINT_TEMP_CH_OFF;
+        else  
+        {
+          MARK_PRINT_TEMP_LIMITS;
+        }
       }
     }
     
@@ -294,40 +337,31 @@ void ControlloRitardi(void)
       CLEAR_TIMER2_EXPIRED;
       if(CHECK_PUMP_STATE_ATTIVO)
       {
-        CLEAR_PUMP_STATES;
-        MARK_PUMP_STATE_WAIT;//tanto non entro nemmeno nella funzione di lavoro pompa
-        //dovrei restare in wait perchè nessun timer(TIMER3) mi fa uscire
-        //>>>>>>>>>>>>>Disable_Pump();
-        SelectFont(CALIBRI_10);
-        CleanArea_Ram_and_Screen(2,64,42,64);//cancella pompa e limiti
-        LCDPrintString("TimeOut",4,42);
-        LCD_CopyPartialScreen(2,64,42,58);
-            
+        CLEAR_PUMP_STATES;//tanto non entro nemmeno nella funzione di lavoro pompa
+
+        IOEXP_clr(IOEXP0_PUMP_ENABLE);
+          
         MARK_TIMEOUT_CONC;
+        MARK_PRINT_CONC_TO;
         CLEAR_PRINT_CONC_LIMITS;
         CLEAR_PRINT_PUMP;
-		IOEXP_clr(IOEXP0_PUMP_ENABLE);
       }
     }
-  
+     
+    
     if(CHECK_TIMER7_EXPIRED)//Time out heater
     {
       CLEAR_TIMER7_EXPIRED;
       if(CHECK_HEATER_STATE_ATTIVO)
       {
-        MARK_HEATER_STATE_RIPOSO;//tanto non entro nemmeno nella funzione di lavoro pompa
-        
-        //>>>>>>>>>>>>>Disable_Heather();
-        SelectFont(CALIBRI_10);
-        CleanArea_Ram_and_Screen(66,128,42,64);//cancella pompa e limiti
-        LCDPrintString("TimeOut",68,42);
-        LCD_CopyPartialScreen(66,128,42,58);
-        //MARK_PRINT_TIMOUT;
-        
+        CLEAR_HEATER_STATES;//tanto non entro nemmeno nella funzione di lavoro heater
+        IOEXP_clr(IOEXP0_HEATER_ENABLE);
+
         MARK_TIMEOUT_TEMP;
+        MARK_PRINT_TEMP_TO;
         CLEAR_PRINT_TEMP_LIMITS;
         CLEAR_PRINT_HEATER;
-		IOEXP_clr(IOEXP0_HEATER_ENABLE);
+
       }
     }
     
@@ -335,35 +369,22 @@ void ControlloRitardi(void)
     {
       CLEAR_TIMER3_EXPIRED;
       //se ho allarmi lascio scadere il timer e non faccio altro
-      if((!CHECK_CONC_ALARMS_MASK)  && (!CHECK_ALARM_TANK))
+      if((!CHECK_TIMEOUT_CONC)  && (!CHECK_ALARM_TANK))
       {
         if(CHECK_PUMP_STATE_WAIT)
         {
           CLEAR_PUMP_STATES;
           MARK_PUMP_STATE_ATTIVO;
           
-          //CleanArea_Ram_and_Screen(2,60,32,42);//pulisco scritta WaitMix Time
-          CleanArea_Ram_and_Screen(2,62,42,64);
-          mybmp_struct2.bmp_pointer=pompa_OK_bmp;
-          mybmp_struct2.righe	 =pompa_OKHeightPixels;
-          mybmp_struct2.colonne	 =pompa_OKWidthPages;
-          mybmp_struct2.start_x=2;
-          mybmp_struct2.start_y=42;
-          GetBitmap();
-          LCD_CopyPartialScreen(2,26,42,64);
-          PrintSoglia(SOGLIE_SET_CONC_INDEX,28,42);//come parametro gli basta l'id della soglia da mostrare
-   
+
+          MARK_PRINT_PUMP;
+          //MARK_PRINT_CONC_LIMITS;
           
-          
-          
-                    
-                    
-          
-          
+          //prima disegnava pompa e setpoint qui
           if( xTimerStart( xTimers[ TIMER2_TOUT_DOSAGGIO ], 0 ) != pdPASS ){}
-          CLEAR_PRINT_PUMP;
-          CLEAR_PRINT_CONC_LIMITS;
-		  IOEXP_set(IOEXP0_PUMP_ENABLE);//>>>>>>>>>>>>>Enable_Pump();
+          //CLEAR_PRINT_PUMP;
+          //
+	  IOEXP_set(IOEXP0_PUMP_ENABLE);//>>>>>>>>>>>>>Enable_Pump();
         }
       }
     }
@@ -376,47 +397,25 @@ void ControlloRitardi(void)
       CLEAR_TIMER4_EXPIRED;
       if(CHECK_OVER_CONC_MIN)
       {
-       // CLEAR_CONTROL_CONC_ENA ;
-        xTimerStop( xTimers[TIMER2_TOUT_DOSAGGIO], 0 );
-        //cancello metà sx e scrivo(da decidere bene)
-        SelectFont(CALIBRI_10);
-        CleanArea_Ram_and_Screen(2,62,42,64);
-        LCDPrintString("Alarm Min",2,42);
-        LCD_CopyPartialScreen(2,62,42,64);
-
-		IOEXP_set(IOEXP0_MIN_CONC_ALARM);
-		IOEXP_clr(IOEXP0_PUMP_ENABLE);
+        IOEXP_set(IOEXP0_MIN_CONC_ALARM);
+        MARK_PRINT_CONC_AL_MIN;
         MARK_ALARM_CONC_MIN;//se quando il timer di preallarme è scaduto la condizione è confermata allora marca allarme
-        
-        //tock_signal();
-        //SPEGNI POMPA
-        //DISABILITA FUNZ LAV CONCENTRAZIONE
+
       }
     }
     
     
     if(CHECK_TIMER8_EXPIRED)//ritardo allarme min temperatura(T4 analogo per mi temp)
     {
+      CLEAR_TIMER8_EXPIRED;
+      
       if(CHECK_OVER_TEMP_MIN)
       {
-        xTimerStop( xTimers[TIMER7_TOUT_TEMP], 0 );
-        //CLEAR_CONTROL_TEMP_ENA ;
-        SelectFont(CALIBRI_10);
-
-        CleanArea_Ram_and_Screen(66,126,42,64);
-        LCDPrintString("Alarm Min",66,42);
-        LCD_CopyPartialScreen(66,126,42,64);
-        
-
-		IOEXP_set(IOEXP0_MIN_TEMP_ALARM);
-		IOEXP_clr(IOEXP0_HEATER_ENABLE);
+        //xTimerStop( xTimers[TIMER7_TOUT_TEMP], 0 );
+        IOEXP_set(IOEXP0_MIN_TEMP_ALARM);
         MARK_ALARM_TEMP_MIN;//se quando il timer di preallarme è scaduto la condizione è confermata allora marca allarme
-        
-        //tock_signal();
-        //SPEGNI HEATER
-        //DISABILITA FUNZ LAV TEMPERATURA
+        MARK_PRINT_TEMP_AL_MIN;
       }
-      CLEAR_TIMER8_EXPIRED;
     }
     
     
@@ -426,45 +425,32 @@ void ControlloRitardi(void)
       CLEAR_TIMER5_EXPIRED;
       if(CHECK_OVER_CONC_MAX)
       {
-        //cancello metà sx e scrivo(da decidere bene)
-        SelectFont(CALIBRI_10);
-        CleanArea_Ram_and_Screen(2,62,42,64);
-        LCDPrintString("Alarm Max",2,42);
-        LCD_CopyPartialScreen(2,62,42,64);
-        
-        
+        if(CHECK_PUMP_STATE_ATTIVO)
+        {  
+          IOEXP_clr(IOEXP0_PUMP_ENABLE);
+          CLEAR_PUMP_STATE_ATTIVO;
+        } 
+        MARK_PRINT_CONC_AL_MAX;
         MARK_ALARM_CONC_MAX;//se quando il timer di preallarme è scaduto la condizione è confermata allora marca allarme
-		IOEXP_set(IOEXP0_MAX_CONC_ALARM);
-		IOEXP_clr(IOEXP0_PUMP_ENABLE);
-        
-        //tock_signal();
-        //SPEGNI POMPA
-        //DISABILITA FUNZ LAV CONCENTRAZIONE
-      }
+        IOEXP_set(IOEXP0_MAX_CONC_ALARM);
+       }
     }
     
     
-    if(CHECK_TIMER9_EXPIRED)//ritardo allarme max concentrazione(T5 analogo per concentrazione)
+    if(CHECK_TIMER9_EXPIRED)//ritardo allarme max temperatura(T5 analogo per concentrazione)
     {
-     if(CHECK_OVER_TEMP_MAX)
-      {
-        //cancello metà sx e scrivo(da decidere bene)
-        SelectFont(CALIBRI_10);
-        CleanArea_Ram_and_Screen(66,126,42,64);
-        LCDPrintString("Alarm Max",66,42);
-        LCD_CopyPartialScreen(66,126,42,64);
-        
-        
-        MARK_ALARM_TEMP_MAX;//se quando il timer di preallarme è scaduto la condizione è confermata allora marca allarme
-		IOEXP_set(IOEXP0_MAX_TEMP_ALARM);
-		IOEXP_clr(IOEXP0_HEATER_ENABLE);
-        
-        //tock_signal();
-        //SPEGNI HEATER
-        //DISABILITA FUNZ LAV TEMPERATURA
-      }
       CLEAR_TIMER9_EXPIRED;
-      
+      if(CHECK_OVER_TEMP_MAX)
+      {
+        if(CHECK_HEATER_STATE_ATTIVO)
+        {  
+         IOEXP_clr(IOEXP0_HEATER_ENABLE);
+          CLEAR_HEATER_STATE_ATTIVO;
+        }
+        MARK_PRINT_TEMP_AL_MAX;
+        MARK_ALARM_TEMP_MAX;//se quando il timer di preallarme è scaduto la condizione è confermata allora marca allarme
+        IOEXP_set(IOEXP0_MAX_TEMP_ALARM);
+      }
     }
  
 }
@@ -472,15 +458,35 @@ void ControlloRitardi(void)
 void StopAllTimers(void)
 {
   int32_t x;
-
-
-  // Create then start some timers.  Starting the timers before the scheduler
-  // has been started means the timers will start running immediately that
-  // the scheduler starts.
+  
   for( x = 0; x < NUM_TIMERS; x++ )
   {
     xTimerStop( xTimers[x], 0 );
   }
+   xTimerStop( AuxTimer, 0 );
+}
+//***************************************************************************************
+void Stop_ChConc_Timers(void)
+{
+  int32_t x;
+
+#define TIMERS_CH_CONC_INDEX 5//i 5 timers da 1 a 5(0-4)sono per la concentrazione,uno in + di temp x ritardo dosaggio
   
+  for( x = 0; x < TIMERS_CH_CONC_INDEX; x++ )
+  {
+    xTimerStop( xTimers[x], 0 );
+  }
+}
+//***************************************************************************************
+void Stop_ChTemp_Timers(void)
+{
+  int32_t x;
+
+#define TIMERS_CH_CONC_INDEX 5//i 4 timers da 5 a 9(5-8)sono per la temperatura
+  
+  for( x = TIMERS_CH_CONC_INDEX; x < 9; x++ )
+  {
+    xTimerStop( xTimers[x], 0 );
+  }
 }
 //***************************************************************************************
