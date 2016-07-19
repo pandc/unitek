@@ -58,6 +58,11 @@ extern const unsigned char unitekLogo_bmp [];
 extern const unsigned char unitekLogoWidthPages;
 extern const unsigned char unitekLogoHeightPixels;
 
+/* Bitmap info for convergenza */
+extern const unsigned char convergenza_bmp [];
+extern const unsigned char convergenzaWidthPages;
+extern const unsigned char convergenzaHeightPixels;
+
 
 
 
