@@ -95,7 +95,7 @@ portTickType xLastWakeTime;
 	IOEXP_init();
 
 	MenuInit();
-
+        vTaskDelay(kSec);
 	meas_init();
 
 	// Initialise the xLastWakeTime variable with the current time.
