@@ -5,6 +5,7 @@
 #include "task.h"
 #include "ffile.h"
 #include "meas.h"
+#include "math.h"
 
 #include "my_definitions.h"
 #include "my_types.h"
@@ -67,12 +68,12 @@ void Formula_ConcConvers_PuntTitol(unsigned int  bin)
     if(decimillesimi>999)
     {
             struct_conc_print.conc_to_print     = decimillesimi/10;
-            struct_conc_print.decimali_to_print =UN_DECIMALE;
+            struct_conc_print.decimali_to_print =INTERO;
     }
     else
     {
             struct_conc_print.conc_to_print=decimillesimi;
-            struct_conc_print.decimali_to_print =DUE_DECIMALI;
+            struct_conc_print.decimali_to_print =UN_DECIMALE;
     }
  }
 
@@ -81,8 +82,8 @@ unsigned int  FormulaInversa_Conc_PuntTitol(void)
 {
   unsigned int decimillesimi,multiplied;
   
-  if(struct_conc_print.decimali_to_print==UN_DECIMALE)  {	 decimillesimi=struct_conc_print.conc_to_print*10;  }
-  if(struct_conc_print.decimali_to_print==DUE_DECIMALI)	{	 decimillesimi=struct_conc_print.conc_to_print   ;	 }
+  if(struct_conc_print.decimali_to_print==INTERO     )  {	 decimillesimi=struct_conc_print.conc_to_print*10;  }
+  if(struct_conc_print.decimali_to_print==UN_DECIMALE)	{	 decimillesimi=struct_conc_print.conc_to_print   ;	 }
   multiplied=decimillesimi;//*64;
   multiplied+=struct_conc_print.resto;
   return multiplied;
@@ -198,13 +199,13 @@ float CompensConduc_TK(float* meas_conduc) //
   f1=measures.temp_resist;
   Convers_Res_to_Temp(&f1);//ora f1 è temperatura in °C,la temp di riferimento è già in °C
   
-  float delta_temp=PROGR_IN_USO.temp_acq_curva_lav-f1;//delta_temp è in °C
+  float delta_temp=f1-PROGR_IN_USO.temp_acq_curva_lav;//delta_temp è in °C
   
   if(1)//PROGR_IN_USO.curva_lav_cal_type==CURVA_LAV_1PT)
   {/*
     f1=(ftk/100)*delta_temp;
     f1=(1+(ftk/100)*delta_temp);*/
-    f1=*meas_conduc  *(1+(ftk/100)*delta_temp);
+    f1=*meas_conduc /(1+(ftk/100)*delta_temp);
   }
   else  //curva_lav_3pt 
   {
@@ -227,20 +228,19 @@ float NormalizzaConduc_TK(float* conduc_to_correct,float* fixed_temp) //
   f1=*fixed_temp;
   //Convers_Res_to_Temp(&f1);//ora f1 è temperatura in °C,la temp di riferimento è già in °C
   
-  float delta_temp=PROGR_IN_USO.temp_acq_curva_lav-f1;//delta_temp è in °C
+  float delta_temp=f1-PROGR_IN_USO.temp_acq_curva_lav;//delta_temp è in °C
   
   if(1)//PROGR_IN_USO.curva_lav_cal_type==CURVA_LAV_1PT)
   {/*
     f1=(ftk/100)*delta_temp;
     f1=(1+(ftk/100)*delta_temp);*/
-    f1=*conduc_to_correct  *(1+(ftk/100)*delta_temp);
+    f1=*conduc_to_correct  /(1+(ftk/100)*delta_temp);
   }
   else  //curva_lav_3pt 
   {
     
   }
-  
-  
+   
   return f1;
   
 }
@@ -268,7 +268,7 @@ float CalcoloConcent_Now(float conduc_meas)
   */
   switch(PROGR_IN_USO.curva_lav_cal_type)
   {  
-    case CURVA_LAV_1PT:
+    case CURVA_LAVORO_1PT:
       
       if(  ((conduc_meas-CONDUC_H20_DISTILL)<0) ||  ((conduc_meas-CONDUC_H20_DISTILL)==0)  )
       {
@@ -285,7 +285,7 @@ float CalcoloConcent_Now(float conduc_meas)
       break;
       
       
-     case CURVA_LAV_2PT: 
+     case CURVA_LAVORO_2PT: 
      if((conduc_meas-PROGR_IN_USO.curva_lav_XconducL)<0)
         {
           f_concent=0;
@@ -312,7 +312,7 @@ float CalcoloConcent_Now(float conduc_meas)
        
       break;
     
-     case CURVA_LAV_3PT: 
+     case CURVA_LAVORO_3PT: 
      //nel caso di curva a 3 punti dovrebbe cambiare solo la pendenza...
       
         if((conduc_meas-PROGR_IN_USO.curva_lav_XconducL)<0)
@@ -416,7 +416,7 @@ float CalcoloConcent_Now(float conduc_meas)
 #endif   
             if   (f_concent<10) struct_conc_print.decimali_to_print=DUE_DECIMALI;
             else                struct_conc_print.decimali_to_print=UN_DECIMALE;
-            struct_conc_print.fconc_to_print=f_concent/1000;
+            struct_conc_print.fconc_to_print=f_concent;
             if(struct_conc_print.fconc_to_print>999)struct_conc_print.fconc_to_print=999;
             break ;
             
@@ -435,7 +435,12 @@ float CalcoloConcent_Now(float conduc_meas)
 //NB  il risultato è la stessa variabile modificata che gli viene data come argomento
 void Convers_Res_to_Temp(float* float_res)
 {
-//funzione mia che fa interpolazione lineare a segmenti
+  
+  
+
+#ifdef INTERPOLAZIONE_DIEGO  
+  
+  //funzione mia che fa interpolazione lineare a segmenti
   unsigned int tab_index=0;
   float temp,interval_res,delta,f;
   
@@ -465,7 +470,17 @@ void Convers_Res_to_Temp(float* float_res)
   temp=delta/interval_res;
   
   *float_res=(float)(10*(tab_index-1))+temp*10;
-
+#else  
+  /*
+  float determinante;
+  float f1,f2,f3;
+  
+  f1=-PT100_Ro*PT100_A_COEFF;
+  f2=sqrt(ecc ecc.....
+  
+  
+  */
+#endif
 }
 
 //***************************************************************************************
