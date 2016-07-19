@@ -34,6 +34,7 @@ extern unsigned char width_font;
 extern bitmap_struct_type mybmp_struct1,mybmp_struct2;
 
 extern  TimerHandle_t xTimers[ NUM_TIMERS ];
+extern  TimerHandle_t AuxTimer; 
 //extern int32_t lExpireCounters[ NUM_TIMERS ] ;
 /* _____      _           _                      _                                                          __            _          ___   ___  
   / ____|    | |         | |                    | |                                                        / _|          | |        |__ \ / _ \ 
@@ -45,7 +46,7 @@ extern  TimerHandle_t xTimers[ NUM_TIMERS ];
                                                                    |_|      */
 
 //***************************************************************************************
-void WorkMenu_CalcPrint_Percent(unsigned int bin)
+/*void WorkMenu_CalcPrint_Percent(unsigned int bin)
 {
      
       static unsigned int conc_to_print_old=0xFFFFFFF;
@@ -70,9 +71,9 @@ void WorkMenu_CalcPrint_Percent(unsigned int bin)
 
               conc_to_print_old=struct_conc_print.conc_to_print;
       }
-}
+}*/
 //***************************************************************************************
-void WorkMenu_CalcPrint_PuntTitol(unsigned int bin)
+/*void WorkMenu_CalcPrint_PuntTitol(unsigned int bin)
 {
       static unsigned int conc_to_print_old=0xFFFFFFF;
       //AD1_GetValue16(ADC_array);
@@ -97,9 +98,9 @@ void WorkMenu_CalcPrint_PuntTitol(unsigned int bin)
                 conc_to_print_old=struct_conc_print.conc_to_print;
 
         }
-}
+}*/
 //***************************************************************************************
-void WorkMenu_CalcPrint_GrammiLitro(unsigned int bin)
+/*void WorkMenu_CalcPrint_GrammiLitro(unsigned int bin)
 {
       static unsigned int conc_to_print_old=0xFFFFFFF;
       
@@ -126,10 +127,9 @@ void WorkMenu_CalcPrint_GrammiLitro(unsigned int bin)
               conc_to_print_old=struct_conc_print.conc_to_print;
 
       }
-}
-
+}*/
 //***************************************************************************************
-void WorkMenu_CalcPrint_uSiemens(unsigned int bin)
+/*void WorkMenu_CalcPrint_uSiemens(unsigned int bin)
 {
    static unsigned int conc_to_print_old=0xFFFFFFF;
     //AD1_GetValue16(ADC_array);
@@ -152,10 +152,9 @@ void WorkMenu_CalcPrint_uSiemens(unsigned int bin)
 
             conc_to_print_old=struct_conc_print.conc_to_print;
     }
-}
-
+}*/
 //***************************************************************************************
-void WorkMenu_CalcPrint_milliSiemens(unsigned int bin)
+/*void WorkMenu_CalcPrint_milliSiemens(unsigned int bin)
 {
     static unsigned int conc_to_print_old=0xFFFFFFF;
       //AD1_GetValue16(ADC_array);
@@ -177,7 +176,7 @@ void WorkMenu_CalcPrint_milliSiemens(unsigned int bin)
 
               conc_to_print_old=struct_conc_print.conc_to_print;
       }
-}
+}*/
 //****************************************************************************************************************************************************
 //****************************************************************************************************************************************************
 
@@ -335,16 +334,96 @@ void CalcPrintTemperatura(float * t_float)
  /*+-+-+-+-+-+-+ +-+-+-+-+-+-+-+-+-+-+-+ +-+-+-+-+ +-+-+
   |S|T|A|M|P|A| |T|E|M|P|E|R|A|T|U|R|A| |F|O|N|T| |2|0|
   +-+-+-+-+-+-+ +-+-+-+-+-+-+-+-+-+-+-+ +-+-+-+-+ +-+-+  */             
- 
- CleanArea_Ram_and_Screen(60,120,14,36);
+ SelectFont(CALIBRI_20);
+ CleanArea_Ram_and_Screen(66,120,14,36);
  //BinToBCDisp(ADC_array[LETTURA_TEMP]/*temperature_to_print*/,UN_DECIMALE,68,14);
  sprintf(string_to_print,"%.1f",*t_float);//pot=206,5 ohm
  len=strlen(string_to_print);
  LCDPrintString(string_to_print,125-(width_font*len)-5,14);
- LCD_CopyPartialScreen(60,120,14,36);
+ LCD_CopyPartialScreen(66,120,14,36);
  
   
 }
+//***************************************************************************************
+void CalcPrintTemperaturaXY_10(float * t_float,unsigned int x,unsigned int y)
+{
+  char string_to_print[16];
+  //unsigned int len;
+  //float generic_float;
+  
+  
+  *t_float=measures.temp_resist;
+  Convers_Res_to_Temp(t_float);
+  
+ /*+-+-+-+-+-+-+ +-+-+-+-+-+-+-+-+-+-+-+ +-+-+-+-+ +-+-+
+  |S|T|A|M|P|A| |T|E|M|P|E|R|A|T|U|R|A| |F|O|N|T| |1|0|
+  +-+-+-+-+-+-+ +-+-+-+-+-+-+-+-+-+-+-+ +-+-+-+-+ +-+-+  */             
+ SelectFont(CALIBRI_10);
+ CleanArea_Ram_and_Screen(x,x+60,y,y+12);
+ //BinToBCDisp(ADC_array[LETTURA_TEMP]/*temperature_to_print*/,UN_DECIMALE,68,14);
+ sprintf(string_to_print,"%.1f",*t_float);//pot=206,5 ohm
+ //len=strlen(string_to_print);
+ LCDPrintString(string_to_print,x+20,y);
+ PrintUnitMis(4,x,y);
+ LCDPrintString("=",x+14,y);
+ LCD_CopyPartialScreen(x,x+54,y,y+12);
+ 
+  
+}
+//***************************************************************************************
+void PrintConduttXY_10(float * t_float,unsigned int x,unsigned int y)
+{
+  char string_to_print[16];
+  //unsigned int len;
+  //float generic_float;
+  
+  
+ /*+-+-+-+-+-+-+ +-+-+-+-+-+-+-+-+-+-+-+ +-+-+-+-+ +-+-+
+  |S|T|A|M|P|A| |C|O|N|D|U|T|T|A|N|Z|A| |F|O|N|T| |1|0|
+  +-+-+-+-+-+-+ +-+-+-+-+-+-+-+-+-+-+-+ +-+-+-+-+ +-+-+  */             
+ SelectFont(CALIBRI_10);
+ CleanArea_Ram_and_Screen(x,x+60,y,y+12);
+ if(*t_float<0.001)
+ {
+   *t_float*=1000000;
+    LCDPrintString("uS",x,y);
+ }
+ else
+ {
+   *t_float*=1000;
+    LCDPrintString("mS",x,y);
+ }  
+ //BinToBCDisp(ADC_array[LETTURA_TEMP]/*temperature_to_print*/,UN_DECIMALE,68,14);
+ sprintf(string_to_print,"%.2f",*t_float);//pot=206,5 ohm
+ //len=strlen(string_to_print);
+ LCDPrintString(string_to_print,x+20,y);
+ LCDPrintString("=",x+14,y);
+ LCD_CopyPartialScreen(x,x+60,y,y+12);
+ 
+  
+} 
+//***************************************************************************************
+void PrintResXY_10(float * t_float,unsigned int x,unsigned int y)
+{
+  char string_to_print[16];
+  //unsigned int len;
+  //float generic_float;
+  
+  
+ /*+-+-+-+-+-+-+ +-+-+-+-+-+-+-+-+-+-+-+ +-+-+-+-+ +-+-+
+  |S|T|A|M|P|A| |T|E|M|P|E|R|A|T|U|R|A| |F|O|N|T| |1|0|
+  +-+-+-+-+-+-+ +-+-+-+-+-+-+-+-+-+-+-+ +-+-+-+-+ +-+-+  */             
+ SelectFont(CALIBRI_10);
+ CleanArea_Ram_and_Screen(x,x+40,y,y+12);
+ //BinToBCDisp(ADC_array[LETTURA_TEMP]/*temperature_to_print*/,UN_DECIMALE,68,14);
+ sprintf(string_to_print,"%.1f",*t_float);//pot=206,5 ohm
+ //len=strlen(string_to_print);
+ LCDPrintString(string_to_print,x/*-(width_font*len)*/,y);
+ LCDPrintString("Ohm",x+32,y);
+ LCD_CopyPartialScreen(x,x+60,y,y+12);
+ 
+  
+} 
 //***************************************************************************************
 void PrintConc_WorkMenu(void)
 {
@@ -368,6 +447,7 @@ void PrintConc_WorkMenu(void)
       default:
       break;
     }
+   SelectFont(CALIBRI_20);
    CleanArea_Ram_and_Screen(00,62,14,36);
    len=strlen(string_to_print);
    LCDPrintString(string_to_print,62-(width_font*len)-5,14);
@@ -857,9 +937,6 @@ void MoveTriangolinoSx(void)
 	CleanArea_Ram_and_Screen(menu_triang_limit_dx,menu_triang_limit_dx+TRIANG_W,
 							 menu_triang_y,menu_triang_y+TRIANG_H);//cancello il triangolo...e un pezzettino di riga verticale
 
-#ifdef DISEGNA_CORNICE
-	RigaVertic(0,0,63);
-#endif
 	menu_triang_x=0;
 	//menu_triang_index--;
 
@@ -977,6 +1054,8 @@ void SaveInFlash(void)
      LCD_CopyScreen();
      vTaskDelay(500);
      CleanArea_Ram_and_Screen(30,110,20,50);
+     
+     SelectFont(CALIBRI_10);
    }
   
 }
@@ -1004,17 +1083,17 @@ void MyCreateTimers(void)
           }
           else
           {
-              // Start the timer.  No block time is specified, and even if one was
-              // it would be ignored because the scheduler has not yet been
-              // started.
-             // if( xTimerStart( xTimers[ x ], 0 ) != pdPASS )
-              /*{
-                  // The timer could not be set into the Active state.
-              }*/
+              // Start the timer.  No block time is specified, and even if one was // it would be ignored because the scheduler has not yet been
+              // started.  // if( xTimerStart( xTimers[ x ], 0 ) != pdPASS )/*{ // The timer could not be set into the Active state. }*/
           }
       }
       
-      
+      AuxTimer=  xTimerCreate(    "Timer",       // Just a text name, not used by the kernel.
+                                          (BLINK_TIME_ms),   // The timer period in ticks.
+                                          pdTRUE,        // The timers will auto-reload themselves when they expire.
+                                          ( void * )AUX_TIMER_ID,  // Assign each timer a unique id equal to its array index.
+                                           AuxTimerCallback // Each timer calls the same callback when it expires.
+                              );
   
 }
 //***************************************************************************************   
@@ -1022,30 +1101,46 @@ void MyCreateTimers(void)
   // The callback function does nothing but count the number of times the
   // associated timer expires, and stop the timer once the timer has expired
   // 10 times.
-  void vTimerCallback( TimerHandle_t pxTimer )
-  {
-  int32_t lArrayIndex;
-  //const int32_t xMaxExpiryCountBeforeStopping = 10;
- 
-  	   // Optionally do something if the pxTimer parameter is NULL.
-  	   configASSERT( pxTimer );
- 
-      // Which timer expired?
-      lArrayIndex = ( int32_t ) pvTimerGetTimerID( pxTimer );
-      timer_flags |=1<<lArrayIndex;//uno dei 9 lsb di timer flags va a 1
-      //xTimerStop( pxTimer, 0 );//ANGELO
- 
-      // Increment the number of times that pxTimer has expired.
-     // lExpireCounters[ lArrayIndex ] += 1;
- 
-      // If the timer has expired 10 times then stop it from running.
-      //if( lExpireCounters[ lArrayIndex ] == xMaxExpiryCountBeforeStopping )
-     // {
-          // Do not use a block time if calling a timer API function from a
-          // timer callback function, as doing so could cause a deadlock!
-         // xTimerStop( pxTimer, 0 );
-     // }
-  }
+void vTimerCallback( TimerHandle_t pxTimer )
+{
+int32_t lArrayIndex;
+//const int32_t xMaxExpiryCountBeforeStopping = 10;
+
+         // Optionally do something if the pxTimer parameter is NULL.
+         configASSERT( pxTimer );
+
+    // Which timer expired?
+    lArrayIndex = ( int32_t ) pvTimerGetTimerID( pxTimer );
+    timer_flags |=1<<lArrayIndex;//uno dei 9 lsb di timer flags va a 1
+    //xTimerStop( pxTimer, 0 );//ANGELO
+
+    // Increment the number of times that pxTimer has expired.
+   // lExpireCounters[ lArrayIndex ] += 1;
+
+    // If the timer has expired 10 times then stop it from running.
+    //if( lExpireCounters[ lArrayIndex ] == xMaxExpiryCountBeforeStopping )
+   // {
+        // Do not use a block time if calling a timer API function from a
+        // timer callback function, as doing so could cause a deadlock!
+       // xTimerStop( pxTimer, 0 );
+   // }
+}
+
+//***************************************************************************************   
+void AuxTimerCallback( TimerHandle_t pxTimer )
+{
+
+      //const int32_t xMaxExpiryCountBeforeStopping = 10;
+
+      // Optionally do something if the pxTimer parameter is NULL.
+      configASSERT( pxTimer );
+      
+      MARK_BLINK_TIMER1_EXPIRED;
+
+
+   
+}
+
 
 //***************************************************************************************
 void DisegnaMarker(unsigned short x,unsigned short y,unsigned short y_old)
@@ -1056,6 +1151,17 @@ void DisegnaMarker(unsigned short x,unsigned short y,unsigned short y_old)
 	CleanArea_Ram_and_Screen(x,x+10,y,y+10);
 	LCD_DrawChar('*');
 	LCD_CopyPartialScreen(x,x+10,y,y+10);
+}
+                                                                 
+ //***************************************************************************************
+void DisegnaOK(unsigned short x,unsigned short y,unsigned short y_old)
+{
+	mybmp_struct1.start_x=x;
+	mybmp_struct1.start_y=y;
+	CleanArea_Ram_and_Screen(x,x+20,y_old,y_old+20);
+	CleanArea_Ram_and_Screen(x,x+20,y,y+20);
+	LCDPrintString("OK",x,y);
+	LCD_CopyPartialScreen(x,x+20,y,y+20);
 }
 //***************************************************************************************
 void DisegnaCarattereBlink(char char_to_blink,unsigned short x,unsigned short y,unsigned char *toggler)
@@ -1125,33 +1231,47 @@ void AumentaIncrDecrStep(int * step,int * counter)
 //***************************************************************************************                                                                 
 unsigned char ControlloCongruita_CurvaLav(void)
 {
-
+  
+  if(PROGR_IN_USO.curva_lav_Yconcent[PROGR_IN_USO.curva_lav_C_index]==0)return FALSE;//se il valore impostato in C è 0 non va bene
+  if(PROGR_IN_USO.curva_lav_XconducC<CONDUC_H20_DISTILL)return FALSE;
+  
+  
+  
   //controllo indici
   if(PROGR_IN_USO.curva_lav_L_index<PROGR_IN_USO.curva_lav_C_index){}
    else return FALSE;
    
-  if(PROGR_IN_USO.curva_lav_C_index<PROGR_IN_USO.curva_lav_H_index){}
-   else return FALSE;
-  
   
   //controllo valori immessi
    if(PROGR_IN_USO.curva_lav_Yconcent[PROGR_IN_USO.curva_lav_L_index]  < 
       PROGR_IN_USO.curva_lav_Yconcent[PROGR_IN_USO.curva_lav_C_index]){}
    else return FALSE; 
   
-   if(PROGR_IN_USO.curva_lav_Yconcent[PROGR_IN_USO.curva_lav_C_index]  < 
-      PROGR_IN_USO.curva_lav_Yconcent[PROGR_IN_USO.curva_lav_H_index]){}
-   else return FALSE; 
    
    //controllo valori misurati all'ok
     if(PROGR_IN_USO.curva_lav_XconducL  < PROGR_IN_USO.curva_lav_XconducC  ){}
    else return FALSE;
    
-   //controllo valori misurati all'ok
-    if(PROGR_IN_USO.curva_lav_XconducC  < PROGR_IN_USO.curva_lav_XconducH  ){}
-   else return FALSE;
    
-   
+   if(PROGR_IN_USO.curva_lav_cal_type==CURVA_LAVORO_3PT)
+   {  
+       if(PROGR_IN_USO.curva_lav_C_index<PROGR_IN_USO.curva_lav_H_index){}
+       else return FALSE;
+       
+        if(PROGR_IN_USO.curva_lav_Yconcent[PROGR_IN_USO.curva_lav_C_index]  < 
+          PROGR_IN_USO.curva_lav_Yconcent[PROGR_IN_USO.curva_lav_H_index]){}
+       else return FALSE; 
+       
+       //controllo valori misurati all'ok
+        if(PROGR_IN_USO.curva_lav_XconducC  < PROGR_IN_USO.curva_lav_XconducH  ){}
+       else return FALSE;
+   }   
   
   return TRUE;
 }
+                                                                                                     
+
+                                                                                                    
+                                                                                                     
+                                                                                                     
+                                                                                                     
