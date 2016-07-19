@@ -122,9 +122,7 @@ typedef struct
 	unsigned char ComunRS485;
 	unsigned char ComunUSB;
 	unsigned char Linguaggio;
-        
-        
-        
+    
 }my_RamSettings_type;
 
 typedef struct
