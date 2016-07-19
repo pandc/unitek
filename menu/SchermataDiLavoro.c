@@ -66,84 +66,102 @@ void SchermataDiLavoro(void)
             }
             
              
-            
+            /*+-+-+-+-+ +-+-+-+-+-+-+-+
+              |C|a|v|o| |a|p|e|r|t|o|?|
+              +-+-+-+-+ +-+-+-+-+-+-+-+  */
             if(!CHECK_CABLE_OPEN)//solo se il cavo è ok controllo gli interruttori e il sensore tank
             {  
               input_status=IOEXP_get();
-              if(input_status  & DISABIL_CONC_EXT)//controllo input,se interrutore è in OFF
-              {  //se arrivo da stato OFF dovrei avere già fatto tutto,trane la stampa,se arrivo da fuori
-                 if(CHECK_ATTIVAZIONE_EXT_CH_CONC)//se ero in stato ON
-                 {
-                   MARK_PRINT_CONC_CH_OFF;// se arrivo da OFF ho già stampato,ma se arrivo da fuori ho già i flags che mi dicono di stampare
-                   CLEAR_ATTIVAZIONE_EXT_CH_CONC;
-                   ResetChConc_OFF();
-                 }
-              }
-              else
-              {
-          
-                  if(!CHECK_ATTIVAZIONE_EXT_CH_CONC)
-                  {
-                    MARK_ATTIVAZIONE_EXT_CH_CONC;
-                    ResetChConc_ON();
-                  }
-                  
-               }
-             
-             if(input_status  & TANK_ALARM_INPUT)
-             {
-                if(!(CHECK_ALARM_TANK))//controllo solo se non sono già in allarme tank
+              
+                if(RamSettings.abilita_disabilita==ABILITA)
                 {
-                
-                  MARK_ALARM_TANK;
-                  IOEXP_set(IOEXP0_TANK_ALARM);
                   
-                  if(CHECK_PUMP_STATE)
-                  {  
-                    
-                    IOEXP_clr(IOEXP0_PUMP_ENABLE);
-                    CLEAR_PUMP_STATES;//indica che la pompa non deve essere presa in considerazione
-                   } 
-                  MARK_PRINT_CONC_ET;
-                }
-                
-              }
-              else
-              {
-                if(CHECK_ALARM_TANK)//controllo solo se sono già in allarme tank
-                {
-                  MARK_CONTROL_CONC_ENA;
-                  IOEXP_clr(IOEXP0_TANK_ALARM);
-                  CleanArea_Ram_and_Screen(ET_X_START,ET_X_END,ET_Y_START,ET_Y_END);
-                  CLEAR_ALARM_TANK;
-                  MARK_PUMP_STATE_RIPOSO;//devo dargli uno dei 3 stati possibili e poi da questo,alla prima lettura ricontrollerà cosa fare
-                  MARK_PRINT_CONC_LIMITS;
-                }
-              }        
+                 /*  +-+-+-+-+-+-+ +-+-+-+-+-+-+-+ +-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+                    |S|w|i|t|c|h| |e|s|t|e|r|n|o| |c|o|n|c|e|n|t|r|a|z|i|o|n|e|
+                    +-+-+-+-+-+-+ +-+-+-+-+-+-+-+ +-+-+-+-+-+-+-+-+-+-+-+-+-+-+*/
+                  if(input_status  & DISABIL_CONC_EXT)//controllo input,se interrutore è in OFF
+                  {  //se arrivo da stato OFF dovrei avere già fatto tutto,trane la stampa,se arrivo da fuori
+                     if(CHECK_ATTIVAZIONE_EXT_CH_CONC)//se ero in stato ON
+                     {
+                       MARK_PRINT_CONC_CH_OFF;// se arrivo da OFF ho già stampato,ma se arrivo da fuori ho già i flags che mi dicono di stampare
+                       CLEAR_ATTIVAZIONE_EXT_CH_CONC;
+                       ResetChConc_OFF();
+                     }
+                  }
+                  else
+                  {
+              
+                      if(!CHECK_ATTIVAZIONE_EXT_CH_CONC)
+                      {
+                        MARK_ATTIVAZIONE_EXT_CH_CONC;
+                        ResetChConc_ON();
+                      }
+                      
+                   /*+-+-+-+-+ +-+-+-+-+-+
+                    |T|a|n|k| |v|u|o|t|o|
+                    +-+-+-+-+ +-+-+-+-+-+*/
+                     if(input_status  & TANK_ALARM_INPUT)
+                     {
+                        if(!(CHECK_ALARM_TANK))//controllo solo se non sono già in allarme tank
+                        {
+                        
+                          MARK_ALARM_TANK;
+                          IOEXP_set(IOEXP0_TANK_ALARM);
+                          
+                          if(CHECK_PUMP_STATE)
+                          {  
+                            
+                            IOEXP_clr(IOEXP0_PUMP_ENABLE);
+                            CLEAR_PUMP_STATES;//indica che la pompa non deve essere presa in considerazione
+                           } 
+                          MARK_PRINT_CONC_ET;
+                        }
+                        
+                      }
+                      else
+                      {
+                        if(CHECK_ALARM_TANK)//controllo solo se sono già in allarme tank
+                        {
+                          MARK_CONTROL_CONC_ENA;
+                          IOEXP_clr(IOEXP0_TANK_ALARM);
+                          CleanArea_Ram_and_Screen(ET_X_START,ET_X_END,ET_Y_START,ET_Y_END);
+                          CLEAR_ALARM_TANK;
+                          MARK_PUMP_STATE_RIPOSO;//devo dargli uno dei 3 stati possibili e poi da questo,alla prima lettura ricontrollerà cosa fare
+                          MARK_PRINT_CONC_LIMITS;
+                        }
+                      }  
+                          
+                          
+                          
+                   }
+                   
               
               
-
-              
-              if(input_status  & DISABIL_TEMP_EXT)
-              {
-                 if(CHECK_ATTIVAZIONE_EXT_CH_TEMP)//se ero in stato ON
-                 {
-                   MARK_PRINT_TEMP_CH_OFF;// se arrivo da OFF ho già stampato,ma se arrivo da fuori ho già i flags che mi dicono di stampare
-                   CLEAR_ATTIVAZIONE_EXT_CH_TEMP;
-                   ResetChTemp_OFF();
-                 }
-              }
-              else
-              {
-                
-                if(!CHECK_ATTIVAZIONE_EXT_CH_TEMP)
+                  /* +-+-+-+-+-+-+ +-+-+-+-+-+-+-+ +-+-+-+-+-+-+-+-+-+-+-+
+                     |S|w|i|t|c|h| |e|s|t|e|r|n|o| |t|e|m|p|e|r|a|t|u|r|a|
+                     +-+-+-+-+-+-+ +-+-+-+-+-+-+-+ +-+-+-+-+-+-+-+-+-+-+-+  */
+                                
+                  if(input_status  & DISABIL_TEMP_EXT)
+                  {
+                     if(CHECK_ATTIVAZIONE_EXT_CH_TEMP)//se ero in stato ON
+                     {
+                       MARK_PRINT_TEMP_CH_OFF;// se arrivo da OFF ho già stampato,ma se arrivo da fuori ho già i flags che mi dicono di stampare
+                       CLEAR_ATTIVAZIONE_EXT_CH_TEMP;
+                       ResetChTemp_OFF();
+                     }
+                  }
+                  else
                   {
                     
-                    MARK_ATTIVAZIONE_EXT_CH_TEMP;
-                    ResetChTemp_ON();
-                  }
-                
-              }
+                    if(!CHECK_ATTIVAZIONE_EXT_CH_TEMP)
+                      {
+                        
+                        MARK_ATTIVAZIONE_EXT_CH_TEMP;
+                        ResetChTemp_ON();
+                      }
+                   }
+                  
+                }//fine if(RamSettings.abilita_disabilita==DISABILITA)   
             }//fine   if(!CHECK_CABLE_OPEN)   
             
             
@@ -153,7 +171,7 @@ void SchermataDiLavoro(void)
              +-+-+-+-+-+-+-+ +-+-+-+-+-+-+-+-+-+-+-+ +-+ +-+-+-+-+-+-+-+-+-+-+-+-+-+-+    */
             if(measures.temp_ok)
             {
-                if(measures.temp_resist>LIMITE_CAVO_APERTO_TEMP)
+                if(measures.temp_resist>LIMITE_CAVO_APERTO_TEMP  || measures.temp_resist < 0 )
                 {
                   if(!CHECK_CABLE_OPEN)
                   {  
