@@ -9,34 +9,34 @@
 
 
 //stringhe uguali in ognuno dei 4 linguaggi
-const char StringsSubmenuLingua [4][10]={  	   "Italiano",
-												"English",
-												"Francais",
-												"Espanol"};
+const char StringsSubmenuLingua [4][10]={                                               "Italiano",
+											"English",
+											"Francais",
+											"Espanol"};
 
 const char StringsSubmenuSimboliConc   [5][4]={ "%",
-												"P",
-												"g/l",
-												"uS",
-												"mS"
+											"P",
+											"g/l",
+											"uS",
+											"mS"
 													};
 
-const char StringsSubmenuCurvaLavoro  [16][5]={                                                 "Pt00",
-												"Pt01",
-												"Pt02",
-												"Pt03",
-												"Pt04",
-												"Pt05",
-												"Pt06",
-												"Pt07",
-												"Pt08",
-												"Pt09",
-												"Pt10",
-												"Pt11",
-												"Pt12",
-												"Pt13",
-												"Pt14",
-												"Pt15"
+const char StringsSubmenuCurvaLavoro  [16][5]={                                        "P-00",
+											"P-01",
+											"P-02",
+												"P-03",
+												"P-04",
+												"P-05",
+												"P-06",
+												"P-07",
+												"P-08",
+												"P-09",
+												"P-10",
+												"P-11",
+												"P-12",
+												"P-13",
+												"P-14",
+												"P-15"
 													};
 
 
@@ -228,9 +228,82 @@ const char StringsSubmenuTipoCurvLav [4][3][20]={{ 	                            
 
 
 
+const char StringsFustoVuotoUp [4][10]={{ 	                                "Fusto"},//ITALIANO
+                                                                                                
+                                                                               {"Empty"},//ENGLISH
+ 
+                                                                               {"Baril "},//FRANCAIS
+
+                                                                               {"Barril "}
+                                                                               };//ITALIANO	//ENGLISH	//FRANCAIS	//ESPANOL
 
 
+const char StringsFustoVuotoDn [4][10]={{ 	                               "Vuoto"},//ITALIANO
+                                                                                                
+                                                                               {"Barrel"},//ENGLISH
+ 
+                                                                               {"Vide "},//FRANCAIS
+
+                                                                               {"Vacio "}//ESPANOL
+                                                                               };//ITALIANO	//ENGLISH	//FRANCAIS	//ESPANOL
 
 
+const char StringsServizio [4][4][22]={{ 	                                "Taratura PT100",//ITALIANO
+                                                                                "Compensazione cavo",
+                                                                                "Lettura diretta ",
+                                                                                "Aggiorna licenza"},
+
+                                                                               {"Calibrate PT100",//ENGLISH
+                                                                                "Cable compensation",
+                                                                                "Raw measure",
+                                                                                "Update License"},
+
+                                                                               {"Etallonage PT100",
+                                                                                "Compensation de cable",
+                                                                                "Mesure directe",
+                                                                                "Mise a jour licence"},
+
+                                                                               {"Calibracion PT100",
+                                                                                "Compensacion cable",
+                                                                                "Medicion directa",
+                                                                                "Actualiza licencia"}};
 
 
+const char StringsCableOpen [4][10]={{ 	           "No Cavo"},//ITALIANO
+                                                  {"No Cable"},//ENGLISH
+                                                  {"No Cable"},//FRANCAIS
+                                                  {"No Cable"}//ESPANOL
+                                                    };//ITALIANO	//ENGLISH	//FRANCAIS	//ESPANOL
+ 
+const char Strings_RemovePT100 [4][20]={{               "Rimuovi PT100"},//ITALIANO
+                                                  {"Remove  PT100"},//ENGLISH
+                                                  {"Retirez PT100"},//FRANCAIS
+                                                  {"Retire  PT100"}//ESPANOL
+                                                    };//ITALIANO	//ENGLISH	//FRANCAIS	//ESPANOL
+
+
+const char Strings_InsertCalRes [4][25]={{        "Inser. resist. cal."},//ITALIANO
+                                                  {"Insert calibr. res."},//ENGLISH
+                                                  {"Entrez res. etallon."},//FRANCAIS
+                                                  {"Connect res. calibr."}//ESPANOL
+                                                    };//ITALIANO	//ENGLISH	//FRANCAIS	//ESPANOL
+
+
+const char Strings_RemoveProbe [4][20]={{               "Rimuovi Sonda"},//ITALIANO
+                                                  {"Remove  probe"},//ENGLISH
+                                                  {"Retirez sonde"},//FRANCAIS
+                                                  {"Retire  sonda"}//ESPANOL
+                                                    };//ITALIANO	//ENGLISH	//FRANCAIS	//ESPANOL
+
+const char StringsCableCalibOK [4][20]={{          "Calibr. Cavo   OK"},//ITALIANO
+                                                  {"Cable Calibr.  OK"},//ENGLISH
+                                                  {"Etallon. Cable OK"},//FRANCAIS
+                                                  {"Calibr.  Cable OK"}//ESPANOL
+                                                    };
+
+/*
+const char StringsMisDiretta [4][20]={{            "Misura diretta"},//ITALIANO
+                                                  {"Direct measurem."},//ENGLISH
+                                                  {"Measure directe"},//FRANCAIS
+                                                  {"Medicion directa"}//ESPANOL
+                                                    };*/
