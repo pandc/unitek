@@ -2946,6 +2946,9 @@
         <name>$PROJ_DIR$\menu\Formule.c</name>
       </file>
       <file>
+        <name>$PROJ_DIR$\menu\FunzSchermLav.c</name>
+      </file>
+      <file>
         <name>$PROJ_DIR$\menu\Menu.c</name>
       </file>
       <file>
@@ -2959,6 +2962,9 @@
       </file>
       <file>
         <name>$PROJ_DIR$\menu\Submenu.c</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\menu\SubMenuServizi.c</name>
       </file>
       <file>
         <name>$PROJ_DIR$\menu\SubSubMenu.c</name>
