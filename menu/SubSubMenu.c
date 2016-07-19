@@ -7,6 +7,7 @@
 
 #include "bsp.h"
 #include "io.h"
+#include "timers.h"
 
 #include "freertos.h"
 #include "task.h"
@@ -21,21 +22,6 @@
 #include "Menu.h"
 #include "VariabiliGlobali_di_Lavoro.h"
 
-
-/*
-struct
-{
-	unsigned short SetConc;
-	unsigned short AllConcMin;
-	unsigned short AllConcMax;
-	unsigned short IsteresiConc;
-	unsigned short SetTemp;
-	unsigned short AllTempMin;
-	unsigned short AllTempMax;
-	unsigned short IsteresiTemp;
-
-}StructSoglie;
-*/
 
 
 extern  int incr_step,incr_counter;
@@ -64,13 +50,16 @@ extern unsigned int blink_timer_on;
 
 extern const char StringsSubmenuProg      	[4][5][20];
 extern const char StringsSubmenuSelezProg 	[4][5][20];
-extern const char StringsSubmenuLingua    	   [4][10];
+extern const char StringsSubmenuLingua    	[4][10];
 extern const char StringsSubmenuImpostaSimboli	[4][5][20];
 extern const char StringsSubmenuImpostaSoglie 	[4][8][20];
 extern const char StringsSubmenuImpostaTimer  	[4][9][20];
 extern const char StringsSubmenuSimboliConc   	[5][4];
 extern const char StringsSubmenuCurvaLavoro  	[16][5];
 extern const char StringsSubmenuTipoCurvLav     [4][2][20];
+extern const char Strings_InsertCalRes          [4][25];
+extern const char Strings_RemovePT100           [4][20];  
+
 
 //***************************************************************************************
 void  Sub2MenuSelTipoCurvaLavoro(void)
@@ -111,8 +100,17 @@ void  Sub2MenuSelTipoCurvaLavoro(void)
                 if (key == KEY_PROG)
                 
                 {
+                        if(CHECK_INCOMP_UNIT_MISUR)
+                        {
+                          PROGR_IN_USO.unita_mis_concentr=global_unit_misura_old;//rimetto i simboli com'erano prima del cambiamento
+                          MenuFunction_Index=SUB2MENU_IMPOSTA_SIMBOLI;
+                          CLEAR_INCOMP_UNIT_MISUR;
+                        }
+                        else
+                        {
+                          MenuFunction_Index=SUBMENU_SELECTED_PROGR;
+                        }
                         
-                        MenuFunction_Index=SUBMENU_SELECTED_PROGR;
                         loop_flag=0;
 
                 }
@@ -172,6 +170,11 @@ void Sub2Sel_L_C_H(void)
         unsigned char *C_index;
         unsigned char *H_index;
         
+        unsigned char y_old=2;
+        
+        unsigned char modificato=0;
+        
+        
         //unsigned int sel_progr_num=RamSettings.selected_program_id;
         unsigned int un_misura=PROGR_IN_USO.unita_mis_concentr;
         
@@ -183,7 +186,7 @@ void Sub2Sel_L_C_H(void)
         
         if(PROGR_IN_USO.curva_lav_cal_type>2)PROGR_IN_USO.curva_lav_cal_type=0;//controllo che il menu precedente non dia un valore >2
         
-        
+        SelectFont(CALIBRI_10);
 	
         menu_triang_limit_dx=60;
         menu_triang_limit_sx=0;
@@ -200,7 +203,7 @@ void Sub2Sel_L_C_H(void)
         switch(PROGR_IN_USO.curva_lav_cal_type)
         {
           case CURVA_LAVORO_1PT:
-            LCDPrintString("Pt", 8,26);
+            LCDPrintString("P-", 8,26);
             LCDPrintString("C=", 68,26);
             
             menu_triang_limit_up=26;
@@ -211,10 +214,10 @@ void Sub2Sel_L_C_H(void)
             
             break;
           case CURVA_LAVORO_2PT:
-            LCDPrintString("Pt", 8, 2);
+            LCDPrintString("P-", 8, 2);
             LCDPrintString("L=", 68, 2);
             
-            LCDPrintString("Pt", 8,26);
+            LCDPrintString("P-", 8,26);
             LCDPrintString("C=", 68,26);
             
             menu_triang_limit_up=2;
@@ -224,13 +227,13 @@ void Sub2Sel_L_C_H(void)
             DisegnaTriangolinoMenu(0,menu_triang_y);
             break;
           case CURVA_LAVORO_3PT:
-            LCDPrintString("Pt", 8, 2);
+            LCDPrintString("P-", 8, 2);
             LCDPrintString("L=", 68, 2);
             
-            LCDPrintString("Pt", 8,26);
+            LCDPrintString("P-", 8,26);
             LCDPrintString("C=", 68,26);
             
-            LCDPrintString("Pt", 8,50);
+            LCDPrintString("P-", 8,50);
             LCDPrintString("H=", 68,50);
             
             menu_triang_limit_up=2;
@@ -294,7 +297,8 @@ void Sub2Sel_L_C_H(void)
         {
             if(key==KEY_PLUS)
             {
-
+                measures.temp_ok=0;//se vario un valore devo indicare che sono in attesa di prox misura pronta
+                CleanArea_Ram_and_Screen(40,60,y_old,y_old+10);
                 if(menu_triang_x==menu_triang_limit_dx)//se devo incrementare il valore
                 {
                         incr_counter++;
@@ -363,7 +367,9 @@ void Sub2Sel_L_C_H(void)
 
             if(key == KEY_MINUS)
             {
-
+                    measures.temp_ok=0;//se vario un valore devo indicare che sono in attesa di prox misura pronta
+                    CleanArea_Ram_and_Screen(40,60,y_old,y_old+10);
+                    
                     if(menu_triang_x==menu_triang_limit_dx)//se devo variare il valore
                     {
                             incr_counter++;
@@ -434,24 +440,26 @@ void Sub2Sel_L_C_H(void)
                 
          if (key == KEY_PROG)
          {
-             
+           if(modificato) 
+           {  
+              modificato=0;
               switch(PROGR_IN_USO.curva_lav_cal_type)
-                    {
-                      case CURVA_LAVORO_1PT:
-                        break;
-                      
-                      case CURVA_LAVORO_2PT:
-                        PROGR_IN_USO.curva_lav_XconducL=NormalizzaConduc_TK(&PROGR_IN_USO.curva_lav_XconducL,&temp_temporanea_L);
-                        break;
-                        
-                      case CURVA_LAVORO_3PT: 
-                        PROGR_IN_USO.curva_lav_XconducL=NormalizzaConduc_TK(&PROGR_IN_USO.curva_lav_XconducL,&temp_temporanea_L);
-                        PROGR_IN_USO.curva_lav_XconducH=NormalizzaConduc_TK(&PROGR_IN_USO.curva_lav_XconducH,&temp_temporanea_H);  
-                       break;
-                        
-                      default:
-                        break;
-                     }
+              {
+                case CURVA_LAVORO_1PT:
+                  break;
+                
+                case CURVA_LAVORO_2PT:
+                  PROGR_IN_USO.curva_lav_XconducL=NormalizzaConduc_TK(&PROGR_IN_USO.curva_lav_XconducL,&temp_temporanea_L);
+                  break;
+                  
+                case CURVA_LAVORO_3PT: 
+                  PROGR_IN_USO.curva_lav_XconducL=NormalizzaConduc_TK(&PROGR_IN_USO.curva_lav_XconducL,&temp_temporanea_L);
+                  PROGR_IN_USO.curva_lav_XconducH=NormalizzaConduc_TK(&PROGR_IN_USO.curva_lav_XconducH,&temp_temporanea_H);  
+                 break;
+                  
+                default:
+                  break;
+               }
            
            
            
@@ -479,21 +487,36 @@ void Sub2Sel_L_C_H(void)
                         break;
                      }
                     
-         
+                     CLEAR_INCOMP_UNIT_MISUR;
                      MenuFunction_Index=SUB3MENU_CURVA_DI_LAVORO3pt;//era SUB2MENU_SEL_TIPO_CURV_LAV;    
                      SaveInFlash();
                      loop_flag=0;
                      
                }    
-
-             }//fine if (key == KEY_PROG)
+              }//fine if(modificato) 
+              else
+              {
+                //se non è stato modificato e  sono passato a due unità di misura incompatibili non deve uscire
+                if(CHECK_INCOMP_UNIT_MISUR)
+                {
+                  
+                }
+                else
+                {
+                  MenuFunction_Index=SUB3MENU_CURVA_DI_LAVORO3pt;//era SUB2MENU_SEL_TIPO_CURV_LAV;    
+                  loop_flag=0;
+                }
+                
+                
+              }
+            }//fine if (key == KEY_PROG)
         }
         
         
         
         if(key == KEY_OK)
 	{
-	    
+	       
                
                if(menu_triang_x==menu_triang_limit_sx)//se devo variare la posizione orizzontale
                {
@@ -541,6 +564,10 @@ void Sub2Sel_L_C_H(void)
                             
                             
                             MoveTriangolinoSx();
+                            DisegnaOK(40,menu_triang_y,y_old);
+                            y_old=menu_triang_y;
+                            modificato=1;
+                            
   
                         
                         
@@ -642,7 +669,7 @@ void Sub2MenuCurvadiLavoro3Punti(void)
 	menu_triang_index=menu_CurvaLavoro_index;
 	incr_step=1;
         
-        
+        SelectFont(CALIBRI_10);
 
         switch(PROGR_IN_USO.curva_lav_cal_type)
         {
@@ -689,7 +716,6 @@ void Sub2MenuCurvadiLavoro3Punti(void)
              if (key == KEY_PROG)
               
               {
-                SaveInFlash();
                 MenuFunction_Index=SUB2MENU_SEL_TIPO_CURV_LAV;
                 loop_flag=0;
 
@@ -838,6 +864,7 @@ void Sub2MenuImpostaSoglie(void)
 	unsigned char loop_flag=1;
 	unsigned char first_string_to_print=0,last_string_to_print=4;
 	unsigned char to_print=1;
+        unsigned char modificato=0;
         //unsigned int sel_progr_num=RamSettings.selected_program_id;
 
 	menu_triang_limit_up=2;
@@ -846,6 +873,8 @@ void Sub2MenuImpostaSoglie(void)
 	menu_triang_y=2+(menu_ImpostaSoglie_index*H_RIGA_CALIBRI10);
 	menu_triang_index=menu_ImpostaSoglie_index;
 	incr_step=1;
+        
+        SelectFont(CALIBRI_10);
 
 	key = last_key = 0;
 	while(loop_flag)
@@ -885,7 +914,7 @@ void Sub2MenuImpostaSoglie(void)
                 if (key == KEY_PROG)
                 
                 {
-                        SaveInFlash();
+                        if(modificato)SaveInFlash();//salvo solo se ho premuto i tasti  + o -
                         MenuFunction_Index=SUBMENU_SELECTED_PROGR;
                         loop_flag=0;
 
@@ -896,7 +925,7 @@ void Sub2MenuImpostaSoglie(void)
                         if ((key == KEY_PLUS) || (last_key == KEY_PLUS))
                         //if(CHECK_TASTO_PLUS_PRESSED)
                         {
-
+                                modificato=1;
                                 if(menu_triang_x==menu_triang_limit_dx)
                                 {
                                         incr_counter++;
@@ -923,7 +952,7 @@ void Sub2MenuImpostaSoglie(void)
                         if ((key == KEY_MINUS) || (last_key == KEY_MINUS))
                         //if(CHECK_TASTO_MENO_PRESSED)
                         {
-
+                                modificato=1;
                                 if(menu_triang_x==menu_triang_limit_dx)
                                 {
                                         incr_counter++;
@@ -1045,6 +1074,8 @@ void Sub2MenuImpostaTimer(void)
   unsigned short menu_ImpostaTimers_index=0;
   unsigned char first_string_to_print=0,last_string_to_print=4;
   int prova=80;
+  unsigned char modificato=0;
+  unsigned int new_period;
   
 
   menu_triang_limit_up=2;
@@ -1073,7 +1104,7 @@ void Sub2MenuImpostaTimer(void)
       
     if (key == KEY_PROG)
     {
-            SaveInFlash();
+            if(modificato)SaveInFlash();//salvo solo se ho premuto i tasti  + o -
             MenuFunction_Index=SUBMENU_SELECTED_PROGR;
             loop_flag=0;
 
@@ -1099,6 +1130,11 @@ void Sub2MenuImpostaTimer(void)
               else
               {
                       MoveTriangolinoSx();
+                      
+                      new_period=PROGR_IN_USO.Timers.Timers_values[menu_ImpostaTimers_index]*1000;
+                      xTimerChangePeriod( xTimers[menu_ImpostaTimers_index], new_period / portTICK_PERIOD_MS, 10 );
+                      xTimerStop( xTimers[menu_ImpostaTimers_index], 0 );
+
                       MARK_ARROW_KEYS_MOVE_UPDOWN;
                       
                       CLEAR_PIU_MENO_ENABLED;
@@ -1159,7 +1195,7 @@ void Sub2MenuImpostaTimer(void)
               if ((key == KEY_PLUS) || (last_key == KEY_PLUS))
               //if(CHECK_TASTO_PLUS_PRESSED)
               {
-
+                      modificato=1;
                       if(menu_triang_x==menu_triang_limit_dx)
                       {
                               incr_counter++;
@@ -1197,7 +1233,7 @@ void Sub2MenuImpostaTimer(void)
               if ((key == KEY_MINUS) || (last_key == KEY_MINUS))
               //if(CHECK_TASTO_MENO_PRESSED)
               {
-
+                      modificato=1;
                       if(menu_triang_x==menu_triang_limit_dx)
                       {
                               incr_counter++;
@@ -1273,14 +1309,13 @@ void Sub2MenuImpostaSimboli(void)
 	uint8_t key;
 
 	unsigned short string_index=0,strings_y=2,y_old;
-
-
-	unsigned short submenuImpostaSimboli_index;
+	unsigned short submenuImpostaSimboli_index,sel_simb_old;
 	unsigned char loop_flag=1;
         
         if(PROGR_IN_USO.unita_mis_concentr>NUM_UN_MIS_MAX_INDEX)PROGR_IN_USO.unita_mis_concentr=0;//se ho un valore che mi fa puntare oltre mSiemens forzo a %
 	submenuImpostaSimboli_index=PROGR_IN_USO.unita_mis_concentr;
-
+        sel_simb_old=PROGR_IN_USO.unita_mis_concentr;
+        global_unit_misura_old=sel_simb_old;
 	loop_flag=1;
 
 	menu_triang_limit_up=2;
@@ -1355,11 +1390,42 @@ void Sub2MenuImpostaSimboli(void)
 
 		if (key == KEY_PROG)
 		
-		{
-			SaveInFlash();
-			MenuFunction_Index=SUBMENU_SELECTED_PROGR;
-			loop_flag=0;
-
+		{       //se c'è stato un cambiamento
+			if(sel_simb_old!=PROGR_IN_USO.unita_mis_concentr)
+                        {  
+                          
+                          //valutazione incompatibilità unità di misura
+                          MARK_INCOMP_UNIT_MISUR;
+                          if(sel_simb_old==UNIT_MIS_CONCENTR_PERCENTUALE   &&  PROGR_IN_USO.unita_mis_concentr==UNIT_MIS_CONCENTR_GRAMMILITRO)
+                          {
+                            CLEAR_INCOMP_UNIT_MISUR;
+                          }
+                          
+                          if(sel_simb_old==UNIT_MIS_CONCENTR_GRAMMILITRO   &&  PROGR_IN_USO.unita_mis_concentr==UNIT_MIS_CONCENTR_PERCENTUALE)
+                          {
+                            CLEAR_INCOMP_UNIT_MISUR;
+                          }
+                          
+                          
+                        if(CHECK_INCOMP_UNIT_MISUR)
+                        {
+                          MenuFunction_Index=SUB2MENU_SEL_TIPO_CURV_LAV;
+                        }
+                        else
+                        {
+                          MenuFunction_Index=SUBMENU_SELECTED_PROGR;
+                          SaveInFlash();//salvo solo se ho cambiato e se le unità di misura sono compatibili
+                        }
+                          
+                          
+                        }  
+                        
+                        else
+                        {  
+                          MenuFunction_Index=SUBMENU_SELECTED_PROGR;
+                          
+                        } 
+                    loop_flag=0;
 		}
 	}
 }
@@ -1369,6 +1435,7 @@ void Sub2MenuTK(void)
 	uint8_t key,last_key;
 	unsigned char loop_flag=1,to_print=1;
 	static unsigned short submenuTK_index=0;
+        unsigned char modificato=0;
 	//unsigned int nuovo_TK=2345;
         int prova;
 
@@ -1466,7 +1533,7 @@ void Sub2MenuTK(void)
 				if ((key == KEY_PLUS) || (last_key == KEY_PLUS))
 				
 					{
-
+                                                modificato=1;
 						if(menu_triang_x==76)
 						{
 							incr_counter++;
@@ -1498,7 +1565,7 @@ void Sub2MenuTK(void)
 					if ((key == KEY_MINUS) || (last_key == KEY_MINUS))
 					//if(CHECK_TASTO_MENO_PRESSED)
 					{
-
+                                                modificato=1;
 						if(menu_triang_x==76)
 						{
 							incr_counter++;
@@ -1510,6 +1577,11 @@ void Sub2MenuTK(void)
 								PROGR_IN_USO.TK.TK_array[submenuTK_index]-=incr_step;
 								to_print=1;
 							}
+                                                        else
+                                                        {
+                                                          RiduciIncrDecrStep(&incr_step,&incr_counter);
+                                                        }
+                                                        
 						}
 					}
 					else if (key == (KEY_MINUS | KEY_RELEASED))
@@ -1525,7 +1597,12 @@ void Sub2MenuTK(void)
 			if (key == KEY_PROG)
 			
 			{
-				SaveInFlash();
+				
+                                if(modificato)
+                                {
+                                  SaveInFlash();
+                                  modificato=0;
+                                }
 				MenuFunction_Index=SUBMENU_SELECTED_PROGR;
 				loop_flag=0;
 			}
