@@ -248,24 +248,28 @@ const char StringsFustoVuotoDn [4][10]={{ 	                               "Vuoto
                                                                                };//ITALIANO	//ENGLISH	//FRANCAIS	//ESPANOL
 
 
-const char StringsServizio [4][4][22]={{ 	                                "Taratura PT100",//ITALIANO
+const char StringsServizio [4][5][22]={{ 	                                "Taratura PT100",//ITALIANO
                                                                                 "Compensazione cavo",
                                                                                 "Lettura diretta ",
+                                                                                "Resist serie cavo",
                                                                                 "Aggiorna licenza"},
 
                                                                                {"Calibrate PT100",//ENGLISH
                                                                                 "Cable compensation",
                                                                                 "Raw measure",
+                                                                                "Cable series res.",
                                                                                 "Update License"},
 
                                                                                {"Etallonage PT100",
                                                                                 "Compensation de cable",
                                                                                 "Mesure directe",
+                                                                                "Res. serie du cable",
                                                                                 "Mise a jour licence"},
 
                                                                                {"Calibracion PT100",
                                                                                 "Compensacion cable",
                                                                                 "Medicion directa",
+                                                                                "Res. en serie cable",
                                                                                 "Actualiza licencia"}};
 
 
