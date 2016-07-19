@@ -88,6 +88,7 @@ typedef struct
 #define TEMP_MIN_LIMIT		     10
 
 #define MAX_CONCENT_LIMIT_9990     9990
+#define LIMITE_CAVO_APERTO_TEMP     180  // a 129°C leggo 149,a cavo aperto leggo 204
 
 void SchermataDiLavoro(void);
 void MenuProg(void);
@@ -98,6 +99,11 @@ void SubmenuComunic(void);
 void SubmenuSetClock(void);
 void SumMenuSelLingua(void);
 void SubmenuServizio(void);
+void Sub2Menu_Cal_PT100(void);
+void Sub2Menu_Cal_Cable(void);
+void Sub2Menu_MisuraDiretta(void);
+void Sub2Menu_Licenza(void);
+
 
 void Sub2MenuImpostaSimboli(void);
 void Sub2MenuTK(void);
@@ -123,6 +129,7 @@ void MoveTriangolinoSx(void);
 void DisegnaTriangolinoMenu(unsigned short triang_x,unsigned short triang_y);
 void DisegnaCornice (void);
 void DisegnaMarker(unsigned short x,unsigned short y,unsigned short y_old);
+void DisegnaOK(unsigned short x,unsigned short y,unsigned short y_old);
 
 void AumentaIncrDecrStep(int * step,int * counter);
 void RiduciIncrDecrStep(int * step,int * counter);
@@ -138,7 +145,7 @@ void WriteMyFlashSector(void);
 
 
 
-#define MENU_TEMPHUM  			0
+#define SCHERM_LAV  			0
 #define MENU_PROGR 			1
 #define SUBMENU_INOUT  			2
 #define SUBMENU_SELEZIONA_PROG 		3
@@ -147,15 +154,22 @@ void WriteMyFlashSector(void);
 #define SUBMENU_SEL_LINGUA		6
 #define SUBMENU_SERVIZIO  		7
 #define SUBMENU_SELECTED_PROGR		8
+#define SUB2MENU_CAL_PT100              9  
+#define SUB2MENU_CABLE_COMPENS         10  
+#define SUB2MENU_MISURA_DIRETTA        11  
+#define SUB2MENU_LICENZA               12 
 
-#define SUB2MENU_IMPOSTA_SIMBOLI	9
-#define SUB2MENU_TK			10
-#define SUB2MENU_SEL_TIPO_CURV_LAV      11
-#define SUB2MENU_IMPOSTA_SOGLIE		12
-#define SUB2MENU_IMPOSTA_TIMER		13
-#define SUB3MENU_CURVA_DI_LAVORO	14
-#define SUB3MENU_CURVA_DI_LAVORO3pt	15
-#define SUB3MENU_SEL_LCH		16
+
+#define SUB2MENU_IMPOSTA_SIMBOLI	13
+#define SUB2MENU_TK			14
+#define SUB2MENU_SEL_TIPO_CURV_LAV      15
+#define SUB2MENU_IMPOSTA_SOGLIE		16
+#define SUB2MENU_IMPOSTA_TIMER		17
+#define SUB3MENU_CURVA_DI_LAVORO	18
+#define SUB3MENU_CURVA_DI_LAVORO3pt	19
+#define SUB3MENU_SEL_LCH		20
+
+
 
 
 #define SPOSTA_TRIANGOLINO  10
@@ -234,7 +248,7 @@ void WriteMyFlashSector(void);
 #define MARK_OVER_TEMP_NORMAL   (global_flags &=~(OVER_TEMP_STATE ))
 #define OVER_TEMP_NORMAL                                           0
 
-
+//-----------------ALLARMI CONCENTRAZIONE-------------------------------------
 #define ALARM_CONC_MAX 							0x10
 #define MARK_ALARM_CONC_MAX  		(global_flags |= ALARM_CONC_MAX )
 #define CLEAR_ALARM_CONC_MAX 		(global_flags &=~ALARM_CONC_MAX )
@@ -250,25 +264,27 @@ void WriteMyFlashSector(void);
 #define CLEAR_TIMEOUT_CONC 		(global_flags &=~TIMEOUT_CONC )
 #define CHECK_TIMEOUT_CONC 		(global_flags &  TIMEOUT_CONC )
 
-
-#define ALARMS_CONC_MASK                (ALARM_CONC_MAX | ALARM_CONC_MIN ) 
+#define ALARM_TANK 						        0x80
+#define MARK_ALARM_TANK  	        (global_flags |= ALARM_TANK )
+#define CLEAR_ALARM_TANK 	        (global_flags &=~ALARM_TANK )
+#define CHECK_ALARM_TANK 	        (global_flags &  ALARM_TANK )
+                       
+#define ALARMS_CONC_MASK                (ALARM_CONC_MAX | ALARM_CONC_MIN | ALARM_TANK) 
 #define CLEAR_CONC_ALARMS_MASK 		(global_flags &=~ALARMS_CONC_MASK )
 #define CHECK_CONC_ALARMS_MASK		(global_flags &  ALARMS_CONC_MASK )
 
-
-
-
-#define ALARM_TEMP_MAX 							0x80
+//-----------------ALLARMI TEMPERATURA   -------------------------------------
+#define ALARM_TEMP_MAX 							0x100
 #define MARK_ALARM_TEMP_MAX  		(global_flags |= ALARM_TEMP_MAX )
 #define CLEAR_ALARM_TEMP_MAX 		(global_flags &=~ALARM_TEMP_MAX )
 #define CHECK_ALARM_TEMP_MAX 		(global_flags &  ALARM_TEMP_MAX )
 
-#define ALARM_TEMP_MIN 							0x100
+#define ALARM_TEMP_MIN 							0x200
 #define MARK_ALARM_TEMP_MIN  		(global_flags |= ALARM_TEMP_MIN )
 #define CLEAR_ALARM_TEMP_MIN 		(global_flags &=~ALARM_TEMP_MIN )
 #define CHECK_ALARM_TEMP_MIN 		(global_flags &  ALARM_TEMP_MIN )
 
-#define TIMEOUT_TEMP 							0x200
+#define TIMEOUT_TEMP 							0x400
 #define MARK_TIMEOUT_TEMP  		(global_flags |= TIMEOUT_TEMP )
 #define CLEAR_TIMEOUT_TEMP 		(global_flags &=~TIMEOUT_TEMP )
 #define CHECK_TIMEOUT_TEMP 		(global_flags &  TIMEOUT_TEMP )
@@ -279,22 +295,10 @@ void WriteMyFlashSector(void);
 
 
 
-
-
-
-#define ALARM_TANK 						0x400
-#define MARK_ALARM_TANK  	(global_flags |= ALARM_TANK )
-#define CLEAR_ALARM_TANK 	(global_flags &=~ALARM_TANK )
-#define CHECK_ALARM_TANK 	(global_flags &  ALARM_TANK )
-
-
-
-
 #define PUMP_STATE_RIPOSO 						0x800
 #define MARK_PUMP_STATE_RIPOSO  	(global_flags |= PUMP_STATE_RIPOSO )
 #define CLEAR_PUMP_STATE_RIPOSO 	(global_flags &=~PUMP_STATE_RIPOSO )
 #define CHECK_PUMP_STATE_RIPOSO 	(global_flags &  PUMP_STATE_RIPOSO )
-
 
 #define PUMP_STATE_ATTIVO 						0x1000
 #define MARK_PUMP_STATE_ATTIVO  	(global_flags |= PUMP_STATE_ATTIVO )
@@ -324,11 +328,9 @@ void WriteMyFlashSector(void);
 #define CLEAR_HEATER_STATE_ATTIVO 	(global_flags &=~HEATER_STATE_ATTIVO )
 #define CHECK_HEATER_STATE_ATTIVO 	(global_flags &  HEATER_STATE_ATTIVO )
 
-
-
-#define HEATER_STATE (HEATER_STATE_RIPOSO | HEATER_STATE_ATTIVO)
-#define CHECK_HEATER_STATE                (global_flags &  HEATER_STATE)          
-
+#define HEATER_STATES (HEATER_STATE_RIPOSO | HEATER_STATE_ATTIVO)
+#define CLEAR_HEATER_STATES                (global_flags &=~ (HEATER_STATE_RIPOSO | HEATER_STATE_ATTIVO))                          
+#define CHECK_HEATER_STATES                (global_flags &  HEATER_STATES)          
 
 //mettere flag indicante uscita da menu,considerata come riaccensione,riazzera timers
 
@@ -342,8 +344,6 @@ void WriteMyFlashSector(void);
 #define MARK_CONTROL_TEMP_ENA  			(global_flags |= CONTROL_TEMP_ENA )
 #define CLEAR_CONTROL_TEMP_ENA 			(global_flags &=~CONTROL_TEMP_ENA )
 #define CHECK_CONTROL_TEMP_ENA 			(global_flags &  CONTROL_TEMP_ENA )
-
-
 
 
 #define ARROW_KEYS_MOVE_UPDOWN 						0x40000
@@ -372,40 +372,62 @@ void WriteMyFlashSector(void);
 #define MARK_STATE_ABILITATO  	(global_flags |= STATE_ABILITATO )
 #define CLEAR_STATE_ABILITATO 	(global_flags &=~STATE_ABILITATO )
 #define CHECK_STATE_ABILITATO 	(global_flags &  STATE_ABILITATO )
+                       
+#define INCOMP_UNIT_MISUR 						0x800000
+#define MARK_INCOMP_UNIT_MISUR  	(global_flags |= INCOMP_UNIT_MISUR )
+#define CLEAR_INCOMP_UNIT_MISUR 	(global_flags &=~INCOMP_UNIT_MISUR )
+#define CHECK_INCOMP_UNIT_MISUR 	(global_flags &  INCOMP_UNIT_MISUR )    
+
+#define ATTIVAZIONE_EXT_CH_CONC 					0x1000000
+#define MARK_ATTIVAZIONE_EXT_CH_CONC  	(global_flags |= ATTIVAZIONE_EXT_CH_CONC )
+#define CLEAR_ATTIVAZIONE_EXT_CH_CONC 	(global_flags &=~ATTIVAZIONE_EXT_CH_CONC )
+#define CHECK_ATTIVAZIONE_EXT_CH_CONC 	(global_flags &  ATTIVAZIONE_EXT_CH_CONC )
+
+#define ATTIVAZIONE_EXT_CH_TEMP 					0x2000000
+#define MARK_ATTIVAZIONE_EXT_CH_TEMP  	(global_flags |= ATTIVAZIONE_EXT_CH_TEMP )
+#define CLEAR_ATTIVAZIONE_EXT_CH_TEMP 	(global_flags &=~ATTIVAZIONE_EXT_CH_TEMP )
+#define CHECK_ATTIVAZIONE_EXT_CH_TEMP 	(global_flags &  ATTIVAZIONE_EXT_CH_TEMP )
+
+
+#define CABLE_OPEN 						        0x4000000
+#define MARK_CABLE_OPEN  	(global_flags |= CABLE_OPEN )
+#define CLEAR_CABLE_OPEN 	(global_flags &=~CABLE_OPEN )
+#define CHECK_CABLE_OPEN 	(global_flags &  CABLE_OPEN )
+
 
                    /*  +-+-+-+-+-+-+-+-+-+-+-+
                        |p|r|i|n|t|_|f|l|a|g|s|
                        +-+-+-+-+-+-+-+-+-+-+-+ */
 
-#define BLINK_PUMP 								0x1
-#define MARK_BLINK_PUMP  			(print_flags |= BLINK_PUMP )
-#define CLEAR_BLINK_PUMP 			(print_flags &=~BLINK_PUMP )
-#define CHECK_BLINK_PUMP 			(print_flags &  BLINK_PUMP )
+#define BLINK 								        0x1
+#define MARK_BLINK  			(print_flags |= BLINK )
+#define CLEAR_BLINK 			(print_flags &=~BLINK )
+#define CHECK_BLINK 			(print_flags &  BLINK )
 
 #define PRINT_PUMP 								0x2
-#define MARK_PRINT_PUMP  			(print_flags |= PRINT_PUMP )
-#define CLEAR_PRINT_PUMP 			(print_flags &=~PRINT_PUMP )
-#define CHECK_PRINT_PUMP 			(print_flags &  PRINT_PUMP )
+#define MARK_PRINT_PUMP  		(print_flags |= PRINT_PUMP )
+#define CLEAR_PRINT_PUMP 		(print_flags &=~PRINT_PUMP )
+#define CHECK_PRINT_PUMP 		(print_flags &  PRINT_PUMP )
 
 #define PRINT_HEATER 								0x4
-#define MARK_PRINT_HEATER  			(print_flags |= PRINT_HEATER )
-#define CLEAR_PRINT_HEATER 			(print_flags &=~PRINT_HEATER )
-#define CHECK_PRINT_HEATER 			(print_flags &  PRINT_HEATER )
+#define MARK_PRINT_HEATER  		(print_flags |= PRINT_HEATER )
+#define CLEAR_PRINT_HEATER 		(print_flags &=~PRINT_HEATER )
+#define CHECK_PRINT_HEATER 		(print_flags &  PRINT_HEATER )
 
 #define PRINT_CONC_LIMITS 							0x8
-#define MARK_PRINT_CONC_LIMITS  		(print_flags |= PRINT_CONC_LIMITS )
-#define CLEAR_PRINT_CONC_LIMITS 		(print_flags &=~PRINT_CONC_LIMITS )
-#define CHECK_PRINT_CONC_LIMITS 		(print_flags &  PRINT_CONC_LIMITS )
+#define MARK_PRINT_CONC_LIMITS  	(print_flags |= PRINT_CONC_LIMITS )
+#define CLEAR_PRINT_CONC_LIMITS 	(print_flags &=~PRINT_CONC_LIMITS )
+#define CHECK_PRINT_CONC_LIMITS 	(print_flags &  PRINT_CONC_LIMITS )
 
 #define PRINT_TEMP_LIMITS 							0x10
-#define MARK_PRINT_TEMP_LIMITS  		(print_flags |= PRINT_TEMP_LIMITS )
-#define CLEAR_PRINT_TEMP_LIMITS 		(print_flags &=~PRINT_TEMP_LIMITS )
-#define CHECK_PRINT_TEMP_LIMITS 		(print_flags &  PRINT_TEMP_LIMITS )
+#define MARK_PRINT_TEMP_LIMITS  	(print_flags |= PRINT_TEMP_LIMITS )
+#define CLEAR_PRINT_TEMP_LIMITS 	(print_flags &=~PRINT_TEMP_LIMITS )
+#define CHECK_PRINT_TEMP_LIMITS 	(print_flags &  PRINT_TEMP_LIMITS )
 
 #define PRINT_DISABILITA 							0x20
-#define MARK_PRINT_DISABILITA  			(print_flags |= PRINT_DISABILITA )
-#define CLEAR_PRINT_DISABILITA 			(print_flags &=~PRINT_DISABILITA )
-#define CHECK_PRINT_DISABILITA 			(print_flags &  PRINT_DISABILITA )
+#define MARK_PRINT_DISABILITA  		(print_flags |= PRINT_DISABILITA )
+#define CLEAR_PRINT_DISABILITA 		(print_flags &=~PRINT_DISABILITA )
+#define CHECK_PRINT_DISABILITA 		(print_flags &  PRINT_DISABILITA )
 
 #define PRINT_CONC_WAIT 							0x40
 #define MARK_PRINT_CONC_WAIT  		(print_flags |= PRINT_CONC_WAIT )
@@ -417,9 +439,82 @@ void WriteMyFlashSector(void);
 #define CLEAR_PRINT_TEMP_WAIT 		(print_flags &=~PRINT_TEMP_WAIT )
 #define CHECK_PRINT_TEMP_WAIT 		(print_flags &  PRINT_TEMP_WAIT )
 
+#define BLINK_SHOW								0x100
+#define MARK_BLINK_SHOW  		(print_flags |= BLINK_SHOW )
+#define CLEAR_BLINK_SHOW 		(print_flags &=~BLINK_SHOW )
+#define CHECK_BLINK_SHOW 		(print_flags &  BLINK_SHOW )
 
+#define PRINT_CONC_CH_OFF 							0x200
+#define MARK_PRINT_CONC_CH_OFF  		(print_flags |= PRINT_CONC_CH_OFF )
+#define CLEAR_PRINT_CONC_CH_OFF 		(print_flags &=~PRINT_CONC_CH_OFF )
+#define CHECK_PRINT_CONC_CH_OFF 		(print_flags &  PRINT_CONC_CH_OFF )
 
+#define PRINT_TEMP_CH_OFF 							0x400
+#define MARK_PRINT_TEMP_CH_OFF  		(print_flags |= PRINT_TEMP_CH_OFF )
+#define CLEAR_PRINT_TEMP_CH_OFF 		(print_flags &=~PRINT_TEMP_CH_OFF )
+#define CHECK_PRINT_TEMP_CH_OFF 		(print_flags &  PRINT_TEMP_CH_OFF )                         
+                         
+                         
+                         
+                         
+#define CONC_PRINT_STATE_BITS          0xF0000000   //4 bits per 16 possibili situazioni 
+#define TEMP_PRINT_STATE_BITS          0x0F000000   //4 bits per 16 possibili situazioni 
+                       
 
+#define PRINT_CONC_AL_MIN 							0x1000
+#define MARK_PRINT_CONC_AL_MIN  	(print_flags |= PRINT_CONC_AL_MIN )
+#define CLEAR_PRINT_CONC_AL_MIN 	(print_flags &=~PRINT_CONC_AL_MIN )
+#define CHECK_PRINT_CONC_AL_MIN 	(print_flags &  PRINT_CONC_AL_MIN )
+
+#define PRINT_CONC_AL_MAX 							0x2000
+#define MARK_PRINT_CONC_AL_MAX  	(print_flags |= PRINT_CONC_AL_MAX )
+#define CLEAR_PRINT_CONC_AL_MAX 	(print_flags &=~PRINT_CONC_AL_MAX )
+#define CHECK_PRINT_CONC_AL_MAX 	(print_flags &  PRINT_CONC_AL_MAX )
+
+#define PRINT_CONC_ET 							        0x4000
+#define MARK_PRINT_CONC_ET  		(print_flags |= PRINT_CONC_ET )
+#define CLEAR_PRINT_CONC_ET 		(print_flags &=~PRINT_CONC_ET )
+#define CHECK_PRINT_CONC_ET 		(print_flags &  PRINT_CONC_ET )
+
+#define PRINT_CONC_TO 							        0x8000
+#define MARK_PRINT_CONC_TO  		(print_flags |= PRINT_CONC_TO )
+#define CLEAR_PRINT_CONC_TO 		(print_flags &=~PRINT_CONC_TO )
+#define CHECK_PRINT_CONC_TO 		(print_flags &  PRINT_CONC_TO )                       
+                       
+#define PRINT_TEMP_AL_MIN 							0x10000
+#define MARK_PRINT_TEMP_AL_MIN  	(print_flags |= PRINT_TEMP_AL_MIN )
+#define CLEAR_PRINT_TEMP_AL_MIN 	(print_flags &=~PRINT_TEMP_AL_MIN )
+#define CHECK_PRINT_TEMP_AL_MIN 	(print_flags &  PRINT_TEMP_AL_MIN )
+
+#define PRINT_TEMP_AL_MAX 							0x20000
+#define MARK_PRINT_TEMP_AL_MAX  	(print_flags |= PRINT_TEMP_AL_MAX )
+#define CLEAR_PRINT_TEMP_AL_MAX 	(print_flags &=~PRINT_TEMP_AL_MAX )
+#define CHECK_PRINT_TEMP_AL_MAX 	(print_flags &  PRINT_TEMP_AL_MAX )
+
+#define PRINT_TEMP_TO 							        0x40000
+#define MARK_PRINT_TEMP_TO  		(print_flags |= PRINT_TEMP_TO )
+#define CLEAR_PRINT_TEMP_TO 		(print_flags &=~PRINT_TEMP_TO )
+#define CHECK_PRINT_TEMP_TO 		(print_flags &  PRINT_TEMP_TO )                                              
+
+#define PRINT_ALARMS_CONC_MASK (PRINT_CONC_AL_MIN | PRINT_CONC_AL_MAX | PRINT_CONC_ET )                            
+#define CLEAR_PRINT_ALARMS_CONC_MASK (print_flags &=~ PRINT_ALARMS_CONC_MASK )
+#define PRINT_ALARMS_TEMP_MASK (PRINT_TEMP_AL_MIN | PRINT_TEMP_AL_MAX )                       
+#define CLEAR_PRINT_ALARMS_TEMP_MASK (print_flags &=~ PRINT_ALARMS_TEMP_MASK )
+                         
+#define FULL_SCREEN_CONC 		        			        0x80000
+#define MARK_FULL_SCREEN_CONC  		(print_flags |= FULL_SCREEN_CONC )
+#define CLEAR_FULL_SCREEN_CONC 		(print_flags &=~FULL_SCREEN_CONC )
+#define CHECK_FULL_SCREEN_CONC 		(print_flags &  FULL_SCREEN_CONC )
+
+#define FULL_SCREEN_TEMP 		        			        0x100000
+#define MARK_FULL_SCREEN_TEMP  		(print_flags |= FULL_SCREEN_TEMP )
+#define CLEAR_FULL_SCREEN_TEMP 		(print_flags &=~FULL_SCREEN_TEMP )
+#define CHECK_FULL_SCREEN_TEMP 		(print_flags &  FULL_SCREEN_TEMP )
+
+#define CABLE_OPEN_PRINT 		        			        0x200000
+#define MARK_CABLE_OPEN_PRINT  		(print_flags |= CABLE_OPEN_PRINT )
+#define CLEAR_CABLE_OPEN_PRINT 		(print_flags &=~CABLE_OPEN_PRINT )
+#define CHECK_CABLE_OPEN_PRINT 		(print_flags &  CABLE_OPEN_PRINT )
 
                    /*  +-+-+-+-+-+-+-+-+-+-+-+
                        |t|i|m|e|r|_|f|l|a|g|s|
@@ -472,10 +567,10 @@ void WriteMyFlashSector(void);
 #define CLEAR_TIMER9_EXPIRED 		(timer_flags &=~TIMER9_EXPIRED )
 #define CHECK_TIMER9_EXPIRED 		(timer_flags &  TIMER9_EXPIRED )
                          
-#define TIMER_CHECK_TANK_EXPIRED 					0x200
-#define MARK_TIMER_CHECK_TANK_EXPIRED  	(timer_flags |= TIMER_CHECK_TANK_EXPIRED )
-#define CLEAR_TIMER_CHECK_TANK_EXPIRED 	(timer_flags &=~TIMER_CHECK_TANK_EXPIRED )
-#define CHECK_TIMER_CHECK_TANK_EXPIRED 	(timer_flags &  TIMER_CHECK_TANK_EXPIRED )                         
+#define BLINK_TIMER1_EXPIRED 						0x200
+#define MARK_BLINK_TIMER1_EXPIRED  	(timer_flags |= BLINK_TIMER1_EXPIRED )
+#define CLEAR_BLINK_TIMER1_EXPIRED 	(timer_flags &=~BLINK_TIMER1_EXPIRED )
+#define CHECK_BLINK_TIMER1_EXPIRED 	(timer_flags &  BLINK_TIMER1_EXPIRED )                      
 
 
       /*        +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
@@ -538,12 +633,8 @@ void WriteMyFlashSector(void);
 
 
 
-#define CURVA_LAV_1PT 0
-#define CURVA_LAV_2PT 1
-#define CURVA_LAV_3PT 2
-
 #define CONDUC_H2O_RUBINETTO 0.000661
-#define CONDUC_H20_DISTILL   0//0.0000055      //     CONDUC_H2O_RUBINETTO//5.5us
+#define CONDUC_H20_DISTILL   0.0000055      //     CONDUC_H2O_RUBINETTO//5.5us
 #define SCALED_TK_DIV      10000
                        
 #define MAX_CONCENTR_x100 10000                       
@@ -597,7 +688,100 @@ void WriteMyFlashSector(void);
 
 
 
-#define NUM_TIMERS 9
-#define TIMER_CHECK_TANK 10
-#define CHECK_TANK_PERIOD 100  //in ms
+#define NUM_TIMERS              9
+#define AUX_TIMER_ID           10 
+#define TIMER_CHECK_TANK       10
+#define CHECK_TANK_PERIOD     100  //in ms
+#define BLINK_TIME_ms         500  //in ms
 #endif /* SOURCES_MY_DEFINITIONS_H_ */
+
+
+#define CALIBRI_10_ALTEZZA 12
+
+#define TO_CONC_X_START  6
+#define TO_CONC_X_END   20
+#define TO_CONC_Y_START 40
+#define TO_CONC_Y_END   TO_CONC_Y_START + CALIBRI_10_ALTEZZA
+
+
+#define TO_TEMP_X_START  70
+#define TO_TEMP_X_END    84
+#define TO_TEMP_Y_START  40
+#define TO_TEMP_Y_END    TO_TEMP_Y_START + CALIBRI_10_ALTEZZA
+
+
+#define AL_CONC_X_START 22
+#define AL_CONC_X_END   38
+#define AL_CONC_Y_START 40
+#define AL_CONC_Y_END   AL_CONC_Y_START + CALIBRI_10_ALTEZZA
+
+//DP
+#define AL2r_CONC_X_START 4
+#define AL2r_CONC_X_END   62
+#define AL2r_CONC_Y_START 54
+#define AL2r_CONC_Y_END   64
+
+#define AL2r_TEMP_X_START 68
+#define AL2r_TEMP_X_END   126
+#define AL2r_TEMP_Y_START 54
+#define AL2r_TEMP_Y_END   64
+                       
+#define WAIT_CONC_AREA_X_START  2
+#define WAIT_CONC_AREA_X_END   62
+#define WAIT_CONC_AREA_Y_START 40
+#define WAIT_CONC_AREA_Y_END   64 
+
+#define WAIT_TEMP_AREA_X_START 66
+#define WAIT_TEMP_AREA_X_END   128
+#define WAIT_TEMP_AREA_Y_START 40
+#define WAIT_TEMP_AREA_Y_END   64 
+                       
+                       
+//DP END
+
+#define AL_TEMP_X_START  86
+#define AL_TEMP_X_END   100
+#define AL_TEMP_Y_START  40
+#define AL_TEMP_Y_END    AL_TEMP_Y_START + CALIBRI_10_ALTEZZA
+
+#define ET_X_START      38
+#define ET_X_END        52
+#define ET_Y_START      40
+#define ET_Y_END        ET_Y_START + CALIBRI_10_ALTEZZA
+
+#define PUMP_AREA_X_START  2
+#define PUMP_AREA_X_END   26
+#define PUMP_AREA_Y_START 42
+#define PUMP_AREA_Y_END   64 
+
+#define HEATER_AREA_X_START 66
+#define HEATER_AREA_X_END   92
+#define HEATER_AREA_Y_START 42
+#define HEATER_AREA_Y_END   64 
+                  
+                  
+#define PUMP_E_SETPOINT_AREA_X_START  2
+#define PUMP_E_SETPOINT_AREA_X_END   64
+#define PUMP_E_SETPOINT_AREA_Y_START 40
+#define PUMP_E_SETPOINT_AREA_Y_END   64 
+                  
+                  
+#define HEATER_E_SETPOINT_AREA_X_START 66
+#define HEATER_E_SETPOINT_AREA_X_END  128
+#define HEATER_E_SETPOINT_AREA_Y_START 40
+#define HEATER_E_SETPOINT_AREA_Y_END   64 
+
+#define TO 0
+#define AL 1
+#define ET 2      
+
+#define DISABIL_CONC_EXT     (1<<0)
+#define DISABIL_TEMP_EXT     (1<<1)                
+#define TANK_ALARM_INPUT     (1<<2)   
+
+#define PT100_A_COEFF 0.0039083
+#define PT100_B_COEFF -0.0000005775
+#define PT100_Ro       100       
+//#define C_COEFF
+#define INTERPOLAZIONE_DIEGO 
+                  
