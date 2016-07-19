@@ -50,6 +50,10 @@ void Rappresentazione_Conc_Percent(unsigned int bin);
 
 void MyCreateTimers(void);
 void StopAllTimers(void);
+void Stop_ChConc_Timers(void);
+void Stop_ChTemp_Timers(void);
+
+
 
 
 
@@ -95,15 +99,27 @@ float CompensConduc_TK(float*) ;
 float NormalizzaConduc_TK(float* meas_conduc,float* fixed_temp) ;
 
 void CalcPrintTemperatura(float * t_float);
+void PrintConduttXY_10(float * t_float,unsigned int x,unsigned int y);
+void CalcPrintTemperaturaXY_10(float * t_float,unsigned int x,unsigned int y);
+void PrintResXY_10(float * t_float,unsigned int x,unsigned int y);
 void PrintConc_WorkMenu(void);
 void ControlloSoglieAllarmi_Temp(float*);
 void ControlloSoglieAllarmi_Conc(float*);
-void ControlloRitardi(void);
+void ControlloTimers(void);
 void ConcPump_AtWork(float * t_float);
 void TempHeater_AtWork(float * t_float);
+void CheckPrint_SchermataDiLavoro(void);
+void SchermLavoroInitCondition(void);
+void ResetChConc_OFF(void);
+void ResetChTemp_OFF(void);
+void ResetChConc_ON(void);
+void ResetChTemp_ON(void);
+void SchermLav_ScritteFisse(void);
+
 
 
 void vTimerCallback( TimerHandle_t pxTimer );
+void AuxTimerCallback( TimerHandle_t pxTimer );
 
 #define SET_CONC_INDEX      0
 #define ALL_CONC_MIN_INDEX  1
