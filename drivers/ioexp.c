@@ -93,8 +93,11 @@ uint8_t b;
 		if (!I2C_RandWrite(IOEXP0_ADDR,0x43,1,ioexp0_conf + 3, 1))
 			continue;
 		vTaskDelay(kCen);
-		b = 1;
-		if (!I2C_RandWrite(IOEXP1_ADDR,0x42,1,&b, 1))	// input latch
+		b = 0xFF;
+                if (!I2C_RandWrite(IOEXP1_ADDR,0x42,1,&b, 1))	// input latch
+			continue;
+                b=0;
+                if (!I2C_RandWrite(IOEXP1_ADDR,0x45,1,&b, 1))	// input latch
 			continue;
 		if (I2C_RandRead(IOEXP1_ADDR,0,1,&ioexp1_inp,1))			// read input
 			break;
