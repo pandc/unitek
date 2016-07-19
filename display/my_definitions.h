@@ -101,6 +101,7 @@ void SumMenuSelLingua(void);
 void SubmenuServizio(void);
 void Sub2Menu_Cal_PT100(void);
 void Sub2Menu_Cal_Cable(void);
+void Sub2Menu_ResSerie_Cable(void);
 void Sub2Menu_MisuraDiretta(void);
 void Sub2Menu_Licenza(void);
 
@@ -155,19 +156,20 @@ void WriteMyFlashSector(void);
 #define SUBMENU_SERVIZIO  		7
 #define SUBMENU_SELECTED_PROGR		8
 #define SUB2MENU_CAL_PT100              9  
-#define SUB2MENU_CABLE_COMPENS         10  
-#define SUB2MENU_MISURA_DIRETTA        11  
-#define SUB2MENU_LICENZA               12 
+#define SUB2MENU_CABLE_COMPENS         10 
+#define SUB2MENU_RES_SERIE_CAVO        11          
+#define SUB2MENU_MISURA_DIRETTA        12  
+#define SUB2MENU_LICENZA               13 
 
 
-#define SUB2MENU_IMPOSTA_SIMBOLI	13
-#define SUB2MENU_TK			14
-#define SUB2MENU_SEL_TIPO_CURV_LAV      15
-#define SUB2MENU_IMPOSTA_SOGLIE		16
-#define SUB2MENU_IMPOSTA_TIMER		17
-#define SUB3MENU_CURVA_DI_LAVORO	18
-#define SUB3MENU_CURVA_DI_LAVORO3pt	19
-#define SUB3MENU_SEL_LCH		20
+#define SUB2MENU_IMPOSTA_SIMBOLI	14
+#define SUB2MENU_TK			15
+#define SUB2MENU_SEL_TIPO_CURV_LAV      16
+#define SUB2MENU_IMPOSTA_SOGLIE		17
+#define SUB2MENU_IMPOSTA_TIMER		18
+#define SUB3MENU_CURVA_DI_LAVORO	19
+#define SUB3MENU_CURVA_DI_LAVORO3pt	20
+#define SUB3MENU_SEL_LCH		21
 
 
 
