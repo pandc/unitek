@@ -26,6 +26,7 @@
 #include "keyboard.h"
 #include "menu.h"
 #include "my_types.h"
+#include "ioexp.h"
 
 extern bitmap_struct_type mybmp_struct1,mybmp_struct2;
 
@@ -47,6 +48,7 @@ unsigned char menu_triang_index;
 
 // An array to hold handles to the created timers.
 TimerHandle_t xTimers[ NUM_TIMERS ];
+TimerHandle_t AuxTimer; 
 
 // An array to hold a count of the number of times each timer expires.
 //int32_t lExpireCounters[ NUM_TIMERS ] = { 0 };
@@ -74,7 +76,7 @@ unsigned int(* FormulaInversa_Conc      [5])(void);
 //***************************************************************************************
 static void menu_task(void *par)
 {
-  
+    unsigned char input_status;
   
     LCD_Display_Setup();
     FontPointerInit(); 
@@ -83,22 +85,69 @@ static void menu_task(void *par)
     LoadRamSettingsFrom_External_DataFlash();
     //se voglio forzare uscite disabilitate indipendentemnte da quanto mem lo faccio qui
     
-
+    MyCreateTimers();
       
+    input_status=IOEXP_get();
+    //impostazioni al power on
+    if(input_status & DISABIL_CONC_EXT)//controllo input,se interrutore è in OFF
+    {  //se arrivo da stato OFF dovrei avere già fatto tutto,trane la stampa,se arrivo da fuori
+      CLEAR_ATTIVAZIONE_EXT_CH_CONC;
+      MARK_PRINT_CONC_CH_OFF;// se arrivo da OFF ho già stampato,ma se arrivo da fuori ho già i flags che mi dicono di stampare
+      CLEAR_PRINT_ALARMS_CONC_MASK;
+      CLEAR_PRINT_CONC_LIMITS;
+    }
+    else  //se inizialmente switch CONC è ON
+    {
+      MARK_ACCENSIONE_CONC;
+      //if( xTimerStart( xTimers[ TIMER1_RIT_ACC_CONC ], 0 ) != pdPASS ){}
+      MARK_PRINT_CONC_WAIT;
+      
+      MARK_ATTIVAZIONE_EXT_CH_CONC;
+      CLEAR_PUMP_STATES;
+      MARK_PUMP_STATE_RIPOSO;
+
+     } 
     
+    
+    
+    if(input_status & DISABIL_TEMP_EXT)//controllo input,se interrutore è in OFF
+    {  //se arrivo da stato OFF dovrei avere già fatto tutto,trane la stampa,se arrivo da fuori
+      CLEAR_ATTIVAZIONE_EXT_CH_TEMP;
+      MARK_PRINT_TEMP_CH_OFF;// se arrivo da OFF ho già stampato,ma se arrivo da fuori ho già i flags che mi dicono di stampare
+      CLEAR_PRINT_ALARMS_TEMP_MASK;
+      CLEAR_PRINT_TEMP_LIMITS;
+    }
+    else  //se inizialmente switch TEMP è ON
+    {
+      MARK_ACCENSIONE_TEMP;
+      //if( xTimerStart( xTimers[ TIMER6_RIT_ACC_TEMP ], 0 ) != pdPASS ){}  
+      MARK_PRINT_TEMP_WAIT;
+      
+      MARK_ATTIVAZIONE_EXT_CH_TEMP;
+      CLEAR_HEATER_STATES;
+      MARK_HEATER_STATE_RIPOSO;
+      
+    } 
     
 
+
+ 
+  
     
-    MARK_ACCENSIONE_CONC;
-    MARK_ACCENSIONE_TEMP;
+
+ 
+
+
+
+
 
     
     if(RamSettings.abilita_disabilita==ABILITA) MARK_STATE_ABILITATO;
     else                                        CLEAR_STATE_ABILITATO;
 
-    MyCreateTimers();
+    
 
-    MenuFunction_Index=MENU_TEMPHUM;
+    MenuFunction_Index=SCHERM_LAV;
 
     for (;;)
     {
@@ -114,7 +163,7 @@ static void menu_task(void *par)
 void MenuInit(void)
 {  
         //associo i puntatori a funzione menu a specifiche funzioni
-	MenuFunctionPt[MENU_TEMPHUM]		=&SchermataDiLavoro;	    //0
+	MenuFunctionPt[SCHERM_LAV]		=&SchermataDiLavoro;	    //0
 	MenuFunctionPt[MENU_PROGR]		=&MenuProg;			//1
 	MenuFunctionPt[SUBMENU_INOUT]		=&SubmenuINOUT;		//2
 	MenuFunctionPt[SUBMENU_SELEZIONA_PROG]	=&SubmenuSelProgr;	//3
@@ -123,6 +172,10 @@ void MenuInit(void)
 	MenuFunctionPt[SUBMENU_SEL_LINGUA]	=&SumMenuSelLingua;	//6
 	MenuFunctionPt[SUBMENU_SERVIZIO]	=&SubmenuServizio;	//7
 	MenuFunctionPt[SUBMENU_SELECTED_PROGR]	=&SubmenuSelectedProgr;	//8
+        MenuFunctionPt[SUB2MENU_CAL_PT100]	=&Sub2Menu_Cal_PT100;
+        MenuFunctionPt[SUB2MENU_CABLE_COMPENS]	=&Sub2Menu_Cal_Cable;
+        MenuFunctionPt[SUB2MENU_MISURA_DIRETTA]	=&Sub2Menu_MisuraDiretta;
+        MenuFunctionPt[SUB2MENU_LICENZA]	=&Sub2Menu_Licenza;
 
 
 	MenuFunctionPt[SUB2MENU_IMPOSTA_SIMBOLI]	=&Sub2MenuImpostaSimboli;
@@ -133,15 +186,16 @@ void MenuInit(void)
 	MenuFunctionPt[SUB2MENU_SEL_TIPO_CURV_LAV]      =&Sub2MenuSelTipoCurvaLavoro;
 	MenuFunctionPt[SUB3MENU_CURVA_DI_LAVORO3pt]	=&Sub2MenuCurvadiLavoro3Punti;
         MenuFunctionPt[SUB3MENU_SEL_LCH]		=&Sub2Sel_L_C_H;
+        
 
         
         //associo i puntatori a funzione calcolo e stampa concentrazione a specifiche funzioni che tengono conto unità di misura
         //vale solo per schermata iniziale con fonts=20
-       WorkMenu_CalcPrint_UnMisura_Conc[UNIT_MIS_CONCENTR_PERCENTUALE ]=WorkMenu_CalcPrint_Percent;
+     /*  WorkMenu_CalcPrint_UnMisura_Conc[UNIT_MIS_CONCENTR_PERCENTUALE ]=WorkMenu_CalcPrint_Percent;
        WorkMenu_CalcPrint_UnMisura_Conc[UNIT_MIS_CONCENTR_PUNT_TITOL  ]=WorkMenu_CalcPrint_PuntTitol;
        WorkMenu_CalcPrint_UnMisura_Conc[UNIT_MIS_CONCENTR_GRAMMILITRO ]=WorkMenu_CalcPrint_GrammiLitro;
        WorkMenu_CalcPrint_UnMisura_Conc[UNIT_MIS_CONCENTR_uSIEMENS    ]=WorkMenu_CalcPrint_uSiemens;
-       WorkMenu_CalcPrint_UnMisura_Conc[UNIT_MIS_CONCENTR_mSIEMENS    ]=WorkMenu_CalcPrint_milliSiemens;
+       WorkMenu_CalcPrint_UnMisura_Conc[UNIT_MIS_CONCENTR_mSIEMENS    ]=WorkMenu_CalcPrint_milliSiemens;*/
        
        CalcPrint_UnMisura_Conc[UNIT_MIS_CONCENTR_PERCENTUALE ]=CalcPrint_Percent_xy;
        CalcPrint_UnMisura_Conc[UNIT_MIS_CONCENTR_PUNT_TITOL  ]=CalcPrint_PuntTitol_xy;
@@ -283,7 +337,7 @@ void MenuProg(void)
 		
 		{
 			
-			MenuFunction_Index=MENU_TEMPHUM;
+			MenuFunction_Index=SCHERM_LAV;
 			loop_flag=0;
 
 		}
