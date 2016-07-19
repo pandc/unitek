@@ -35,7 +35,6 @@ unsigned char stato_USB=0;
 
 
 
-unsigned char stato_intervento_conc,stato_intervento_temper;
 
 //variabili selezione in uso
 //menu IN OUT
@@ -43,6 +42,10 @@ unsigned char stato_intervento_conc,stato_intervento_temper;
 
 unsigned int * sector_image;
 my_RamSettings_type RamSettings;
+
+unsigned char global_unit_misura_old;
+
+
 
 
 
