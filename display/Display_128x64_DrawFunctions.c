@@ -72,6 +72,27 @@ void RigaVertic(unsigned short x_start,unsigned short  y_start,unsigned short y_
 		}
 }
 //***************************************************************************************
+void CleanRigaVertic(unsigned short x_start,unsigned short  y_start,unsigned short y_stop)
+{
+	    unsigned short x8start;
+	    unsigned short i,j;
+
+
+	    //xstop =xstart+1;//coordinate_struct1.thick;
+	    x8start=x_start/8;//vedo in quale grupo di 8 pixel orizzontali parto
+	    x8start +=y_start*16;
+	    i=x_start & 7;
+
+		for(j=y_start;j<(y_stop+1);j++)
+		{
+				screen_image[x8start] &=~(1<<i);
+
+				x8start+=16;
+
+		}
+}
+
+//***************************************************************************************
 void LCD_CleanArea(unsigned int x_start,unsigned int x_stop,unsigned int y_start,unsigned int y_stop)
 {
 	unsigned int diff_x,diff_y,diff_xy;
@@ -193,10 +214,10 @@ void CleanArea_Ram_and_Screen(unsigned int start_byte_x,unsigned int stop_byte_x
 {
 	 static unsigned int screen_mem_index,bit,col,col_stop,row,col_start_byte,bits_restanti_start,col_stop_byte,bits_restanti_stop;
 	 uint16_t i;
-      start_byte_x /=2;
-      stop_byte_x  /=2;
+         start_byte_x /=2;
+         stop_byte_x  /=2;
 
-      if(stop_y>64)stop_y=64;//per non sforare
+          if(stop_y>64)stop_y=64;//per non sforare
 
 	  col		=(start_byte_x+FIRST_COLUMN);
 	  col_stop	=(stop_byte_x +FIRST_COLUMN) - 1;
@@ -280,7 +301,80 @@ void CleanArea_Ram_and_Screen(unsigned int start_byte_x,unsigned int stop_byte_x
 		LCD_Send_Data(array_line,i,TRUE);
 	  }
 }
-//***************************************************************************************
+//******************************************************************************************************************************************************************************
+void CleanAreaScreenOnly(unsigned int start_byte_x,unsigned int stop_byte_x ,unsigned int start_y,unsigned int stop_y)
+{
+   static unsigned int bit,col,col_stop,row,col_start_byte,bits_restanti_start,col_stop_byte,bits_restanti_stop;
+   uint16_t i;
+   start_byte_x /=2;
+   stop_byte_x  /=2;
+
+    if(stop_y>64)stop_y=64;//per non sforare
+
+    col		=(start_byte_x+FIRST_COLUMN);
+    col_stop	=(stop_byte_x +FIRST_COLUMN) - 1;
+
+
+    LCD_Set_Column_Address(col,col_stop);
+    //LCD_Set_Column_Address(col,col_stop);//63 colonne composte però da 2 byte ciascuna
+    LCD_Set_Row_Address(start_y,stop_y-1);
+
+
+    
+
+    start_byte_x*=2;
+
+    bits_restanti_start=start_byte_x %8;
+
+    stop_byte_x*=2;
+    col_stop_byte=stop_byte_x/8;//ossia stop_byte_x*2/8
+    bits_restanti_stop=stop_byte_x %8;
+    //if(bits_restanti_stop)col_stop_byte++;
+    LCD_Set_Write_RAM();
+
+    for( row = start_y; row<stop_y;row++)//NB è solo il calcolo del n°di pixel...lui procede dalla 1a riga alla 1a all'ultima colonna,e poi con la 2nda riga
+    {
+      i = 0;
+      col_start_byte=start_byte_x/8;//ossia start_byte_x*2/8
+
+
+      if(bits_restanti_start)
+      {
+          for (bit = bits_restanti_start; bit < 8; bit++,i++)
+          {
+                  
+                  array_line[i] = 0;
+          }
+          col_start_byte++;
+
+      }
+
+      //for( col = 0;col<3;col++)
+      for( col = col_start_byte;col<col_stop_byte;col++)//NB ogni colonna delle 63 possibili è composta da 2 pixel cioè 2 bit di ogni elemento di screen image
+      {						 //quindi devo scegliere un numero di colonne multiplo di 8 bit es 8 colonne=16 bit =2 bytes di screen_image
+          //bit=0;
+          for (bit = 0; bit < 8; bit++,i++)
+          {
+                  
+                  array_line[i] = 0;
+          }
+
+      }
+
+      if(bits_restanti_stop)
+          {
+                  for (bit = 0; bit < bits_restanti_stop; bit++,i++)
+                  {
+                          
+                          array_line[i] = 0;
+                  }
+          }
+          LCD_Send_Data(array_line,i,TRUE);
+    }
+  
+  
+}
+//******************************************************************************************************************************************************************************
 void GetBitmap(void)
 {
 	unsigned short righe,colonne,screen_mem_index,xo1,xo2;
