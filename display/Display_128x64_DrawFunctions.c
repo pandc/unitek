@@ -126,8 +126,9 @@ void LCD_CopyPartialScreen(unsigned int start_byte_x,unsigned int stop_byte_x ,u
 
   col=(start_byte_x+FIRST_COLUMN);
   col_stop=(stop_byte_x+FIRST_COLUMN) - 1;
-
-  if(stop_y>64)stop_y=64;//per non sforare
+  
+  if(stop_byte_x>128)stop_byte_x=128;//per non sforare
+  if(stop_y> 64)stop_y= 64;//per non sforare
 
   LCD_Set_Column_Address(col,col_stop);
   //LCD_Set_Column_Address(col,col_stop);//63 colonne composte però da 2 byte ciascuna
@@ -217,7 +218,8 @@ void CleanArea_Ram_and_Screen(unsigned int start_byte_x,unsigned int stop_byte_x
          start_byte_x /=2;
          stop_byte_x  /=2;
 
-          if(stop_y>64)stop_y=64;//per non sforare
+          if(stop_byte_x>128)stop_byte_x=128;//per non sforare
+          if(stop_y> 64)stop_y= 64;//per non sforare
 
 	  col		=(start_byte_x+FIRST_COLUMN);
 	  col_stop	=(stop_byte_x +FIRST_COLUMN) - 1;
@@ -309,7 +311,8 @@ void CleanAreaScreenOnly(unsigned int start_byte_x,unsigned int stop_byte_x ,uns
    start_byte_x /=2;
    stop_byte_x  /=2;
 
-    if(stop_y>64)stop_y=64;//per non sforare
+    if(stop_byte_x>128)stop_byte_x=128;//per non sforare
+    if(stop_y> 64)stop_y= 64;//per non sforare
 
     col		=(start_byte_x+FIRST_COLUMN);
     col_stop	=(stop_byte_x +FIRST_COLUMN) - 1;
