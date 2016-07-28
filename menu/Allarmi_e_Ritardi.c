@@ -282,7 +282,7 @@ void ControlloTimers(void)
     if(CHECK_TIMER1_EXPIRED )//Ritardo accensione conc(T6 analogo per temperatura)
     {
       CLEAR_TIMER1_EXPIRED;
-      if(CHECK_ACCENSIONE_CONC)
+      if(CHECK_ACCENSIONE_CONC)//s
       {
         CLEAR_ACCENSIONE_CONC;
        //esco da attesa iniziale,qualsiasi sia il valore mi metto in riposo
