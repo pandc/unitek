@@ -7,6 +7,10 @@
 
 #include "bsp.h"
 #include "io.h"
+#include "time.h"
+#include "timers.h"
+#include "stdio.h"
+#include "string.h"
 
 #include "freertos.h"
 #include "task.h"
@@ -37,12 +41,13 @@ struct
 */
 
 int incr_step,incr_counter;
+unsigned int  glob_key=0;
 
 extern bitmap_struct_type mybmp_struct1,mybmp_struct2;
 
 extern unsigned char MenuFunction_Index;
 
-
+extern  TimerHandle_t AuxTimer; 
 
 
 extern unsigned char array_line[128];//un array abbastanza grande da contenere la + lunga linea possibile
@@ -63,11 +68,13 @@ extern const char StringsSubmenuImpostaSoglie 	[4][8][20];
 extern const char StringsSubmenuImpostaTimer  	[4][9][20];
 extern const char StringsSubmenuSimboliConc   	    [5][4];
 extern const char StringsServizio               [4][5][22];
+extern const char Strings_GGMMAA                [4][10];
 
 extern setp_e_soglie_type setp_e_soglie;
 extern setp_e_soglie_type conc_soglie_limit_up,conc_soglie_limit_dn;
 
-
+struct tm *tm;
+struct tm  my_tm;
 //***************************************************************************************
 void SubmenuINOUT(void)
 {
@@ -546,45 +553,276 @@ void SubmenuComunic(void)
 //***************************************************************************************
 void SubmenuSetClock(void)
 {
-	uint8_t key;
-	unsigned char loop_flag=1;
-
-		menu_triang_limit_up=2;
-		menu_triang_limit_dn=38;
-		menu_triang_y=2;
-
-		LCD_Fill_ImageRAM(0x00);
-
-	#ifdef DISEGNA_CORNICE
-		DisegnaCornice();
-	#endif
+  uint8_t key,modificato,last_key;
+  unsigned char loop_flag=1,to_print;
+  
+  unsigned char time_date_to_change=0;
+  unsigned char mark_change=0;
+  unsigned char day_limit;
+  
 
 
-		//DisegnaTriangolinoMenu(0,menu_triang_y);
+  LCD_Fill_ImageRAM(0x00);
+  
+
+
+  SelectFont(CALIBRI_10);
+  
+  
+  LCDPrintString("hh  :  mm",HOUR_X-4,HMIN_Y-12);
+  LCDPrintString(Strings_GGMMAA[RamSettings.Linguaggio],DAY_X+8,DATE_Y-12);
+  LCD_CopyScreen();
+  
+  
+  
+  uint32_t t;
+  time_t my_t = time(NULL);
+  tm = localtime(&my_t); 
+  
+  
+  
+  if( xTimerStart( AuxTimer, 0 ) != pdPASS ){}//timer blink
+
+  //LCD_CopyScreen();
+
+  key = last_key = 0;
+  while(loop_flag)
+  {
+  if (key_getstroke(&key,kDec*2))last_key = key;
+      else	key = 0;
+  
+  
+          
+  if (key == KEY_OK)
+  //if(CHECK_TASTO_OK_PRESSED)
+  {
+    my_tm=*tm;
+    t = mktime(&my_tm);
+    RTC_SetCounter(t);      
+  }
+
+  if (key == KEY_PROG)
+  
+  {
+          if(modificato)RTC_SetCounter(0);;//salvo solo se ho premuto i tasti  + o -
+          MenuFunction_Index=MENU_PROGR;
+          CLEAR_PIU_MENO_ENABLED ;  
+          xTimerStop( AuxTimer, 0 );//spengo timer per lampeggio
+          loop_flag=0;
+          
+
+  }
+
+  if(CHECK_PIU_MENO_ENABLED)
+  {
+    if ((key == KEY_PLUS) || (last_key == KEY_PLUS))
+    //if(CHECK_TASTO_PLUS_PRESSED)
+    {
+     modificato=1;
+     to_print=1;
+     switch(time_date_to_change)
+     {
+       case 0:
+         
+         break;
+         
+       case CHANGE_HOUR:
+         if(tm->tm_hour <23)tm->tm_hour++;
+         break;
+         
+       case CHANGE_MIN:
+         if(tm->tm_min <59)tm->tm_min++;
+         break;
+         
+       case CHANGE_YEAR:
+         if(tm->tm_year<2100)tm->tm_year++;
+         break;
+         
+       case CHANGE_MONTH:
+         if(tm->tm_mon<11)tm->tm_mon++; 
+         break;
+         
+       case CHANGE_DAY:
+         day_limit=31;
+         if(tm->tm_mon==3) day_limit=30;//Aprile
+         if(tm->tm_mon==5) day_limit=30;//Giugno
+         if(tm->tm_mon==8) day_limit=30;//Settembre
+         if(tm->tm_mon==10)day_limit=30;//Novembre
+         if(tm->tm_mon==1)              //Febbraio
+         {
+           if((tm->tm_year+1900)%4)day_limit=28;//non bisestile
+           else                    day_limit=29;//    bisestile   
+         }
+         
+         if(tm->tm_mday<day_limit)tm->tm_mday++;
+         break;
+                    
+     }//fine switch
+              
+    }
+    else if (key == (KEY_PLUS | KEY_RELEASED))
+
+    {
+            incr_step=1;
+            incr_counter=0;
+            
+    }
+
+    if ((key == KEY_MINUS) || (last_key == KEY_MINUS))
+    //if(CHECK_TASTO_MENO_PRESSED)
+    {
+     modificato=1;
+     to_print=1;
+     switch(time_date_to_change)
+     {
+       case 0:
+         
+         break;
+         
+       case CHANGE_HOUR:
+         if(tm->tm_hour )tm->tm_hour--;
+         break;
+         
+       case CHANGE_MIN:
+         if(tm->tm_min )tm->tm_min--;
+         break;
+         
+       case CHANGE_YEAR:
+         if(tm->tm_year)tm->tm_year--;
+         break;
+         
+       case CHANGE_MONTH:
+         if(tm->tm_mon)tm->tm_mon--; 
+         break;
+         
+       case CHANGE_DAY:
+        
+         if(tm->tm_mday)tm->tm_mday--;
+         break;
+                    
+     }//fine switch
+              
+      }
+      else if (key == (KEY_MINUS | KEY_RELEASED))
+      //if(CHECK_TASTO_MENO_RELEASED)
+      {
+              incr_step=1;
+              incr_counter=0;
+
+      }
+
+  }
+
+
+  if (key == KEY_DOWNRIGHT)
+  {
+     mark_change=1; 
+     MARK_PIU_MENO_ENABLED ;    
+  }
+
+  if (key == KEY_UPLEFT)
+  {
+     mark_change=2;
+     MARK_PIU_MENO_ENABLED ;  
+  }
+
+  if(CHECK_BLINK_TIMER1_EXPIRED)
+  {
+      CLEAR_BLINK_TIMER1_EXPIRED;
+      if(CHECK_BLINK_SHOW)//disegno
+      {
+       CLEAR_BLINK_SHOW; 
+       
+       switch(time_date_to_change)
+       {
+         case 0:
+           
+           break;
+           
+         case CHANGE_HOUR:
+           LCD_CopyPartialScreen(HOUR_X,H_MIN_SEP_X-2,HMIN_Y,HMIN_Y+12);
+           break;
+           
+         case CHANGE_MIN:
+           LCD_CopyPartialScreen(MIN_X,MIN_X+14,HMIN_Y,HMIN_Y+12);
+           break;
+           
+
+           
+          case CHANGE_DAY:
+            LCD_CopyPartialScreen(DAY_X,DAY_X+14,DATE_Y,DATE_Y+12); 
+            break;         
+
+         case CHANGE_MONTH:
+           LCD_CopyPartialScreen(MONTH_X,MONTH_X+14,DATE_Y,DATE_Y+12); 
+           break;
+            
+        case CHANGE_YEAR:
+           LCD_CopyPartialScreen(YEAR_X,YEAR_X+24,DATE_Y,DATE_Y+12); 
+           break;
+                      
+       }//fine switch
+       //per evitare di cambiare parametro col precedente spento
+       if(mark_change==2) 
+       {
+         if(time_date_to_change<5)time_date_to_change++; 
+         mark_change=0;
+       }
+       
+        if(mark_change==1)
+        {
+         if(time_date_to_change)time_date_to_change--;  ; 
+         mark_change=0;
+        }  
+       
+      }
+      else
+      {
+        MARK_BLINK_SHOW;
+        
+        switch(time_date_to_change)
+       {
+         case 0:
+           
+           break;
+           
+         case CHANGE_HOUR:
+           CleanAreaScreenOnly(HOUR_X,H_MIN_SEP_X-2,HMIN_Y,HMIN_Y+12);
+           break;
+           
+         case CHANGE_MIN:
+           CleanAreaScreenOnly(MIN_X,MIN_X+12,HMIN_Y,HMIN_Y+12);
+           break;
+         
+         case CHANGE_DAY:
+           CleanAreaScreenOnly(DAY_X,DAY_X+14,DATE_Y,DATE_Y+12);
+           break;
+            
+         case CHANGE_MONTH:
+           CleanAreaScreenOnly(MONTH_X,MONTH_X+14,DATE_Y,DATE_Y+12); 
+           break;
+      
+          case CHANGE_YEAR:
+           CleanAreaScreenOnly(YEAR_X,YEAR_X+48,DATE_Y,DATE_Y+12); 
+           break;           
+        
+                      
+       }//fine switch
+      }
+  }
+
+
+  if(to_print)
+  {
+          to_print=0;
+
+          PrintTimeDate();
+
+  }
 
 
 
-
-		SelectFont(CALIBRI_10);
-		LCDPrintString("Orologio..da fare..",4,26);
-
-
-
-		LCD_CopyScreen();
-
-		while(loop_flag)
-		{
-			key_getstroke(&key,portMAX_DELAY);
-			if (key == KEY_PROG)
-			
-			{
-				;
-				MenuFunction_Index=MENU_PROGR;
-				loop_flag=0;
-
-			}
-		}
-
+	}
 }
 //***************************************************************************************
 void SumMenuSelLingua(void)
@@ -700,7 +938,7 @@ void SubmenuServizio(void)
   LCDPrintString("PASSWORD?",40,26);
   LCD_CopyScreen();
   
-  unsigned char stato=0;
+  unsigned char stato=glob_key;
   
   while(loop_flag)
   {
@@ -710,6 +948,7 @@ void SubmenuServizio(void)
          
           MenuFunction_Index=MENU_PROGR;
           loop_flag=0;
+          glob_key=0;
           return;
 
       }
@@ -721,6 +960,7 @@ void SubmenuServizio(void)
         {
           MenuFunction_Index=MENU_PROGR;
           loop_flag=0;
+          glob_key=0;
           return;
         }
       }
@@ -737,6 +977,7 @@ void SubmenuServizio(void)
         else
         {
           MenuFunction_Index=MENU_PROGR;
+          glob_key=0;
           loop_flag=0;
           return;
         }
@@ -746,6 +987,7 @@ void SubmenuServizio(void)
   
   }
   loop_flag=1;
+  glob_key=4;//ormai sono dentro
   
   
   LCD_Fill_ImageRAM(0x00);
@@ -773,6 +1015,7 @@ void SubmenuServizio(void)
       {
          
           MenuFunction_Index=MENU_PROGR;
+          glob_key=0;
           loop_flag=0;
 
       }
@@ -826,12 +1069,45 @@ void SubmenuServizio(void)
               }
       }
   }
-  
-  
-  
-  
-}
+ }
 //***************************************************************************************   
+void PrintTimeDate(void)
+{
+  char string_to_print[16];
 
+  CleanArea_Ram_and_Screen(HOUR_X,MIN_X+14,HMIN_Y,HMIN_Y+12);
+  
+  sprintf(string_to_print,"%02u",tm->tm_hour);
+  LCDPrintString(string_to_print,HOUR_X,HMIN_Y);
+  
+  LCDPrintString(":",H_MIN_SEP_X,12);
+  
+  sprintf(string_to_print,"%02u",tm->tm_min);
+  LCDPrintString(string_to_print,MIN_X,HMIN_Y);
+  
+  LCD_CopyPartialScreen(HOUR_X,MIN_X+24,HMIN_Y,HMIN_Y+12);
+  
+  
+  //riga data
+  CleanArea_Ram_and_Screen(DAY_X,YEAR_X+24,DATE_Y,DATE_Y+12);
+  
+  sprintf(string_to_print,"%02u",tm->tm_mday);
+  LCDPrintString(string_to_print,DAY_X,DATE_Y);
+   
+  
+  LCDPrintString("/",MONTH_DAY_SEP_X,DATE_Y);
+  
+  sprintf(string_to_print,"%02u",tm->tm_mon+1);
+  LCDPrintString(string_to_print,MONTH_X,DATE_Y);
+ 
+  LCDPrintString("/",Y_MONTH_SEP_X,DATE_Y);
+  
+  sprintf(string_to_print,"%u",tm->tm_year+1900);
+  LCDPrintString(string_to_print,YEAR_X,DATE_Y);
+  
+ 
+  
+  LCD_CopyPartialScreen(DAY_X,YEAR_X+24,DATE_Y,DATE_Y+12);
+}
 
 

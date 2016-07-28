@@ -132,6 +132,8 @@ void DisegnaCornice (void);
 void DisegnaMarker(unsigned short x,unsigned short y,unsigned short y_old);
 void DisegnaOK(unsigned short x,unsigned short y,unsigned short y_old);
 
+void PrintTimeDate(void);
+
 void AumentaIncrDecrStep(int * step,int * counter);
 void RiduciIncrDecrStep(int * step,int * counter);
 
@@ -143,6 +145,8 @@ void RicalcolaCurvaLavoro3pt(void);
 
 void MenuInit(void);
 void WriteMyFlashSector(void);
+
+
 
 
 
@@ -787,3 +791,18 @@ void WriteMyFlashSector(void);
 //#define C_COEFF
 #define INTERPOLAZIONE_DIEGO 
                   
+#define HOUR_X          10
+#define H_MIN_SEP_X     24  
+#define MIN_X           28
+  
+#define YEAR_X          10  
+#define Y_MONTH_SEP_X   36  
+#define MONTH_X         42  
+#define MONTH_DAY_SEP_X 54 
+#define DAY_X           60
+
+#define CHANGE_HOUR  1
+#define CHANGE_MIN   2
+#define CHANGE_YEAR  3
+#define CHANGE_MONTH 4
+#define CHANGE_DAY   5                  
