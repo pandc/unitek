@@ -88,50 +88,53 @@ void SchermataDiLavoro(void)
                        ResetChConc_OFF();
                      }
                   }
-                  else
+                  else  //se interruttore mi dà OK
                   {
               
-                      if(!CHECK_ATTIVAZIONE_EXT_CH_CONC)
+                      if(!CHECK_ATTIVAZIONE_EXT_CH_CONC)//se ero disattivato
                       {
                         MARK_ATTIVAZIONE_EXT_CH_CONC;
                         ResetChConc_ON();
                       }
+                       
                       
-                   /*+-+-+-+-+ +-+-+-+-+-+
-                    |T|a|n|k| |v|u|o|t|o|
-                    +-+-+-+-+ +-+-+-+-+-+*/
-                     if(input_status  & TANK_ALARM_INPUT)
-                     {
-                        if(!(CHECK_ALARM_TANK))//controllo solo se non sono già in allarme tank
-                        {
-                        
-                          MARK_ALARM_TANK;
-                          IOEXP_set(IOEXP0_TANK_ALARM);
+                      if(!CHECK_ACCENSIONE_CONC)
+                      {  
+                         /*+-+-+-+-+ +-+-+-+-+-+
+                          |T|a|n|k| |v|u|o|t|o|
+                          +-+-+-+-+ +-+-+-+-+-+*/
+                           if(input_status  & TANK_ALARM_INPUT)
+                           {
+                              if(!(CHECK_ALARM_TANK))//controllo solo se non sono già in allarme tank
+                              {
+                              
+                                MARK_ALARM_TANK;
+                                IOEXP_set(IOEXP0_TANK_ALARM);
+                                
+                                if(CHECK_PUMP_STATE)
+                                {  
+                                  
+                                  IOEXP_clr(IOEXP0_PUMP_ENABLE);
+                                  CLEAR_PUMP_STATES;//indica che la pompa non deve essere presa in considerazione
+                                 } 
+                                MARK_PRINT_CONC_ET;
+                              }
+                              
+                            }
+                            else
+                            {
+                              if(CHECK_ALARM_TANK)//controllo solo se sono già in allarme tank
+                              {
+                                MARK_CONTROL_CONC_ENA;
+                                IOEXP_clr(IOEXP0_TANK_ALARM);
+                                CleanArea_Ram_and_Screen(ET_X_START,ET_X_END,ET_Y_START,ET_Y_END);
+                                CLEAR_ALARM_TANK;
+                                MARK_PUMP_STATE_RIPOSO;//devo dargli uno dei 3 stati possibili e poi da questo,alla prima lettura ricontrollerà cosa fare
+                                MARK_PRINT_CONC_LIMITS;
+                              }
+                            }  //fine controllo TANK
                           
-                          if(CHECK_PUMP_STATE)
-                          {  
-                            
-                            IOEXP_clr(IOEXP0_PUMP_ENABLE);
-                            CLEAR_PUMP_STATES;//indica che la pompa non deve essere presa in considerazione
-                           } 
-                          MARK_PRINT_CONC_ET;
-                        }
-                        
-                      }
-                      else
-                      {
-                        if(CHECK_ALARM_TANK)//controllo solo se sono già in allarme tank
-                        {
-                          MARK_CONTROL_CONC_ENA;
-                          IOEXP_clr(IOEXP0_TANK_ALARM);
-                          CleanArea_Ram_and_Screen(ET_X_START,ET_X_END,ET_Y_START,ET_Y_END);
-                          CLEAR_ALARM_TANK;
-                          MARK_PUMP_STATE_RIPOSO;//devo dargli uno dei 3 stati possibili e poi da questo,alla prima lettura ricontrollerà cosa fare
-                          MARK_PRINT_CONC_LIMITS;
-                        }
-                      }  
-                          
-                          
+                      } //fine if(!CHECK_ACCENSIONE_CONC)  
                           
                    }
                    
