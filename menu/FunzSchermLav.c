@@ -27,7 +27,7 @@ extern unsigned char screen_image[1024];
 extern const char StringsSubmenuSimboliConc   [5][4];
 extern const char StringsFustoVuotoUp  [4][10];
 extern const char StringsFustoVuotoDn  [4][10];
-extern const char StringsCableOpen [4][6];
+extern const char StringsCableOpen     [4][10];
 extern setp_e_soglie_type conc_soglie_limit_up,conc_soglie_limit_dn;
 
 
@@ -93,7 +93,7 @@ void SchermLavoroInitCondition(void)
 
   
    //E' solo qui che marco lo stato della schermata di lavoro che rimane come stato_old e verrà confrontato
-  //con le nuove condizioni della variabile RamSettings.abilita_disabilita,ce viene impostata solo nell'apposito menu
+  //con le nuove condizioni della variabile RamSettings.abilita_disabilita,che viene impostata solo nell'apposito menu
   if(RamSettings.abilita_disabilita==ABILITA)
   {
        if(CHECK_STATE_ABILITATO) 
@@ -180,6 +180,8 @@ void ResetChConc_OFF(void)
   CLEAR_PRINT_ALARMS_CONC_MASK;
   CLEAR_PRINT_CONC_TO;
   
+  CLEAR_ACCENSIONE_CONC;
+  
   //marcare riaccensione per quel canale
  
   
@@ -203,6 +205,8 @@ void ResetChTemp_OFF(void)
   CLEAR_PRINT_PUMP;
   CLEAR_PRINT_ALARMS_TEMP_MASK;
   CLEAR_PRINT_TEMP_TO;
+  
+  CLEAR_ACCENSIONE_TEMP;
   //marcare riaccensione per quel canale
   
   
@@ -216,7 +220,7 @@ void ResetChConc_ON(void)
   if( xTimerStart( xTimers[ TIMER1_RIT_ACC_CONC ], 0 ) != pdPASS ){}
   MARK_PRINT_CONC_WAIT;
 
-  if(!CHECK_ACCENSIONE_CONC)
+  if(!CHECK_ACCENSIONE_CONC)//dovrebbe essere inutile perchè ho forzato il MARK_ACCENSIONE_CONC
   {
     CLEAR_PUMP_STATES;
     MARK_PUMP_STATE_RIPOSO;
@@ -231,7 +235,7 @@ void ResetChTemp_ON(void)
   if( xTimerStart( xTimers[ TIMER6_RIT_ACC_TEMP ], 0 ) != pdPASS ){}
   MARK_PRINT_TEMP_WAIT;
 
-  if(!CHECK_ACCENSIONE_TEMP)
+  if(!CHECK_ACCENSIONE_TEMP)//dovrebbe essere inutile perchè ho forzato il MARK_ACCENSIONE_TEMP
   {
     CLEAR_PUMP_STATES;
     MARK_HEATER_STATE_RIPOSO;
