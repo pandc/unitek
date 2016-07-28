@@ -335,12 +335,12 @@ void CalcPrintTemperatura(float * t_float)
   |S|T|A|M|P|A| |T|E|M|P|E|R|A|T|U|R|A| |F|O|N|T| |2|0|
   +-+-+-+-+-+-+ +-+-+-+-+-+-+-+-+-+-+-+ +-+-+-+-+ +-+-+  */             
  SelectFont(CALIBRI_20);
- CleanArea_Ram_and_Screen(66,120,14,36);
+ CleanArea_Ram_and_Screen(68,124,14,36);
  //BinToBCDisp(ADC_array[LETTURA_TEMP]/*temperature_to_print*/,UN_DECIMALE,68,14);
  sprintf(string_to_print,"%.1f",*t_float);//pot=206,5 ohm
  len=strlen(string_to_print);
- LCDPrintString(string_to_print,125-(width_font*len)-5,14);
- LCD_CopyPartialScreen(66,120,14,36);
+ LCDPrintString(string_to_print,128-(width_font*len)-5,14);
+ LCD_CopyPartialScreen(68,124,14,36);
  
   
 }
@@ -409,17 +409,56 @@ void PrintResXY_10(float * t_float,unsigned int x,unsigned int y)
   //unsigned int len;
   //float generic_float;
   
-  
+  CleanArea_Ram_and_Screen(x,x+60,y,y+12);
  /*+-+-+-+-+-+-+ +-+-+-+-+-+-+-+-+-+-+-+ +-+-+-+-+ +-+-+
   |S|T|A|M|P|A| |T|E|M|P|E|R|A|T|U|R|A| |F|O|N|T| |1|0|
-  +-+-+-+-+-+-+ +-+-+-+-+-+-+-+-+-+-+-+ +-+-+-+-+ +-+-+  */             
+  +-+-+-+-+-+-+ +-+-+-+-+-+-+-+-+-+-+-+ +-+-+-+-+ +-+-+  */     
+ if(*t_float<1000)
+ {
+   LCDPrintString("Ohm",x+30,y);
+   
+   
+   if(*t_float<100)
+   {
+     if(*t_float<10)
+     {
+            sprintf(string_to_print,"%.3f",*t_float);//pot=206,5 ohm
+     }
+     else   sprintf(string_to_print,"%.2f",*t_float);//pot=206,5 ohm
+   }
+   else
+   {
+     sprintf(string_to_print,"%.1f",*t_float);//pot=206,5 ohm
+   }
+ }
+ else
+ {
+   LCDPrintString("K",x+30,y);
+   *t_float/=1000;
+   if(*t_float<100)
+   {
+     if(*t_float<10)
+     {
+            sprintf(string_to_print,"%.3f",*t_float);//pot=206,5 ohm
+     }
+     else   sprintf(string_to_print,"%.2f",*t_float);//pot=206,5 ohm
+   }
+   else
+   {
+     sprintf(string_to_print,"%.1f",*t_float);//pot=206,5 ohm
+   }
+ 
+   
+   
+ }
+  
  SelectFont(CALIBRI_10);
- CleanArea_Ram_and_Screen(x,x+40,y,y+12);
+ 
  //BinToBCDisp(ADC_array[LETTURA_TEMP]/*temperature_to_print*/,UN_DECIMALE,68,14);
- sprintf(string_to_print,"%.1f",*t_float);//pot=206,5 ohm
+ 
  //len=strlen(string_to_print);
  LCDPrintString(string_to_print,x/*-(width_font*len)*/,y);
- LCDPrintString("Ohm",x+32,y);
+
  LCD_CopyPartialScreen(x,x+60,y,y+12);
  
   
@@ -450,7 +489,7 @@ void PrintConc_WorkMenu(void)
    SelectFont(CALIBRI_20);
    CleanArea_Ram_and_Screen(00,62,14,36);
    len=strlen(string_to_print);
-   LCDPrintString(string_to_print,62-(width_font*len)-5,14);
+   LCDPrintString(string_to_print,64-(width_font*len)-5,14);
    LCD_CopyPartialScreen(00,62,14,36);
 
   
