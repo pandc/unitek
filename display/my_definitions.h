@@ -791,18 +791,24 @@ void WriteMyFlashSector(void);
 //#define C_COEFF
 #define INTERPOLAZIONE_DIEGO 
                   
-#define HOUR_X          10
-#define H_MIN_SEP_X     24  
-#define MIN_X           28
+#define HOUR_X          50
+#define H_MIN_SEP_X     64  
+#define MIN_X           68
   
-#define YEAR_X          10  
-#define Y_MONTH_SEP_X   36  
-#define MONTH_X         42  
-#define MONTH_DAY_SEP_X 54 
-#define DAY_X           60
+#define DAY_X           30
+#define MONTH_DAY_SEP_X 46
+#define MONTH_X         54  
+#define Y_MONTH_SEP_X   70  
+#define YEAR_X          80  
 
 #define CHANGE_HOUR  1
 #define CHANGE_MIN   2
-#define CHANGE_YEAR  3
+#define CHANGE_DAY   3 
 #define CHANGE_MONTH 4
-#define CHANGE_DAY   5                  
+#define CHANGE_YEAR  5
+                  
+#define HMIN_Y       14 
+#define DATE_Y       48 
+
+#define HMIN_WIDTH   24
+                 
