@@ -42,8 +42,8 @@ void Sub2Menu_Cal_PT100(void)
 
   LCD_Fill_ImageRAM(0x00);
   //stampo nella lingua selezionata "Calibrazione PT100)
-  LCDPrintString(StringsServizio[RamSettings.Linguaggio][0],14,2);
-  LCDPrintString(Strings_RemovePT100[RamSettings.Linguaggio],14,38);
+  LCDPrintString(StringsServizio[RamSettings.Linguaggio][0],24,2);
+  LCDPrintString(Strings_RemovePT100[RamSettings.Linguaggio],24,38);
   LCDPrintString("->PRESS OK",68,54);
   LCD_CopyScreen();
   
@@ -64,7 +64,7 @@ void Sub2Menu_Cal_PT100(void)
                   }
                   else
                   {  
-                    MenuFunction_Index=MENU_PROGR;
+                    MenuFunction_Index=SUBMENU_SERVIZIO;
                     return;
                   }  
           }
@@ -76,9 +76,11 @@ void Sub2Menu_Cal_PT100(void)
             {
               
                 case 0: 
-                CleanArea_Ram_and_Screen(14,120,38,52);
-                LCDPrintString(Strings_InsertCalRes[RamSettings.Linguaggio],14,26);
-                LCDPrintString("150 ohm 0.1%",14,38);
+                CleanArea_Ram_and_Screen(24,120,38,52);
+                LCDPrintString(Strings_InsertCalRes[RamSettings.Linguaggio],24,26);
+                LCDPrintString("150 ohm 0.1%  (130",6,38);
+                PrintUnitMis(10,104,38);
+                LCDPrintString(")",116,38);
                 LCD_CopyPartialScreen(2,120,26,54);
                 stato++;
                 
@@ -89,16 +91,18 @@ void Sub2Menu_Cal_PT100(void)
                 case 1 :
                 if (!domeas(CALIB_Ptc,res+i,(i == 1)? NULL:&sp))
                 {
-                         CleanArea_Ram_and_Screen(14,120,38,52);
+                         CleanArea_Ram_and_Screen(6,120,38,52);
                          LCDPrintString("Error!",2,38);
                          stato=8;
                 }
                 else//se la misura va a buon fine
                 {
                   i++;
-                  CleanArea_Ram_and_Screen(14,120,38,52);
-                  LCDPrintString(Strings_InsertCalRes[RamSettings.Linguaggio],14,26);
-                  LCDPrintString("100 ohm 0.1%",14,38);
+                  CleanArea_Ram_and_Screen(6,120,38,52);
+                  LCDPrintString(Strings_InsertCalRes[RamSettings.Linguaggio],24,26);
+                  LCDPrintString("100 ohm 0.1%  (   0",6,38);
+                  PrintUnitMis(10,104,38);
+                  LCDPrintString(")",116,38);
                   LCD_CopyPartialScreen(2,120,26,54);
                   
                   stato++;
@@ -108,7 +112,7 @@ void Sub2Menu_Cal_PT100(void)
                 case 2 :
                 if (!domeas(CALIB_Ptc,res+i,(i == 1)? NULL:&sp))
                 {
-                         CleanArea_Ram_and_Screen(14,120,38,52);
+                         CleanArea_Ram_and_Screen(6,120,38,52);
                          LCDPrintString("Error!",2,38);
                          stato=8;
                 }
@@ -134,9 +138,9 @@ void Sub2Menu_Cal_PT100(void)
                   
                   meas_loadParams();
                   
-                  CleanArea_Ram_and_Screen(14,128,26,64);
+                  CleanArea_Ram_and_Screen(6,128,26,64);
                   //LCDPrintString(Strings_InsertCalRes[RamSettings.Linguaggio],14,26);
-                  LCDPrintString(StringsCableCalibOK[RamSettings.Linguaggio],40,26);
+                  LCDPrintString(StringsCableCalibOK[RamSettings.Linguaggio],24,26);
                   LCD_CopyPartialScreen(2,128,26,54);
                   
                   stato++;
@@ -192,7 +196,7 @@ void Sub2Menu_Cal_Cable(void)
                   }
                   else
                   {  
-                    MenuFunction_Index=MENU_PROGR;
+                    MenuFunction_Index=SUBMENU_SERVIZIO;
                     return;
                   }  
           }
@@ -277,7 +281,7 @@ void Sub2Menu_ResSerie_Cable(void)
                   }
                   else
                   {  
-                    MenuFunction_Index=MENU_PROGR;
+                    MenuFunction_Index=SUBMENU_SERVIZIO;
                     return;
                   }  
           }
@@ -291,7 +295,7 @@ void Sub2Menu_ResSerie_Cable(void)
                 case 0: 
                   CleanArea_Ram_and_Screen(14,120,38,52);
                   LCDPrintString(Strings_InsertCalRes[RamSettings.Linguaggio],14,26);
-                  LCDPrintString("500 Ohm 0.1%",14,38);
+                  LCDPrintString("50 Ohm 0.1%",14,38);
                   LCD_CopyPartialScreen(2,120,26,54);
                   stato++;
                   loop_flag=1;
@@ -355,7 +359,7 @@ void Sub2Menu_MisuraDiretta(void)
           
           if (key_getstroke(&key,200/*portMAX_DELAY*/) && (key == KEY_PROG))
           {
-              MenuFunction_Index=MENU_PROGR;
+              MenuFunction_Index=SUBMENU_SERVIZIO;
               return;
           }
           
@@ -364,7 +368,7 @@ void Sub2Menu_MisuraDiretta(void)
           {
               measures.temp_ok=0;
               CalcPrintTemperaturaXY_10(&t_float,0,14);
-              PrintResXY_10(&measures.temp_resist,72,14);
+              PrintResXY_10(&measures.temp_resist,74,14);
                 
           }
           //conduttanza
@@ -372,7 +376,7 @@ void Sub2Menu_MisuraDiretta(void)
           {
               measures.meas_ok=0;
               PrintConduttXY_10(&measures.condut,0,26);
-              PrintResXY_10    (&measures.resist,72,26);
+              PrintResXY_10    (&measures.resist,74,26);
                 
           }
           
