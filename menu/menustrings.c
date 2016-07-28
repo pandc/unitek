@@ -311,3 +311,9 @@ const char StringsMisDiretta [4][20]={{            "Misura diretta"},//ITALIANO
                                                   {"Measure directe"},//FRANCAIS
                                                   {"Medicion directa"}//ESPANOL
                                                     };*/
+const char Strings_GGMMAA [4][10]={{               "gg/mm/aa"},//ITALIANO
+                                                  {"dd/mm/yy"},//ENGLISH
+                                                  {"jj/mm/aa"},//FRANCAIS
+                                                  {"dd/mm/aa"}//ESPANOL
+                                                    };                                                      
+                                                      
