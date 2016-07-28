@@ -509,7 +509,7 @@ uint32_t freq = 0;
 		COM_Puts("\r\n");
 		if (item == CALIB_RCable)
 		{
-			COM_Puts(">>> Connect reference resistance of 50Ohm and press enter (ESC to abort)\r\n");
+			COM_Puts(">>> Connect reference resistance of 50 Ohm and press enter (ESC to abort)\r\n");
 			for (;;)
 			{
 				if (COM_Getch(&c))
@@ -831,7 +831,7 @@ static int parser_date(char *arg)
 	}
 	else if ((*arg == '=') && (strlen(arg+1) == 12) && isdigits(arg+1,12))
 	{
-		// YYMMDDHHMMSS
+		// YYMMDDHHMMSS  //anno deve essere offset da 1900
 		struct tm tm;
 		uint32_t t;
 		char *s = arg+1;
@@ -853,7 +853,7 @@ static int parser_date(char *arg)
 		tm.tm_sec = convint(s+10,2);
 		if ((tm.tm_sec < 0) || (tm.tm_sec > 59))
 			return CALLBACKRET_Error;
-		tm.tm_isdst = -1;
+		tm.tm_isdst = -1;//indica che non so se ora legale o solare
 		t = mktime(&tm);
 		RTC_SetCounter(t);
 		return CALLBACKRET_Ok;
