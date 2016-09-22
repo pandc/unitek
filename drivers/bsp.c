@@ -93,6 +93,55 @@ uint16_t WaitForOscSource;
 	/*Allow access to Backup Registers*/
 	PWR_BackupAccessCmd(ENABLE);
 
+#if 1
+	// RTC CLK EXT
+	if (BKP_getWord(BACKUP_RtcInit) != RTC_CONF_DONE)
+	{
+		/*Enables the clock to Backup and power interface peripherals    */
+		RCC_APB1PeriphClockCmd(RCC_APB1Periph_BKP | RCC_APB1Periph_PWR,ENABLE);
+
+		/*Enable 32.768 kHz external oscillator */
+		RCC_LSEConfig(RCC_LSE_ON);
+
+		for(WaitForOscSource=0;WaitForOscSource<5000;WaitForOscSource++)
+		{
+		}
+
+		RCC_RTCCLKConfig(RCC_RTCCLKSource_LSE);
+		/* RTC Enabled */
+		RCC_RTCCLKCmd(ENABLE);
+		RTC_WaitForLastTask();
+		/*Wait for RTC registers synchronisation */
+		RTC_WaitForSynchro();
+		RTC_WaitForLastTask();
+		/* Setting RTC Interrupts-Seconds interrupt enabled */
+		/* Enable the RTC Second */
+		//RTC_ITConfig(RTC_IT_SEC , ENABLE);
+		/* Wait until last write operation on RTC registers has finished */
+		RTC_WaitForLastTask();
+
+		/* Set RTC prescaler: set RTC period to 1 sec */
+		RTC_SetPrescaler(32765); /* RTC period = RTCCLK/RTC_PR = (32.768 KHz)/(32767+1) */
+		/* Prescaler is set to 32766 instead of 32768 to compensate for
+		lower as well as higher frequencies*/
+		/* Wait until last write operation on RTC registers has finished */
+		RTC_WaitForLastTask();
+		BKP_storeWord(BACKUP_RtcInit, RTC_CONF_DONE);
+		RTC_SetCounter(0);
+	}
+	else
+	{
+		/* PWR and BKP clocks selection */
+		RCC_APB1PeriphClockCmd(RCC_APB1Periph_PWR | RCC_APB1Periph_BKP, ENABLE);
+		for(WaitForOscSource=0;WaitForOscSource<5000;WaitForOscSource++);
+		/* Wait until last write operation on RTC registers has finished */
+		RTC_WaitForLastTask();
+		/* Enable the RTC Second */
+		//RTC_ITConfig(RTC_IT_SEC, ENABLE);
+		RTC_WaitForLastTask();
+	}
+#elde
+	// RTC CLK INT
 	//if (BKP_getWord(BACKUP_RtcInit) != RTC_CONF_DONE)
 	{
 		/*Enables the clock to Backup and power interface peripherals    */
@@ -130,18 +179,6 @@ uint16_t WaitForOscSource;
 			BKP_storeWord(BACKUP_RtcInit, RTC_CONF_DONE);
 			RTC_SetCounter(0);
 		}
-	}
-#if 0
-	else
-	{
-		/* PWR and BKP clocks selection */
-		RCC_APB1PeriphClockCmd(RCC_APB1Periph_PWR | RCC_APB1Periph_BKP, ENABLE);
-		for(WaitForOscSource=0;WaitForOscSource<5000;WaitForOscSource++);
-		/* Wait until last write operation on RTC registers has finished */
-		RTC_WaitForLastTask();
-		/* Enable the RTC Second */
-		//RTC_ITConfig(RTC_IT_SEC, ENABLE);
-		RTC_WaitForLastTask();
 	}
 #endif
 	BKP_RTCOutputConfig(BKP_RTCOutputSource_None);
