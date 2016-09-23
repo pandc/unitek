@@ -19,7 +19,7 @@
 static const uint8_t ioexp0_conf[4] = { 0, 0, 0, 0 };
 
 static xSemaphoreHandle xSemaDigin,xSemaMutex;
-static uint8_t ioexp0_out,initok,ioexp1_inp;
+static uint8_t ioexp0_out = 0xff,initok,ioexp1_inp;
 
 void DIG_IN_IRQn_EXTI_IRQ_HANDLER(void)
 {
@@ -81,10 +81,10 @@ uint8_t b;
 	for (;;)
 	{
 		vTaskDelay(kCen);
-		if (!I2C_RandWrite(IOEXP0_ADDR,0x4F,1,ioexp0_conf, 1))
+		if (!I2C_RandWrite(IOEXP0_ADDR,0x01,1,&ioexp0_out, 1))
 			continue;
 		vTaskDelay(kCen);
-		if (!I2C_RandWrite(IOEXP0_ADDR,0x01,1,&ioexp0_out, 1))
+		if (!I2C_RandWrite(IOEXP0_ADDR,0x4F,1,ioexp0_conf, 1))
 			continue;
 		vTaskDelay(kCen);
 		if (!I2C_RandWrite(IOEXP0_ADDR,0x03,1,ioexp0_conf + 2, 1))
@@ -94,10 +94,10 @@ uint8_t b;
 			continue;
 		vTaskDelay(kCen);
 		b = 0xFF;
-                if (!I2C_RandWrite(IOEXP1_ADDR,0x42,1,&b, 1))	// input latch
+		if (!I2C_RandWrite(IOEXP1_ADDR,0x42,1,&b, 1))	// input latch
 			continue;
-                b=0;
-                if (!I2C_RandWrite(IOEXP1_ADDR,0x45,1,&b, 1))	// input latch
+		b=0;
+		if (!I2C_RandWrite(IOEXP1_ADDR,0x45,1,&b, 1))	// input latch
 			continue;
 		if (I2C_RandRead(IOEXP1_ADDR,0,1,&ioexp1_inp,1))			// read input
 			break;
